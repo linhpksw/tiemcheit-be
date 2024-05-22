@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/home-screen")
+@RequestMapping("/api/home")
 public class HomeScreenController {
     @Autowired
     private CategoryService categoryService;
@@ -21,13 +21,13 @@ public class HomeScreenController {
     @Autowired
     private ProductService productService;
 
-    // this request is:  http://localhost:8080/api/home-screen/categories
+    // this request is:  http://localhost:8080/api/home/categories
     @GetMapping("/categories")
     public List<CategoryDTO> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
-    // this request is:  http://localhost:8080/api/home-screen/category_id/{cid}
+    // this request is:  http://localhost:8080/api/home/category_id/{cid}
     @GetMapping("/category_id/{cid}")
     public List<ProductDTO> getAllProductsByCategoryID(@PathVariable Long cid) {
         return productService.getAllProductsByCategoryId(cid);
