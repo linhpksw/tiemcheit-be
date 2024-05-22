@@ -3,17 +3,17 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.CategoryDTO;
 import com.tiemcheit.tiemcheitbe.model.Category;
 import com.tiemcheit.tiemcheitbe.repository.CategoryRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class CategoryService {
 
-    @Autowired
-    private CategoryRepo categoryRepository;
+    private final CategoryRepo categoryRepository;
 
     public List<CategoryDTO> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();

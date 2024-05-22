@@ -3,16 +3,17 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.ProductDTO;
 import com.tiemcheit.tiemcheitbe.model.Product;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@AllArgsConstructor
 public class ProductService {
-    @Autowired
-    private ProductRepo productRepository;
+
+    private final ProductRepo productRepository;
 
     //get All ProductDTO by category id
     public List<ProductDTO> getAllProductsByCategoryId(Long categoryId) {
