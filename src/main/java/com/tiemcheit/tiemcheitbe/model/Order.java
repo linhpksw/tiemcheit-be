@@ -1,6 +1,5 @@
 package com.tiemcheit.tiemcheitbe.model;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -37,12 +36,11 @@ public class Order {
     @Column(nullable = false, name = "order_status", length = 256)
     private String orderStatus;
 
-    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY)
-    private List<OrderDetail> orderItems;
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
+    private List<OrderDetail> orderDetails;
 
-    @ManyToOne()
-    @JsonIgnore
-    @JoinColumn(name = "user_id", referencedColumnName = "id")
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "order_user_fk"))
     private User user;
 
 

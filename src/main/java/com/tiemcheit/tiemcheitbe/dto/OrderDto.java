@@ -1,17 +1,17 @@
 package com.tiemcheit.tiemcheitbe.dto;
 
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.Data;
 
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter
-@Setter
+import java.util.Date;
+import java.util.List;
+
+@Data
 public class OrderDto {
-    private Long orderId;
-    private Long userId;
-
-
+    private Long id;
+    private Date orderDate;
+    private String shippingAddress;
+    private String shippingMethod;
+    private String paymentMethod;
+    private String orderStatus;
+    private List<OrderDetailDto> orderDetails;
 }

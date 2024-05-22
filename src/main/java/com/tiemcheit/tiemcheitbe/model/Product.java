@@ -1,7 +1,6 @@
 package com.tiemcheit.tiemcheitbe.model;
 
 import jakarta.persistence.*;
-import org.antlr.v4.runtime.misc.NotNull;
 
 // just for test
 @Entity
@@ -12,9 +11,13 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
-    private @NotNull String name;
-    private @NotNull String imageURL;
-    private @NotNull double price;
-    private @NotNull String description;
+    @Column(name = "name", nullable = false, length = 100)
+    private String name;
+    @Column(name = "image", nullable = false)
+    private String image;
+    @Column(name = "price", nullable = false)
+    private double price;
+    @Column(name = "description", nullable = false)
+    private String description;
 
 }

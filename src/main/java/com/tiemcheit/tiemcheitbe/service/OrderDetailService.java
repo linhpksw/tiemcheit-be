@@ -1,17 +1,17 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.model.OrderDetail;
-import com.tiemcheit.tiemcheitbe.repository.OrderDetailRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.tiemcheit.tiemcheitbe.repository.OrderDetailRepo;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
+@RequiredArgsConstructor
 public class OrderDetailService {
-    @Autowired
-    private OrderDetailRepository orderDetailRepository;
 
+    private final OrderDetailRepo orderDetailRepo;
 
     public void addOrderedProduct(OrderDetail orderDetail) {
-        orderDetailRepository.save(orderDetail);
+        orderDetailRepo.save(orderDetail);
     }
 }
