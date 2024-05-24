@@ -1,22 +1,15 @@
 package com.tiemcheit.tiemcheitbe.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
-import org.springframework.security.core.userdetails.UserDetails;
 
-import java.util.Set;
+import java.util.List;
 
 @Entity
 @Data
-@SuperBuilder
-@NoArgsConstructor
-@AllArgsConstructor
 @Table(name = "users")
-@Inheritance(strategy = InheritanceType.JOINED)
-public abstract class User implements UserDetails {
+//implements UserDetails
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,27 +17,28 @@ public abstract class User implements UserDetails {
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(nullable = false, length = 256)
-    private String password;
-
-    @Column(nullable = false, length = 10, unique = true)
-    private String phone;
-
-    @Column(nullable = false, length = 50)
-    private String email;
-
-    @Column(nullable = false, length = 10)
-    private String status;
-
-    @Column(nullable = false, length = 1)
-    private boolean isActivated;
-
-    @Column(nullable = false, length = 50)
-    @Enumerated(EnumType.STRING)
-    private Role role;
-
-    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<UserAddress> addresses;
-
+    @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
+    private List<CartItem> cartItems;
+//    @Column(nullable = false, length = 256)
+//    private String password;
+//
+//    @Column(nullable = false, length = 10, unique = true)
+//    private String phone;
+//
+//    @Column(nullable = false, length = 50)
+//    private String email;
+//
+//    @Column(nullable = false, length = 10)
+//    private String status;
+//
+//    @Column(nullable = false, length = 1)
+//    private boolean isActivated;
+//
+//    @Column(nullable = false, length = 50)
+//    @Enumerated(EnumType.STRING)
+//    private Role role;
+//
+//    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+//    private Set<UserAddress> addresses;
 
 }
