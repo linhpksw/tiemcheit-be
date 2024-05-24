@@ -1,9 +1,9 @@
-package com.tiemcheit.tiemcheitbe.dto;
+package com.tiemcheit.tiemcheitbe.dto.request;
 
 import lombok.Data;
 
 @Data
-public class ProductDTO {
+public class ProductRequest {
     private Long id;
     private String name;
     private Double price;

@@ -1,7 +1,8 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
-import com.tiemcheit.tiemcheitbe.dto.CategoryDTO;
-import com.tiemcheit.tiemcheitbe.dto.ProductDTO;
+import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.CategoryResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
 import com.tiemcheit.tiemcheitbe.service.CategoryService;
 import com.tiemcheit.tiemcheitbe.service.ProductService;
 import lombok.AllArgsConstructor;
@@ -13,7 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/home")
+@RequestMapping("/home")
 @AllArgsConstructor
 public class HomeScreenController {
 
@@ -22,13 +23,22 @@ public class HomeScreenController {
 
     // this request is:  http://localhost:8080/api/home/category
     @GetMapping("/category")
-    public List<CategoryDTO> getAllCategories() {
-        return categoryService.getAllCategories();
+    public ApiResponse<List<CategoryResponse>> getAllCategories() {
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .data(categoryService.getAllCategories())
+                .error(200)
+                .message("Success")
+                .build();
     }
+
 
     // this request is:  http://localhost:8080/api/home/allProductByCategory/{id}
     @GetMapping("/allProductByCategory/{id}")
-    public List<ProductDTO> getAllProductsByCategoryID(@PathVariable Long id) {
-        return productService.getAllProductsByCategoryId(id);
+    public ApiResponse<List<ProductResponse>> getAllProductsByCategoryID(@PathVariable Long id) {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getAllProductsByCategoryId(id))
+                .error(200)
+                .message("Success")
+                .build();
     }
 }
