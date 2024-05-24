@@ -1,23 +1,34 @@
 package com.tiemcheit.tiemcheitbe.model;
 
 import jakarta.persistence.*;
+import lombok.Data;
 
-// just for test
+import java.util.List;
+
 @Entity
+@Data
 @Table(name = "products")
 public class Product {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer id;
+    private Long id;
 
-    @Column(name = "name", nullable = false, length = 100)
+    @Column(nullable = false, length = 50)
     private String name;
-    @Column(name = "image", nullable = false)
-    private String image;
-    @Column(name = "price", nullable = false)
-    private double price;
-    @Column(name = "description", nullable = false)
+
+    @Column(nullable = false, length = 256)
     private String description;
+
+    @Column(nullable = false)
+    private int price;
+
+    @Column(nullable = false, length = 256)
+    private String image;
+
+    @Column(nullable = false)
+    private int categoryId;
+
+    @OneToMany(mappedBy = "product")
+    private List<CartItem> cartItems;
 
 }

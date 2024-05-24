@@ -17,6 +17,6 @@ public class Store {
     @Column(nullable = false, length = 256)
     private String address;
 
-    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Employee employee;
+//    @OneToOne(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private Employee employee;
 }
