@@ -11,7 +11,6 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/cart")
 public class CartController {
 
     private CartService cartService;
@@ -21,17 +20,17 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @GetMapping("/")
-    public ResponseEntity<List<CartItemDto>> allCartItems() {
-        return ResponseEntity.ok(cartService.allCartItems());
+    @GetMapping("/cart/{uid}")
+    public ResponseEntity<List<CartItemDto>> allCartItems(@PathVariable Long uid) {
+        return ResponseEntity.ok(cartService.allCartItems(uid));
     }
 
-    @PostMapping("/add")
+    @PostMapping("/cart/add")
     public ResponseEntity<CartItemDto> addToCart(@RequestBody CartItemDto cartItemDto) {
         return ResponseEntity.ok(cartService.addToCart(cartItemDto));
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/cart/delete/id")
     public void deleteCartItem(@PathVariable Long id) {
         cartService.deleteCartItem(id);
     }

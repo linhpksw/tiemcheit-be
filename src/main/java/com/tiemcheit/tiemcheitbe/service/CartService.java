@@ -9,7 +9,9 @@ import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -20,8 +22,17 @@ public class CartService {
     private final UserRepo userRepo;
     private final CartItemMapper cartItemMapper;
 
-    public List<CartItemDto> allCartItems() {
-        return cartItemMapper.toCartItemDtos(cartItemRepo.findAll());
+    public List<CartItemDto> allCartItems(Long uid) {
+        List<CartItem> cartItems = cartItemRepo.findAll();
+        List<CartItem> userCartItems = new ArrayList<>();
+
+        for (CartItem ci : cartItems) {
+            if (Objects.equals(ci.getUser().getId(), uid)) {
+                userCartItems.add(ci);
+            }
+        }
+
+        return cartItemMapper.toCartItemDtos(userCartItems);
     }
 
     public CartItemDto addToCart(CartItemDto cartItemDto) {
