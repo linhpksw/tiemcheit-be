@@ -2,6 +2,7 @@ package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CategoryResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
 import com.tiemcheit.tiemcheitbe.service.CategoryService;
 import com.tiemcheit.tiemcheitbe.service.ProductService;
@@ -14,28 +15,27 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/home")
+@RequestMapping("/product")
 @AllArgsConstructor
-public class HomeScreenController {
-    private final CategoryService categoryService;
+public class ProductController {
     private final ProductService productService;
 
-    // this request is:  http://localhost:8080/api/home/category
-    @GetMapping("/category")
-    public ApiResponse<List<CategoryResponse>> getAllCategories() {
-        return ApiResponse.<List<CategoryResponse>>builder()
-                .data(categoryService.getAllCategories())
-                .message("Success")
-                .build();
-    }
-
-
-    // this request is:  http://localhost:8080/api/home/allProductByCategory/{id}
-    @GetMapping("/allProductByCategory/{id}")
+    // this request is:  http://localhost:8080/product/getAllByCategory/{id}
+    @GetMapping("/getAllByCategory/{id}")
     public ApiResponse<List<ProductResponse>> getAllProductsByCategoryID(@PathVariable Long id) {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getAllProductsByCategoryId(id))
                 .message("Success")
                 .build();
     }
+
+    @GetMapping("/getDetail/{id}")
+    public ApiResponse<ProductDetailResponse> getProductDetailById(@PathVariable Long id) {
+        return ApiResponse.<ProductDetailResponse>builder()
+                .data(productService.getProductDetailById(id))
+                .message("Success")
+                .build();
+    }
+
+
 }
