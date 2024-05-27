@@ -1,11 +1,11 @@
 package com.tiemcheit.tiemcheitbe.service;
 
-import com.tiemcheit.tiemcheitbe.dto.CartItemDto;
-import com.tiemcheit.tiemcheitbe.mapper.CartItemMapper;
+import com.tiemcheit.tiemcheitbe.dto.AddCartItemDto;
+import com.tiemcheit.tiemcheitbe.dto.GetCartItemDto;
+import com.tiemcheit.tiemcheitbe.mapper.AddCartItemMapper;
+import com.tiemcheit.tiemcheitbe.mapper.GetCartItemMapper;
 import com.tiemcheit.tiemcheitbe.model.CartItem;
 import com.tiemcheit.tiemcheitbe.repository.CartItemRepo;
-import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
-import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,11 +18,10 @@ import java.util.Objects;
 public class CartService {
 
     private final CartItemRepo cartItemRepo;
-    private final ProductRepo productRepo;
-    private final UserRepo userRepo;
-    private final CartItemMapper cartItemMapper;
+    private final GetCartItemMapper getCartItemMapper;
+    private final AddCartItemMapper addCartItemMapper;
 
-    public List<CartItemDto> allCartItems(Long uid) {
+    public List<GetCartItemDto> allCartItems(Long uid) {
         List<CartItem> cartItems = cartItemRepo.findAll();
         List<CartItem> userCartItems = new ArrayList<>();
 
@@ -32,13 +31,21 @@ public class CartService {
             }
         }
 
-        return cartItemMapper.toCartItemDtos(userCartItems);
+        return getCartItemMapper.toDtos(userCartItems);
     }
 
-    public CartItemDto addToCart(CartItemDto cartItemDto) {
-        CartItem cartItem = cartItemMapper.toCartItem(cartItemDto);
+    public AddCartItemDto addToCart(AddCartItemDto cartItemDto) {
+        List<CartItem> cartItems = cartItemRepo.findAll();
+        for (CartItem ci : cartItems) {
+            if (Objects.equals(ci.getProduct().getId(), cartItemDto.getProduct().getId())) {
+                System.out.println("Cannot add to cart the same product!");
+                return null;
+            }
+        }
+
+        CartItem cartItem = addCartItemMapper.toEntity(cartItemDto);
         CartItem savedCartItem = cartItemRepo.save(cartItem);
-        return cartItemMapper.toCartItemDto(savedCartItem);
+        return addCartItemMapper.toDto(savedCartItem);
     }
 
     public void deleteCartItem(Long id) {

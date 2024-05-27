@@ -3,7 +3,7 @@ package com.tiemcheit.tiemcheitbe.dto;
 import lombok.Data;
 
 @Data
-public class CartItemDto {
+public class GetCartItemDto {
     private int id;
     private UserDto user;
     private ProductDto product;
