@@ -17,7 +17,6 @@ import java.util.List;
 @RequestMapping("/home")
 @AllArgsConstructor
 public class HomeScreenController {
-
     private final CategoryService categoryService;
     private final ProductService productService;
 
@@ -26,7 +25,6 @@ public class HomeScreenController {
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         return ApiResponse.<List<CategoryResponse>>builder()
                 .data(categoryService.getAllCategories())
-                .error(200)
                 .message("Success")
                 .build();
     }
@@ -37,7 +35,6 @@ public class HomeScreenController {
     public ApiResponse<List<ProductResponse>> getAllProductsByCategoryID(@PathVariable Long id) {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getAllProductsByCategoryId(id))
-                .error(200)
                 .message("Success")
                 .build();
     }
