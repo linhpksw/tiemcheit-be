@@ -25,14 +25,14 @@ public class CartController {
         return ResponseEntity.ok(cartService.allCartItems(uid));
     }
 
-    @PostMapping("/cart/add")
+    @PostMapping("/cart")
     public ResponseEntity<CartItemDto> addToCart(@RequestBody CartItemDto cartItemDto) {
         return ResponseEntity.ok(cartService.addToCart(cartItemDto));
     }
 
-    @DeleteMapping("/cart/delete/id")
-    public void deleteCartItem(@PathVariable Long id) {
-        cartService.deleteCartItem(id);
+    @DeleteMapping("/cart/{cid}")
+    public void deleteCartItem(@PathVariable Long cid) {
+        cartService.deleteCartItem(cid);
     }
 
 }
