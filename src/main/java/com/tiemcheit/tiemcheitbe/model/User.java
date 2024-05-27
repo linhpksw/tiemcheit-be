@@ -2,8 +2,6 @@ package com.tiemcheit.tiemcheitbe.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import lombok.experimental.SuperBuilder;
 
 import java.util.List;
 
@@ -11,7 +9,7 @@ import java.util.List;
 @Data
 @Table(name = "users")
 @Inheritance(strategy = InheritanceType.JOINED)
-public abstract class User {
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,14 +19,14 @@ public abstract class User {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.MERGE)
     private List<CartItem> cartItems;
-//    @Column(nullable = false, length = 256)
+    //    @Column(nullable = false, length = 256)
 //    private String password;
 //
-//    @Column(nullable = false, length = 10, unique = true)
-//    private String phone;
-//
-//    @Column(nullable = false, length = 50)
-//    private String email;
+    @Column(nullable = false, length = 10, unique = true)
+    private String phone;
+    //
+    @Column(nullable = false, length = 50)
+    private String email;
 //
 //    @Column(nullable = false, length = 10)
 //    private String status;
