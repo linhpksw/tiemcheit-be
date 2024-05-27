@@ -1,9 +1,9 @@
 package com.tiemcheit.tiemcheitbe.repository;
 
-import com.tiemcheit.tiemcheitbe.model.Store;
+import com.tiemcheit.tiemcheitbe.model.InvalidatedToken;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 @Repository
-public interface StoreRepo extends JpaRepository<Store, Long> {
+public interface InvalidatedTokenRepo extends JpaRepository<InvalidatedToken, String> {
 }
