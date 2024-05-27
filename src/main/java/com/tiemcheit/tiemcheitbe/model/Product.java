@@ -1,8 +1,10 @@
 package com.tiemcheit.tiemcheitbe.model;
 
+
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
 
 @Entity
 @Getter
@@ -10,6 +12,7 @@ import lombok.Setter;
 @Table(name = "products")
 public class Product {
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(length = 50, nullable = false)
@@ -17,7 +20,7 @@ public class Product {
 
     private String description;
 
-    private double price;
+    private Double price;
 
     private String image;
 
