@@ -25,6 +25,7 @@ public class UserAddressService {
 
     public UserAddressResponse addUserAddress(UserAddressRequest request, Long userId) {
         request.getUser().setId(userId);
+        request.setIsDefault(false);
         return userAddressMapper.toResponse(userAddressRepo.save(userAddressMapper.toEntity(request)));
     }
 

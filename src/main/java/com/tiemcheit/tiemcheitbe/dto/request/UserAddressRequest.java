@@ -6,4 +6,5 @@ import lombok.Data;
 public class UserAddressRequest {
     private UserRequest user;
     private String address;
+    private Boolean isDefault;
 }
