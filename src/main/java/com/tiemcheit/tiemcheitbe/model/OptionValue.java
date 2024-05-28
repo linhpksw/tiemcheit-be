@@ -10,7 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "options_values")
+@Table(name = "option_values")
 @IdClass(OptionValueId.class)
 public class OptionValue {
 

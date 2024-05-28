@@ -1,7 +1,5 @@
 package com.tiemcheit.tiemcheitbe.dto.response;
 
-import com.tiemcheit.tiemcheitbe.model.Store;
-import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,7 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IngredientResponse {
+public class OptionValueResponse {
     private Long id;
     private String name;
 }

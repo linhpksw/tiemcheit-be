@@ -1,19 +1,19 @@
 package com.tiemcheit.tiemcheitbe.service;
 
-import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.IngredientResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.OptionResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
+import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
+import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
-import com.tiemcheit.tiemcheitbe.model.Ingredient;
-import com.tiemcheit.tiemcheitbe.model.Option;
-import com.tiemcheit.tiemcheitbe.model.Product;
+import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.ProductIngredientRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductOptionRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,6 +27,8 @@ public class ProductService {
     private final ProductOptionRepo productOptionRepo;
     private final ProductIngredientRepo productIngredientRepo;
 
+    private final OptionMapper optionMapper;
+
     //get All ProductResponse by category id
     public List<ProductResponse> getAllProductsByCategoryId(Long categoryId) {
         List<Product> products = productRepository.findAllByCategoryId(categoryId);
@@ -37,27 +39,23 @@ public class ProductService {
 
     //get ProductDetailResponse by product id
     public ProductDetailResponse getProductDetailById(Long productId) {
-         Product product = productRepository.findById(productId).orElseThrow(() -> new RuntimeException("Product not found"));
+        Product product = productRepository.findById(productId).orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
 
-        List<Option> optionList = productOptionRepo.findAllByProductId(productId)
+        List<OptionResponse> optionList = productOptionRepo.findAllByProductId(product.getId())
                 .stream()
-                .map(productOption -> Option.builder()
-                        .id(productOption.getOption().getId())
-                        .name(productOption.getOption().getName())
-                        .build())
+                .map(ProductOption::getOption)
+                .map(optionMapper::toOptionResponse)
                 .toList();
 
-        List<IngredientResponse> ingredientResponseList = productIngredientRepo.findAllByProductId(productId)
+
+        List<IngredientResponse> ingredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
                 .stream()
-                .map(productIngredient -> Ingredient.builder()
-                        .id(productIngredient.getIngredient().getId())
-                        .name(productIngredient.getIngredient().getName())
-                        .build())
+                .map(ProductIngredient::getIngredient)
                 .toList().stream()
                 .map(IngredientMapper.INSTANCE::toIngredientResponse)
                 .toList();
 
-        ProductDetailResponse productDetailResponse = ProductDetailResponse.builder()
+        return ProductDetailResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
@@ -66,14 +64,5 @@ public class ProductService {
                 .optionList(optionList)
                 .ingredientList(ingredientResponseList)
                 .build();
-
-        return productDetailResponse;
-
-
-
     }
-
-
-
-
 }
