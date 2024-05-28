@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.service;
 
-import com.tiemcheit.tiemcheitbe.dto.CartItemDto;
+import com.tiemcheit.tiemcheitbe.dto.request.CartItemRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.mapper.CartItemMapper;
 import com.tiemcheit.tiemcheitbe.model.CartItem;
 import com.tiemcheit.tiemcheitbe.repository.CartItemRepo;
@@ -22,7 +23,7 @@ public class CartService {
     private final UserRepo userRepo;
     private final CartItemMapper cartItemMapper;
 
-    public List<CartItemDto> allCartItems(Long uid) {
+    public List<CartItemResponse> allCartItems(Long uid) {
         List<CartItem> cartItems = cartItemRepo.findAll();
         List<CartItem> userCartItems = new ArrayList<>();
 
@@ -32,13 +33,13 @@ public class CartService {
             }
         }
 
-        return cartItemMapper.toCartItemDtos(userCartItems);
+        return cartItemMapper.toCartItemResponses(userCartItems);
     }
 
-    public CartItemDto addToCart(CartItemDto cartItemDto) {
+    public CartItemResponse addToCart(CartItemRequest cartItemDto) {
         CartItem cartItem = cartItemMapper.toCartItem(cartItemDto);
         CartItem savedCartItem = cartItemRepo.save(cartItem);
-        return cartItemMapper.toCartItemDto(savedCartItem);
+        return cartItemMapper.toCartItemResponse(savedCartItem);
     }
 
     public void deleteCartItem(Long id) {

@@ -1,6 +1,6 @@
 package com.tiemcheit.tiemcheitbe.service;
 
-import com.tiemcheit.tiemcheitbe.dto.OrderDto;
+import com.tiemcheit.tiemcheitbe.dto.response.OrderResponse;
 import com.tiemcheit.tiemcheitbe.mapper.OrderMapper;
 import com.tiemcheit.tiemcheitbe.model.User;
 import com.tiemcheit.tiemcheitbe.repository.OrderRepo;
@@ -17,13 +17,13 @@ public class OrderService {
 
     private final OrderMapper orderMapper;
 
-    public List<OrderDto> listOrders(User user) {
-        return orderMapper.toDtos(orderRepo.findAllByUserOrderByIdDesc(user));
+    public List<OrderResponse> listOrders(User user) {
+        return orderMapper.toResponses(orderRepo.findAllByUserOrderByIdDesc(user));
     }
 
     // check the not found exception after
-    public OrderDto getOrder(Long id) {
-        return orderMapper.toDto(orderRepo.findById(id).get());
+    public OrderResponse getOrder(Long id) {
+        return orderMapper.toReponse(orderRepo.findById(id).get());
     }
 
     public void placeOrder(User user) {

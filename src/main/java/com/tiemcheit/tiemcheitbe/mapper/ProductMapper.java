@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.mapper;
 
-import com.tiemcheit.tiemcheitbe.dto.ProductDto;
+import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
 import com.tiemcheit.tiemcheitbe.model.Product;
 import org.mapstruct.Mapper;
 
@@ -8,9 +9,9 @@ import java.util.List;
 
 @Mapper
 public interface ProductMapper {
-    ProductDto toDto(Product product);
+    ProductResponse toResponse(Product product);
 
-    Product toEntity(ProductDto productDto);
+    Product toEntity(ProductRequest request);
 
-    List<ProductDto> toDtoList(List<Product> productList);
+    List<ProductResponse> toResponses(List<Product> productList);
 }

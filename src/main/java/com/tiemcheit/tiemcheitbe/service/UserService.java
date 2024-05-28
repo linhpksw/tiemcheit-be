@@ -1,6 +1,6 @@
 package com.tiemcheit.tiemcheitbe.service;
 
-import com.tiemcheit.tiemcheitbe.dto.UserDto;
+import com.tiemcheit.tiemcheitbe.dto.response.UserResponse;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +14,7 @@ public class UserService {
 
     private final UserMapper userMapper;
 
-    public UserDto getUser(Long id) {
-        return userMapper.toDto(userRepo.findById(id).get());
+    public UserResponse getUser(Long id) {
+        return userMapper.toResponse(userRepo.findById(id).get());
     }
 }

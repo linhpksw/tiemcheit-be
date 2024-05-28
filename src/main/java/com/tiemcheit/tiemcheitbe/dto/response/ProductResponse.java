@@ -1,9 +1,9 @@
-package com.tiemcheit.tiemcheitbe.dto;
+package com.tiemcheit.tiemcheitbe.dto.response;
 
 import lombok.Data;
 
 @Data
-public class ProductDto {
+public class ProductResponse {
     private Integer id;
     private String name;
     private String image;

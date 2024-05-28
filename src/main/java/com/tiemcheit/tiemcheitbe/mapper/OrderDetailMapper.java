@@ -1,13 +1,14 @@
 package com.tiemcheit.tiemcheitbe.mapper;
 
-import com.tiemcheit.tiemcheitbe.dto.OrderDetailDto;
+import com.tiemcheit.tiemcheitbe.dto.request.OrderDetailRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.OrderDetailResponse;
 import com.tiemcheit.tiemcheitbe.model.OrderDetail;
 import org.mapstruct.Mapper;
 
 @Mapper(componentModel = "spring", uses = ProductMapper.class)
 public interface OrderDetailMapper {
 
-    OrderDetail toEntity(OrderDetailDto orderDetailDto);
+    OrderDetail toEntity(OrderDetailRequest request);
 
-    OrderDetailDto toDto(OrderDetail orderDetail);
+    OrderDetailResponse toResponse(OrderDetail orderDetail);
 }

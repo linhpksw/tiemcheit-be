@@ -1,9 +1,9 @@
-package com.tiemcheit.tiemcheitbe.dto;
+package com.tiemcheit.tiemcheitbe.dto.response;
 
 import lombok.Data;
 
 @Data
-public class UserDto {
+public class UserResponse {
     private Long id;
     private String username;
     private String phone;

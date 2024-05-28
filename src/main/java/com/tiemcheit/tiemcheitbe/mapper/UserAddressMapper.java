@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.mapper;
 
-import com.tiemcheit.tiemcheitbe.dto.UserAddressDto;
+import com.tiemcheit.tiemcheitbe.dto.request.UserAddressRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.UserAddressResponse;
 import com.tiemcheit.tiemcheitbe.model.UserAddress;
 import org.mapstruct.Mapper;
 
@@ -9,10 +10,10 @@ import java.util.List;
 @Mapper
 public interface UserAddressMapper {
 
-    UserAddress toEntity(UserAddress addressDto);
+    UserAddress toEntity(UserAddressRequest request);
 
-    UserAddressDto toDto(UserAddress address);
+    UserAddressResponse toResponse(UserAddress address);
 
-    List<UserAddressDto> toDtos(List<UserAddress> userAddresses);
+    List<UserAddressResponse> toResponses(List<UserAddress> userAddresses);
 
 }
