@@ -3,7 +3,7 @@ package com.tiemcheit.tiemcheitbe.model;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.List;
+
 import java.util.Set;
 
 @Getter
@@ -24,5 +24,5 @@ public class Option {
     private Set<ProductOption> productOptions;
 
     @OneToMany(mappedBy = "option", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
-    private List<OptionValue> optionValues;
+    private Set<OptionValue> optionValues;
 }

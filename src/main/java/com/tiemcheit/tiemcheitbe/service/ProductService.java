@@ -8,7 +8,9 @@ import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
-import com.tiemcheit.tiemcheitbe.model.*;
+import com.tiemcheit.tiemcheitbe.model.Product;
+import com.tiemcheit.tiemcheitbe.model.ProductIngredient;
+import com.tiemcheit.tiemcheitbe.model.ProductOption;
 import com.tiemcheit.tiemcheitbe.repository.ProductIngredientRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductOptionRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
@@ -21,7 +23,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -58,7 +59,7 @@ public class ProductService {
 
     //get ProductDetailResponse by product id
     public ProductDetailResponse getProductDetailById(Long productId) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+        Product product = productRepo.findById(productId).orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
 
         List<OptionResponse> optionList = productOptionRepo.findAllByProductId(product.getId())
                 .stream()
