@@ -8,6 +8,7 @@ public class TiemcheitBeApplication {
 
 	public static void main(String[] args) {
 		SpringApplication.run(TiemcheitBeApplication.class, args);
+
 	}
 
 }

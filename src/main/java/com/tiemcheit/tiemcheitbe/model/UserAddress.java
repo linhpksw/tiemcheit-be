@@ -3,6 +3,7 @@ package com.tiemcheit.tiemcheitbe.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
+
 @Data
 @Entity
 @Table(name = "user_addresses")

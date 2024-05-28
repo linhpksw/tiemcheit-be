@@ -1,17 +1,19 @@
 package com.tiemcheit.tiemcheitbe.mapper;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.CartProductResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
 import com.tiemcheit.tiemcheitbe.model.Product;
 import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
-import java.util.List;
-
-@Mapper
+@Mapper(componentModel = "spring")
 public interface ProductMapper {
-    ProductResponse toResponse(Product product);
+    ProductMapper INSTANCE = Mappers.getMapper(ProductMapper.class);
 
-    Product toEntity(ProductRequest request);
+    Product toProduct(ProductRequest request);
 
-    List<ProductResponse> toResponses(List<Product> productList);
+    ProductResponse toProductResponse(Product product);
+
+    CartProductResponse toCartProductResponse(Product product);
 }

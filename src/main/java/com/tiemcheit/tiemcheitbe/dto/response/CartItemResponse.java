@@ -4,7 +4,8 @@ import lombok.Data;
 
 @Data
 public class CartItemResponse {
-    private UserResponse user;
-    private ProductResponse product;
+    private int id;
+    private CartUserResponse user;
+    private CartProductResponse product;
     private int quantity;
 }

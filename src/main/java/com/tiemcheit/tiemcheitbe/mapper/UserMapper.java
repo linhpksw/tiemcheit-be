@@ -1,14 +1,19 @@
 package com.tiemcheit.tiemcheitbe.mapper;
 
-import com.tiemcheit.tiemcheitbe.dto.request.UserRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.UserRegisterRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.CartUserResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserResponse;
 import com.tiemcheit.tiemcheitbe.model.User;
 import org.mapstruct.Mapper;
+import org.mapstruct.factory.Mappers;
 
 @Mapper
 public interface UserMapper {
+    UserMapper INSTANCE = Mappers.getMapper(UserMapper.class);
 
-    UserResponse toResponse(User user);
+    User toUser(UserRegisterRequest request);
 
-    User toEntity(UserRequest request);
+    UserResponse toUserResponse(User user);
+
+    CartUserResponse toCartUserResponse(User user);
 }
