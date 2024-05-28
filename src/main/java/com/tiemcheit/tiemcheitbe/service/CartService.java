@@ -67,11 +67,13 @@ public class CartService {
         }
     }
 
-    public void updateItemQuantity(CartItemUpdateRequest cartItemUpdateRequest, Long uid) {
+    public CartItemResponse updateItemQuantity(CartItemUpdateRequest cartItemUpdateRequest, Long uid) {
         CartItem updatedCartItem = cartItemMapper.toEntity(cartItemUpdateRequest);
         updatedCartItem.setUser(userService.getById(uid));
         updatedCartItem.setProduct(getProductInCartItem(cartItemUpdateRequest.getId()));
         cartItemRepo.save(updatedCartItem);
+
+        return cartItemMapper.toCartItemResponse(updatedCartItem);
     }
 
     private Product getProductInCartItem(Long id) {
