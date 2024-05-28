@@ -1,12 +1,14 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.CartItemUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.mapper.CartItemMapper;
 import com.tiemcheit.tiemcheitbe.model.CartItem;
+import com.tiemcheit.tiemcheitbe.model.Product;
 import com.tiemcheit.tiemcheitbe.repository.CartItemRepo;
-import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -17,9 +19,16 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class CartService {
 
-    private final UserRepo userRepo;
     private final CartItemRepo cartItemRepo;
     private final CartItemMapper cartItemMapper;
+    private UserService userService;
+
+    @Autowired
+    public CartService(CartItemRepo cartItemRepo, CartItemMapper cartItemMapper, UserService userService) {
+        this.cartItemRepo = cartItemRepo;
+        this.cartItemMapper = cartItemMapper;
+        this.userService = userService;
+    }
 
     public List<CartItemResponse> allCartItems(Long uid) {
         List<CartItem> cartItems = cartItemRepo.findAll();
@@ -34,18 +43,18 @@ public class CartService {
         return cartItemMapper.toCartItemResponses(userCartItems);
     }
 
-    public CartItemRequest addToCart(CartItemRequest cartItemDto, Long uid) {
+    public CartItemRequest addToCart(CartItemRequest cartItemRequest, Long uid) {
         List<CartItem> cartItems = cartItemRepo.findAll();
         for (CartItem ci : cartItems) {
             if (Objects.equals(ci.getUser().getId(), uid) &&
-                    Objects.equals(ci.getProduct().getId(), cartItemDto.getProduct().getId())) {
+                    Objects.equals(ci.getProduct().getId(), cartItemRequest.getProduct().getId())) {
                 System.out.println("Cannot add to cart the same product!");
                 return null;
             }
         }
 
-        CartItem cartItem = cartItemMapper.toEntity(cartItemDto);
-        cartItem.setUser(userRepo.getReferenceById(uid));
+        CartItem cartItem = cartItemMapper.toEntity(cartItemRequest);
+        cartItem.setUser(userService.getById(uid));
         CartItem savedCartItem = cartItemRepo.save(cartItem);
         return cartItemMapper.toCartItemRequest(savedCartItem);
     }
@@ -58,4 +67,14 @@ public class CartService {
         }
     }
 
+    public void updateItemQuantity(CartItemUpdateRequest cartItemUpdateRequest, Long uid) {
+        CartItem updatedCartItem = cartItemMapper.toEntity(cartItemUpdateRequest);
+        updatedCartItem.setUser(userService.getById(uid));
+        updatedCartItem.setProduct(getProductInCartItem(cartItemUpdateRequest.getId()));
+        cartItemRepo.save(updatedCartItem);
+    }
+
+    private Product getProductInCartItem(Long id) {
+        return cartItemRepo.getReferenceById(id).getProduct();
+    }
 }

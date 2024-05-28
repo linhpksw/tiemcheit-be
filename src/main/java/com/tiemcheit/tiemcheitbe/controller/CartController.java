@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.CartItemUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.service.CartService;
 import lombok.RequiredArgsConstructor;
@@ -36,4 +37,8 @@ public class CartController {
         cartService.deleteCartItem(cid);
     }
 
+    @PatchMapping("/cart/{uid}")
+    public void updateItemQuantity(@RequestBody CartItemUpdateRequest cartItemUpdateRequest, @PathVariable Long uid) {
+        cartService.updateItemQuantity(cartItemUpdateRequest, uid);
+    }
 }
