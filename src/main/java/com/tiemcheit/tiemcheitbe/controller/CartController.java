@@ -2,43 +2,55 @@ package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemUpdateRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.service.CartService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/cart")
 public class CartController {
 
-    private CartService cartService;
+    private final CartService cartService;
 
-    @Autowired
-    public CartController(CartService cartService) {
-        this.cartService = cartService;
+//    @Autowired
+//    public CartController(CartService cartService) {
+//        this.cartService = cartService;
+//    }
+
+    @GetMapping("/{uid}")
+    public ApiResponse<List<CartItemResponse>> allCartItems(@PathVariable Long uid) {
+        var data = cartService.allCartItems(uid);
+        return ApiResponse.<List<CartItemResponse>>builder()
+                .message("Success")
+                .data(data).build();
     }
 
-    @GetMapping("/cart/{uid}")
-    public ResponseEntity<List<CartItemResponse>> allCartItems(@PathVariable Long uid) {
-        return ResponseEntity.ok(cartService.allCartItems(uid));
+    @PostMapping("/{uid}")
+    public ApiResponse<CartItemRequest> addToCart(@RequestBody CartItemRequest cartItemDto, @PathVariable Long uid) {
+        var data = cartService.addToCart(cartItemDto, uid);
+        return ApiResponse.<CartItemRequest>builder()
+                .message("Success")
+                .data(data).build();
     }
 
-    @PostMapping("/cart/{uid}")
-    public ResponseEntity<CartItemRequest> addToCart(@RequestBody CartItemRequest cartItemDto, @PathVariable Long uid) {
-        return ResponseEntity.ok(cartService.addToCart(cartItemDto, uid));
-    }
-
-    @DeleteMapping("/cart/{cid}")
-    public void deleteCartItem(@PathVariable Long cid) {
+    @DeleteMapping("/{cid}")
+    public ApiResponse<Void> deleteCartItem(@PathVariable Long cid) {
         cartService.deleteCartItem(cid);
+        return ApiResponse.<Void>builder()
+                .message("Success")
+                .build();
     }
 
-    @PatchMapping("/cart/{uid}")
-    public ResponseEntity<CartItemResponse> updateItemQuantity(@RequestBody CartItemUpdateRequest cartItemUpdateRequest, @PathVariable Long uid) {
-        return ResponseEntity.ok(cartService.updateItemQuantity(cartItemUpdateRequest, uid));
+    @PatchMapping("/{uid}")
+    public ApiResponse<CartItemResponse> updateItemQuantity(@RequestBody CartItemUpdateRequest cartItemUpdateRequest, @PathVariable Long uid) {
+        var data = cartService.updateItemQuantity(cartItemUpdateRequest, uid);
+        return ApiResponse.<CartItemResponse>builder()
+                .message("Success")
+                .data(data).build();
     }
 }
