@@ -1,7 +1,7 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
-import com.tiemcheit.tiemcheitbe.dto.AddCartItemDto;
-import com.tiemcheit.tiemcheitbe.dto.GetCartItemDto;
+import com.tiemcheit.tiemcheitbe.dto.request.CartItemRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.service.CartService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,13 +22,13 @@ public class CartController {
     }
 
     @GetMapping("/cart/{uid}")
-    public ResponseEntity<List<GetCartItemDto>> allCartItems(@PathVariable Long uid) {
+    public ResponseEntity<List<CartItemResponse>> allCartItems(@PathVariable Long uid) {
         return ResponseEntity.ok(cartService.allCartItems(uid));
     }
 
-    @PostMapping("/cart")
-    public ResponseEntity<AddCartItemDto> addToCart(@RequestBody AddCartItemDto cartItemDto) {
-        return ResponseEntity.ok(cartService.addToCart(cartItemDto));
+    @PostMapping("/cart/{uid}")
+    public ResponseEntity<CartItemRequest> addToCart(@RequestBody CartItemRequest cartItemDto, @PathVariable Long uid) {
+        return ResponseEntity.ok(cartService.addToCart(cartItemDto, uid));
     }
 
     @DeleteMapping("/cart/{cid}")
