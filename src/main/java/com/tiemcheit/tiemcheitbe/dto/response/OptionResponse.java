@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Set;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -15,4 +16,5 @@ public class OptionResponse {
     private Long id;
     private String name;
     private Set<OptionValueResponse> optionValues;
+    private List<OptionValueResponse> optionValues;
 }
