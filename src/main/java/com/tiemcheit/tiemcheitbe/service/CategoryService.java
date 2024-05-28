@@ -5,14 +5,14 @@ import com.tiemcheit.tiemcheitbe.mapper.CategoryMapper;
 import com.tiemcheit.tiemcheitbe.model.Category;
 import com.tiemcheit.tiemcheitbe.repository.CategoryRepo;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-@AllArgsConstructor
-
+@RequiredArgsConstructor
 public class CategoryService {
 
     private final CategoryRepo categoryRepository;
