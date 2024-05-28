@@ -13,4 +13,6 @@ public interface UserMapper {
     User toUser(UserRegisterRequest request);
 
     UserResponse toUserResponse(User user);
+
+    CartUserResponse toCartUserResponse(User user);
 }

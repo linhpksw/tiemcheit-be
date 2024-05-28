@@ -13,4 +13,6 @@ public interface ProductMapper {
     Product toProduct(ProductRequest request);
 
     ProductResponse toProductResponse(Product product);
+
+    CartProductResponse toCartProductResponse(Product product);
 }

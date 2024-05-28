@@ -96,4 +96,9 @@ public class UserService {
         return userMapper.toUserResponse(
                 userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND)));
     }
+
+
+    public User getById(Long id) {
+        return userRepo.getReferenceById(id);
+    }
 }

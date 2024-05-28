@@ -18,14 +18,22 @@ public class Product {
     @Column(length = 50, nullable = false)
     private String name;
 
-    private String description;
-
-    private Double price;
-
-    private String image;
-
     @ManyToOne
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
+    @Column(nullable = false, length = 50)
+    private String name;
+
+    @Column(nullable = false, length = 256)
+    private String description;
+
+    @Column(nullable = false)
+    private Double price;
+
+    @Column(nullable = false, length = 256)
+    private String image;
+
+    @OneToMany(mappedBy = "product")
+    private List<CartItem> cartItems;
 
 }
