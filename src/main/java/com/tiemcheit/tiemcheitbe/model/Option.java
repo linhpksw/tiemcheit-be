@@ -3,6 +3,7 @@ package com.tiemcheit.tiemcheitbe.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Getter
@@ -19,9 +20,9 @@ public class Option {
 
     private String name;
 
-    @OneToMany(mappedBy = "option", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "option", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     private Set<ProductOption> productOptions;
 
-    @OneToMany(mappedBy = "option", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Set<OptionValue> optionValues;
+    @OneToMany(mappedBy = "option", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    private List<OptionValue> optionValues;
 }

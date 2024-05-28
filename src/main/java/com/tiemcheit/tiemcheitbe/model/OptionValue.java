@@ -21,5 +21,6 @@ public class OptionValue {
 
     @Id
     private Long value_id;
+
     private String value_name;
 }
