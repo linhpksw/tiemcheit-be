@@ -51,10 +51,22 @@ public class UserService {
     public UserResponse updateUser(String username, UserUpdateRequest request) {
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        if (request.getPassword() != null) {
+            user.setPassword(passwordEncoder.encode(request.getPassword()));
+        }
 
-        var roles = roleRepo.findAllByNameIn(request.getRoles());
-        user.setRoles(new HashSet<>(roles));
+        if (request.getRoles() != null) {
+            var roles = roleRepo.findAllByNameIn(request.getRoles());
+            user.setRoles(new HashSet<>(roles));
+        }
+
+        if (request.getFullname() != null) {
+            user.setFullname(request.getFullname());
+        }
+
+        if (request.getDob() != null) {
+            user.setDob(request.getDob());
+        }
 
         return userMapper.toUserResponse(userRepo.save(user));
     }

@@ -5,7 +5,6 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.nimbusds.jwt.proc.BadJWTException;
 import com.tiemcheit.tiemcheitbe.dto.request.AuthRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.IntrospectRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.LogoutRequest;
@@ -57,48 +56,51 @@ public class AuthService {
 
         try {
             verifyToken(token, false);
-        } catch (BadJWTException e) {
+        } catch (AppException e) {
             isValid = false;
         }
 
         return IntrospectResponse.builder().valid(isValid).build();
     }
 
-    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException, BadJWTException {
+    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
         JWSVerifier verifier = new MACVerifier(secretKey.getBytes());
 
         SignedJWT signedJWT = SignedJWT.parse(token);
 
-        Date expiryTime = (isRefresh)
-                ? new Date(signedJWT.getJWTClaimsSet().getIssueTime()
-                .toInstant().plus(refreshTokenExpiration, ChronoUnit.SECONDS).toEpochMilli())
-                : signedJWT.getJWTClaimsSet().getExpirationTime();
+        Date expiryTime;
+
+        if (isRefresh) {
+            expiryTime = new Date(signedJWT.getJWTClaimsSet().getIssueTime().toInstant().plus(refreshTokenExpiration, ChronoUnit.SECONDS).toEpochMilli());
+        } else {
+            expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
+        }
 
         var verified = signedJWT.verify(verifier);
 
         if (!verified || !expiryTime.after(new Date())) {
-            throw new BadJWTException("Token is expired or invalid.");
+            throw new AppException("Token is invalid", HttpStatus.UNAUTHORIZED);
         }
 
         if (invalidatedTokenRepo.existsById(signedJWT.getJWTClaimsSet().getJWTID())) {
-            throw new BadJWTException("Token has been invalidated.");
+            throw new AppException("Token is invalid", HttpStatus.UNAUTHORIZED);
         }
 
         return signedJWT;
     }
 
-    public AuthResponse authenticate(AuthRequest request) throws BadJWTException {
+    public AuthResponse authenticate(AuthRequest request) {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         var userOptional = userRepo.findByUsername(request.getUsername());
 
         if (userOptional.isEmpty()) {
-            throw new BadJWTException("User not found.");
+            throw new AppException("User not found", HttpStatus.BAD_REQUEST);
         }
 
         User user = userOptional.get();
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (!authenticated) throw new BadJWTException("User is not authenticated.");
+        if (!authenticated) throw new AppException("Invalid credentials", HttpStatus.BAD_REQUEST);
 
         var token = generateToken(user);
 
@@ -110,8 +112,8 @@ public class AuthService {
             JWSHeader header = new JWSHeader(JWSAlgorithm.HS512);
             JWTClaimsSet jwtClaimsSet = new JWTClaimsSet.Builder()
                     .subject(user.getUsername())
-                    .issuer("https://tiemcheit.com")
-                    .issueTime(new Date())
+                    .issuer("https://api.tiemcheit.com")
+                    .issueTime(Date.from(Instant.now()))
                     .expirationTime(Date.from(Instant.now().plus(accessTokenExpiration, ChronoUnit.SECONDS)))
                     .jwtID(UUID.randomUUID().toString())
                     .claim("scope", buildScope(user))
@@ -141,7 +143,7 @@ public class AuthService {
         return stringJoiner.toString();
     }
 
-    public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException, BadJWTException {
+    public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         var signedJWT = verifyToken(request.getToken(), true);
 
         var jit = signedJWT.getJWTClaimsSet().getJWTID();
@@ -172,8 +174,10 @@ public class AuthService {
                     InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
 
             invalidatedTokenRepo.save(invalidatedToken);
-        } catch (AppException | BadJWTException exception) {
+        } catch (AppException e) {
             log.info("Token already expired");
+
+            throw new AppException("Token already expired", HttpStatus.UNAUTHORIZED);
         }
     }
 }

@@ -15,7 +15,7 @@ import java.util.Set;
 public class Role {
     @ManyToMany
     @JoinTable(
-            name = "roles_permissions",
+            name = "role_permissions",
             joinColumns = @JoinColumn(name = "role_id", referencedColumnName = "id"),
             inverseJoinColumns = @JoinColumn(name = "permission_id", referencedColumnName = "id")
     )
@@ -25,6 +25,7 @@ public class Role {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 50, unique = true)
     private String name;
 
     private String description;

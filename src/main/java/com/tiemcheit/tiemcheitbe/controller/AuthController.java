@@ -1,7 +1,6 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
 import com.nimbusds.jose.JOSEException;
-import com.nimbusds.jwt.proc.BadJWTException;
 import com.tiemcheit.tiemcheitbe.dto.request.AuthRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.IntrospectRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.LogoutRequest;
@@ -26,22 +25,26 @@ public class AuthController {
         return "Welcome to Tiem Che IT!";
     }
 
-    @PostMapping("/authenticate")
-    ApiResponse<AuthResponse> authenticate(@RequestBody AuthRequest request) throws BadJWTException {
+    @PostMapping("/login")
+    ApiResponse<AuthResponse> authenticate(@RequestBody AuthRequest request) {
         var data = authService.authenticate(request);
-        return ApiResponse.<AuthResponse>builder().data(data).build();
+        return ApiResponse.<AuthResponse>builder()
+                .message("Success")
+                .data(data).build();
     }
 
     @PostMapping("/introspect")
     ApiResponse<IntrospectResponse> authenticate(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
         var data = authService.introspect(request);
-        return ApiResponse.<IntrospectResponse>builder().data(data).build();
+        return ApiResponse.<IntrospectResponse>builder()
+                .data(data)
+                .build();
     }
 
     @PostMapping("/refresh")
     ApiResponse<AuthResponse> authenticate(@RequestBody RefreshRequest request)
-            throws ParseException, JOSEException, BadJWTException {
+            throws ParseException, JOSEException {
         var data = authService.refreshToken(request);
         return ApiResponse.<AuthResponse>builder().data(data).build();
     }
