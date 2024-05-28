@@ -8,7 +8,9 @@ import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
-import com.tiemcheit.tiemcheitbe.model.*;
+import com.tiemcheit.tiemcheitbe.model.Product;
+import com.tiemcheit.tiemcheitbe.model.ProductIngredient;
+import com.tiemcheit.tiemcheitbe.model.ProductOption;
 import com.tiemcheit.tiemcheitbe.repository.ProductIngredientRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductOptionRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
@@ -23,7 +25,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ProductService {
 
-    private final ProductRepo productRepository;
+    private final ProductRepo productRepo;
     private final ProductOptionRepo productOptionRepo;
     private final ProductIngredientRepo productIngredientRepo;
 
@@ -31,7 +33,7 @@ public class ProductService {
 
     //get All ProductResponse by category id
     public List<ProductResponse> getAllProductsByCategoryId(Long categoryId) {
-        List<Product> products = productRepository.findAllByCategoryId(categoryId);
+        List<Product> products = productRepo.findAllByCategoryId(categoryId);
         return products.stream()
                 .map(ProductMapper.INSTANCE::toProductResponse)
                 .collect(Collectors.toList());
@@ -39,7 +41,7 @@ public class ProductService {
 
     //get ProductDetailResponse by product id
     public ProductDetailResponse getProductDetailById(Long productId) {
-        Product product = productRepository.findById(productId).orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+        Product product = productRepo.findById(productId).orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
 
         List<OptionResponse> optionList = productOptionRepo.findAllByProductId(product.getId())
                 .stream()

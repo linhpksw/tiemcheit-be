@@ -16,7 +16,7 @@ import java.util.List;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    // this request is:  http://localhost:8080/api/home/category
+    // this request is:  http://localhost:8080/category/getAll
     @GetMapping("/getAll")
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         return ApiResponse.<List<CategoryResponse>>builder()
