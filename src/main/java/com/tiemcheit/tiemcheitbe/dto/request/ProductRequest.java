@@ -4,9 +4,9 @@ import lombok.Data;
 
 @Data
 public class ProductRequest {
-    private Long id;
-    // This does not belong to Thang
-    // private String name;
-    // private Double price;
-    // private String image;
+    private Integer id;
+    private String name;
+    private String image;
+    private double price;
+    private String description;
 }
