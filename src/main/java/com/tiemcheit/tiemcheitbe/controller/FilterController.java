@@ -12,12 +12,12 @@ import java.util.List;
 import java.util.Map;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/filter")
 public class FilterController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping("/filter")
+    @GetMapping("")
     public List<ProductResponse> searchProducts(
             @RequestParam Map<String, String> params,
             @RequestParam(required = false, defaultValue = "id") String sortBy,

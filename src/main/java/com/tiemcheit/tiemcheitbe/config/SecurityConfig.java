@@ -36,7 +36,7 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/auth/login", "/user/register", "/auth/refresh", "/auth/logout", "/auth/authenticate", "/auth/introspect",
-            "/auth/password-reset"
+            "/auth/password-reset", "/filter/**"
     };
 
     private final CustomUserDetailsService customUserDetailService;
