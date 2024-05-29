@@ -4,6 +4,7 @@ import com.tiemcheit.tiemcheitbe.dto.request.RoleRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.RoleResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.RoleMapper;
+import com.tiemcheit.tiemcheitbe.model.Permission;
 import com.tiemcheit.tiemcheitbe.repository.PermissionRepo;
 import com.tiemcheit.tiemcheitbe.repository.RoleRepo;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -45,15 +47,22 @@ public class RoleService {
         roleRepo.deleteByName(role);
     }
 
-    public RoleResponse update(String role, RoleRequest request) {
-        var roleToUpdate = roleRepo.findByName(role)
-                .orElseThrow(() -> new AppException(STR."Role \{role} not found", HttpStatus.NOT_FOUND));
+    public RoleResponse update(RoleRequest request) {
+        String roleName = request.getName();
 
-        var permissions = permissionRepo.findAllByNameIn(request.getPermissions());
+        var roleToUpdate = roleRepo.findByName(roleName)
+                .orElseThrow(() -> new AppException(STR."Role \{roleName} not found", HttpStatus.NOT_FOUND));
 
-        roleToUpdate.setPermissions(new HashSet<>(permissions));
+        Set<Permission> foundPermissions = new HashSet<>();
 
-        roleToUpdate = roleRepo.save(roleToUpdate);
-        return roleMapper.toRoleResponse(roleToUpdate);
+        for (String permName : request.getPermissions()) {
+            Permission perm = permissionRepo.findByName(permName)
+                    .orElseThrow(() -> new AppException(STR."Permission \{permName} not found", HttpStatus.NOT_FOUND));
+            foundPermissions.add(perm);
+        }
+
+        roleToUpdate.setPermissions(foundPermissions);
+
+        return roleMapper.toRoleResponse(roleRepo.save(roleToUpdate));
     }
 }
