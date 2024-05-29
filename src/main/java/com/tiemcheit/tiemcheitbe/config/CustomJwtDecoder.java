@@ -2,6 +2,7 @@ package com.tiemcheit.tiemcheitbe.config;
 
 import com.nimbusds.jose.JOSEException;
 import com.tiemcheit.tiemcheitbe.dto.request.IntrospectRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.IntrospectResponse;
 import com.tiemcheit.tiemcheitbe.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -22,14 +23,14 @@ import java.util.Objects;
 public class CustomJwtDecoder implements JwtDecoder {
     private final AuthService authService;
     private NimbusJwtDecoder nimbusJwtDecoder = null;
-    
+
     @Value("${security.jwt.secret-key}")
     private String secretKey;
 
     @Override
     public Jwt decode(String token) throws JwtException {
         try {
-            var response = authService.introspect(
+            IntrospectResponse response = authService.introspect(
                     IntrospectRequest.builder().token(token).build());
 
             if (!response.isValid()) throw new JwtException("Token invalid");
