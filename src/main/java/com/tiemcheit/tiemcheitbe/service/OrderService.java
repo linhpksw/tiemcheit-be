@@ -75,6 +75,6 @@ public class OrderService {
         orderRepo.save(order);
 
         // Clear the user's cart
-        //cartService.clearCart(uid);
+        cartService.clearCart(uid);
     }
 }
