@@ -12,15 +12,12 @@ import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
-
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +44,7 @@ public class UserService {
         return userMapper.toUserResponse(userRepo.save(user));
     }
 
-    @PostAuthorize("returnObject.username == authentication.name")
+    @PreAuthorize("#username == authentication.name")
     public UserResponse updateUser(String username, UserUpdateRequest request) {
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
 
@@ -71,15 +68,6 @@ public class UserService {
         return userMapper.toUserResponse(userRepo.save(user));
     }
 
-    public UserResponse getMyInfo() {
-        var context = SecurityContextHolder.getContext();
-        String name = context.getAuthentication().getName();
-
-        User user = userRepo.findByUsername(name).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
-
-        return userMapper.toUserResponse(user);
-    }
-
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(String username) {
         userRepo.deleteByUsername(username);
@@ -87,11 +75,10 @@ public class UserService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<UserResponse> getUsers() {
-        log.info("In method get Users");
         return userRepo.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("#username == authentication.name && hasAuthority('READ_STH')")
     public UserResponse getUser(String username) {
         return userMapper.toUserResponse(
                 userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND)));

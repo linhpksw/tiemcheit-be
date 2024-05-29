@@ -6,6 +6,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
+import java.util.Optional;
 import java.util.Set;
 
 @Repository
@@ -16,4 +17,6 @@ public interface PermissionRepo extends JpaRepository<Permission, String> {
     void deleteByName(String permissionName);
 
     boolean existsByName(String permissionName);
+
+    Optional<Permission> findByName(String permissionName);
 }
