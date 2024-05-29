@@ -17,10 +17,12 @@ public class Permission {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 50, unique = true)
     private String name;
 
     private String description;
 
     @ManyToMany(mappedBy = "permissions")
     private Set<Role> roles;
+
 }

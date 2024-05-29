@@ -24,10 +24,17 @@ public class RoleController {
                 .build();
     }
 
-    @GetMapping
+    @GetMapping("/all")
     ApiResponse<List<RoleResponse>> getAll() {
         return ApiResponse.<List<RoleResponse>>builder()
                 .data(roleService.getAll())
+                .build();
+    }
+
+    @PutMapping
+    ApiResponse<RoleResponse> update(@RequestBody RoleRequest request) {
+        return ApiResponse.<RoleResponse>builder()
+                .data(roleService.update(request))
                 .build();
     }
 

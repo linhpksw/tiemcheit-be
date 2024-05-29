@@ -36,7 +36,8 @@ public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
             "/auth/login", "/user/register", "/auth/refresh", "/auth/logout", "/auth/authenticate", "/auth/introspect",
-            "/auth/password-reset", "/filter/**"
+            "/auth/password-reset", "cart/**",
+            "/product/**", "/option/**", "/category/**"
     };
 
     private final CustomUserDetailsService customUserDetailService;
@@ -87,7 +88,7 @@ public class SecurityConfig {
     JwtAuthenticationConverter myConverter() {
         JwtGrantedAuthoritiesConverter jwtGrantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
         JwtAuthenticationConverter converter = new JwtAuthenticationConverter();
-        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("ROLE_");
+        jwtGrantedAuthoritiesConverter.setAuthorityPrefix("");
         converter.setJwtGrantedAuthoritiesConverter(jwtGrantedAuthoritiesConverter);
 
         return converter;
@@ -105,7 +106,7 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://example.com"));  // Adjust according to your needs
+        configuration.setAllowedOrigins(List.of("http://localhost:3000"));  // Adjust according to your needs
         configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(Arrays.asList("Authorization", "Cache-Control", "Content-Type"));
         configuration.setAllowCredentials(true);
