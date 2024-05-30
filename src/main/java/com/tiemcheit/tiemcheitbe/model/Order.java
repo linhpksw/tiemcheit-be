@@ -27,14 +27,17 @@ public class Order {
     private String shippingAddress;
 
     // test
-    @Column(nullable = false, name = "shipping_method", length = 256)
+    @Column(nullable = false, name = "shipping_method", length = 30)
     private String shippingMethod;
     // test
-    @Column(nullable = false, name = "payment_method", length = 256)
+    @Column(nullable = false, name = "payment_method", length = 20)
     private String paymentMethod;
     // test
-    @Column(nullable = false, name = "order_status", length = 256)
+    @Column(nullable = false, name = "order_status", length = 10)
     private String orderStatus;
+
+    @Column(nullable = true, name = "message", length = 256)
+    private String message;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL)
     private List<OrderDetail> orderDetails;

@@ -44,13 +44,15 @@ public class OrderService {
         // Create a new order
         Order order = new Order();
         order.setOrderDate(new Date());
+        
         // Set other order properties like shipping address, shipping method, payment method, order status
         order.setShippingAddress(request.getShippingAddress());
-        order.setShippingMethod("Standard"); // Replace with actual data
-        order.setPaymentMethod("Credit Card"); // Replace with actual data
+        order.setShippingMethod(request.getShippingMethod()); // Replace with actual data
+        order.setPaymentMethod(request.getPaymentMethod()); // Replace with actual data
         order.setOrderStatus("Pending"); // Replace with actual data
 
         // Retrieve the user
+
         User user = userRepo.findById(uid).orElseThrow(() -> new RuntimeException("User not found"));
         order.setUser(user);
 
