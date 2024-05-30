@@ -46,15 +46,10 @@ public class UserService {
 
     @PreAuthorize("#username == authentication.name")
     public UserResponse updateUser(String username, UserUpdateRequest request) {
-        User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
+        User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
         if (request.getPassword() != null) {
             user.setPassword(passwordEncoder.encode(request.getPassword()));
-        }
-
-        if (request.getRoles() != null) {
-            var roles = roleRepo.findAllByNameIn(request.getRoles());
-            user.setRoles(new HashSet<>(roles));
         }
 
         if (request.getFullname() != null) {
@@ -65,7 +60,9 @@ public class UserService {
             user.setDob(request.getDob());
         }
 
-        return userMapper.toUserResponse(userRepo.save(user));
+        User savedUser = userRepo.save(user);
+
+        return userMapper.toUserResponse(savedUser);
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -78,7 +75,8 @@ public class UserService {
         return userRepo.findAll().stream().map(userMapper::toUserResponse).toList();
     }
 
-    @PreAuthorize("#username == authentication.name && hasAuthority('READ_STH')")
+    //    @PreAuthorize("#username == authentication.name && hasAuthority('READ_STH')")
+    @PreAuthorize("#username == authentication.name")
     public UserResponse getUser(String username) {
         return userMapper.toUserResponse(
                 userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND)));
