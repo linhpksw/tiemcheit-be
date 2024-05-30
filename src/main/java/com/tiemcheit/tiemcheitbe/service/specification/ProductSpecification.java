@@ -13,10 +13,14 @@ public class ProductSpecification {
         return (root, query, criteriaBuilder) -> criteriaBuilder.like(root.get("name"), "%" + name + "%");
     }
 
-    public static Specification<Product> hasPriceBetween(Double minPrice, Double maxPrice) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.between(root.get("price"), minPrice, maxPrice);
+    public static Specification<Product> hasPriceHigher(Double minPrice) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("price"), minPrice);
     }
-     
+
+    public static Specification<Product> hasPriceLower(Double maxPrice) {
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("price"), maxPrice);
+    }
+
     public static Specification<Product> hasCategories(Set<Long> categoryIds) {
         return (root, query, criteriaBuilder) -> {
             if (categoryIds == null || categoryIds.isEmpty()) {
@@ -33,21 +37,26 @@ public class ProductSpecification {
             specification = specification.and(hasName(params.get("name")));
         }
 
-        if (params.containsKey("minPrice") && params.containsKey("maxPrice")) {
+        if (params.containsKey("minPrice")) {
             Double minPrice = Double.valueOf(params.get("minPrice"));
-            Double maxPrice = Double.valueOf(params.get("maxPrice"));
-            specification = specification.and(hasPriceBetween(minPrice, maxPrice));
+            specification = specification.and(hasPriceHigher(minPrice));
         }
 
+        if (params.containsKey("maxPrice")) {
+            Double maxPrice = Double.valueOf(params.get("maxPrice"));
+            specification = specification.and(hasPriceLower(maxPrice));
+        }
 
         if (params.containsKey("categories")) {
-            Set<Long> categoryIds = Arrays.stream(params.get("categories").split(","))
-                    .map(Long::valueOf)
-                    .collect(Collectors.toSet());
-            specification = specification.and(hasCategories(categoryIds));
+            if (params.get("categories").equals("")) {
+                specification = specification.and(hasCategories(null));
+            } else {
+                Set<Long> categoryIds = Arrays.stream(params.get("categories").split(","))
+                        .map(Long::valueOf)
+                        .collect(Collectors.toSet());
+                specification = specification.and(hasCategories(categoryIds));
+            }
         }
-
         return specification;
     }
 }
-
