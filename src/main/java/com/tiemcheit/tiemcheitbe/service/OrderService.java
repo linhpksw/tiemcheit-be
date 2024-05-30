@@ -44,7 +44,7 @@ public class OrderService {
         // Create a new order
         Order order = new Order();
         order.setOrderDate(new Date());
-        
+
         // Set other order properties like shipping address, shipping method, payment method, order status
         order.setShippingAddress(request.getShippingAddress());
         order.setShippingMethod(request.getShippingMethod()); // Replace with actual data
@@ -53,7 +53,7 @@ public class OrderService {
 
         // Retrieve the user
 
-        User user = userRepo.findById(uid).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findById(1L).orElseThrow(() -> new RuntimeException("User not found"));
         order.setUser(user);
 
         // Add order items
