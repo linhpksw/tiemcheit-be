@@ -1,13 +1,18 @@
 package com.tiemcheit.tiemcheitbe.service;
 
+import com.tiemcheit.tiemcheitbe.dto.request.CartItemDeleteRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
+import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.CartItemMapper;
 import com.tiemcheit.tiemcheitbe.model.CartItem;
 import com.tiemcheit.tiemcheitbe.model.Product;
 import com.tiemcheit.tiemcheitbe.repository.CartItemRepo;
+import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -19,6 +24,7 @@ import java.util.Objects;
 public class CartService {
 
     private final CartItemRepo cartItemRepo;
+    private final UserRepo userRepo;
     private final CartItemMapper cartItemMapper;
     private final UserService userService;
 
@@ -29,12 +35,12 @@ public class CartService {
 //        this.userService = userService;
 //    }
 
-    public List<CartItemResponse> allCartItems(Long uid) {
+    public List<CartItemResponse> allCartItems() {
         List<CartItem> cartItems = cartItemRepo.findAll();
         List<CartItem> userCartItems = new ArrayList<>();
 
         for (CartItem ci : cartItems) {
-            if (Objects.equals(ci.getUser().getId(), uid)) {
+            if (Objects.equals(ci.getUser().getUsername(), SecurityUtils.getCurrentUsername())) {
                 userCartItems.add(ci);
             }
         }
@@ -42,10 +48,10 @@ public class CartService {
         return cartItemMapper.toCartItemResponses(userCartItems);
     }
 
-    public CartItemRequest addToCart(CartItemRequest cartItemRequest, Long uid) {
+    public CartItemRequest addToCart(CartItemRequest cartItemRequest) {
         List<CartItem> cartItems = cartItemRepo.findAll();
         for (CartItem ci : cartItems) {
-            if (Objects.equals(ci.getUser().getId(), uid) &&
+            if (Objects.equals(ci.getUser().getUsername(), SecurityUtils.getCurrentUsername()) &&
                     Objects.equals(ci.getProduct().getId(), cartItemRequest.getProduct().getId())) {
                 System.out.println("Cannot add to cart the same product!");
                 return null;
@@ -53,22 +59,22 @@ public class CartService {
         }
 
         CartItem cartItem = cartItemMapper.toEntity(cartItemRequest);
-        cartItem.setUser(userService.getById(uid));
+        cartItem.setUser(userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND)));
         CartItem savedCartItem = cartItemRepo.save(cartItem);
         return cartItemMapper.toCartItemRequest(savedCartItem);
     }
 
-    public void deleteCartItem(Long id) {
-        if (cartItemRepo.existsById(id)) {
-            cartItemRepo.deleteById(id);
+    public void deleteCartItem(CartItemDeleteRequest cartItemDeleteRequest) {
+        if (cartItemRepo.existsById(cartItemDeleteRequest.getId())) {
+            cartItemRepo.deleteById(cartItemDeleteRequest.getId());
         } else {
             System.out.println("No Cart Item has been found!");
         }
     }
 
-    public CartItemResponse updateItemQuantity(CartItemUpdateRequest cartItemUpdateRequest, Long uid) {
+    public CartItemResponse updateItemQuantity(CartItemUpdateRequest cartItemUpdateRequest) {
         CartItem updatedCartItem = cartItemMapper.toEntity(cartItemUpdateRequest);
-        updatedCartItem.setUser(userService.getById(uid));
+        updatedCartItem.setUser(userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND)));
         updatedCartItem.setProduct(getProductInCartItem(cartItemUpdateRequest.getId()));
         cartItemRepo.save(updatedCartItem);
 

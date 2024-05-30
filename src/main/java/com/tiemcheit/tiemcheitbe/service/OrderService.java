@@ -39,7 +39,7 @@ public class OrderService {
 
     public void placeOrder(Long uid, OrderRequest request) {
         // first get the item from user's cart
-        List<CartItemResponse> cartItemList = cartService.allCartItems(uid);
+        List<CartItemResponse> cartItemList = cartService.allCartItems();
 
         // Create a new order
         Order order = new Order();

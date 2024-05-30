@@ -1,5 +1,6 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
+import com.tiemcheit.tiemcheitbe.dto.request.CartItemDeleteRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
@@ -22,33 +23,33 @@ public class CartController {
 //        this.cartService = cartService;
 //    }
 
-    @GetMapping("/{uid}")
-    public ApiResponse<List<CartItemResponse>> allCartItems(@PathVariable Long uid) {
-        var data = cartService.allCartItems(uid);
+    @GetMapping("")
+    public ApiResponse<List<CartItemResponse>> allCartItems() {
+        var data = cartService.allCartItems();
         return ApiResponse.<List<CartItemResponse>>builder()
                 .message("Success")
                 .data(data).build();
     }
 
-    @PostMapping("/{uid}")
-    public ApiResponse<CartItemRequest> addToCart(@RequestBody CartItemRequest cartItemDto, @PathVariable Long uid) {
-        var data = cartService.addToCart(cartItemDto, uid);
+    @PostMapping("")
+    public ApiResponse<CartItemRequest> addToCart(@RequestBody CartItemRequest cartItemRequest) {
+        var data = cartService.addToCart(cartItemRequest);
         return ApiResponse.<CartItemRequest>builder()
                 .message("Success")
                 .data(data).build();
     }
 
-    @DeleteMapping("/{cid}")
-    public ApiResponse<Void> deleteCartItem(@PathVariable Long cid) {
-        cartService.deleteCartItem(cid);
+    @DeleteMapping("")
+    public ApiResponse<Void> deleteCartItem(@RequestBody CartItemDeleteRequest cartItemDeleteRequest) {
+        cartService.deleteCartItem(cartItemDeleteRequest);
         return ApiResponse.<Void>builder()
                 .message("Success")
                 .build();
     }
 
-    @PatchMapping("/{uid}")
-    public ApiResponse<CartItemResponse> updateItemQuantity(@RequestBody CartItemUpdateRequest cartItemUpdateRequest, @PathVariable Long uid) {
-        var data = cartService.updateItemQuantity(cartItemUpdateRequest, uid);
+    @PatchMapping("")
+    public ApiResponse<CartItemResponse> updateItemQuantity(@RequestBody CartItemUpdateRequest cartItemUpdateRequest) {
+        var data = cartService.updateItemQuantity(cartItemUpdateRequest);
         return ApiResponse.<CartItemResponse>builder()
                 .message("Success")
                 .data(data).build();
