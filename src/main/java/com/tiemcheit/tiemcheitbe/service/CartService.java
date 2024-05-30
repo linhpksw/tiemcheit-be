@@ -8,7 +8,6 @@ import com.tiemcheit.tiemcheitbe.model.CartItem;
 import com.tiemcheit.tiemcheitbe.model.Product;
 import com.tiemcheit.tiemcheitbe.repository.CartItemRepo;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -21,14 +20,14 @@ public class CartService {
 
     private final CartItemRepo cartItemRepo;
     private final CartItemMapper cartItemMapper;
-    private UserService userService;
+    private final UserService userService;
 
-    @Autowired
-    public CartService(CartItemRepo cartItemRepo, CartItemMapper cartItemMapper, UserService userService) {
-        this.cartItemRepo = cartItemRepo;
-        this.cartItemMapper = cartItemMapper;
-        this.userService = userService;
-    }
+//    @Autowired
+//    public CartService(CartItemRepo cartItemRepo, CartItemMapper cartItemMapper, UserService userService) {
+//        this.cartItemRepo = cartItemRepo;
+//        this.cartItemMapper = cartItemMapper;
+//        this.userService = userService;
+//    }
 
     public List<CartItemResponse> allCartItems(Long uid) {
         List<CartItem> cartItems = cartItemRepo.findAll();
@@ -78,5 +77,9 @@ public class CartService {
 
     private Product getProductInCartItem(Long id) {
         return cartItemRepo.getReferenceById(id).getProduct();
+    }
+
+    public void clearCart(Long uid) {
+        cartItemRepo.deleteByUserId(uid);
     }
 }

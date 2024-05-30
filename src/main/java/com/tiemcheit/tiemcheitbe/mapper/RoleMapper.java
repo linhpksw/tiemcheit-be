@@ -6,7 +6,7 @@ import com.tiemcheit.tiemcheitbe.model.Role;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
-@Mapper
+@Mapper(componentModel = "spring")
 public interface RoleMapper {
     //    Mapping permission by myself
     @Mapping(target = "permissions", ignore = true)

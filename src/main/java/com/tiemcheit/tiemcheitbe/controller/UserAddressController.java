@@ -1,26 +1,29 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.UserAddressRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserAddressResponse;
 import com.tiemcheit.tiemcheitbe.service.UserAddressService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
+@RequestMapping("/address")
 public class UserAddressController {
     private final UserAddressService userAddressService;
 
-    @GetMapping("/address/userId={uid}")
-    public ResponseEntity<List<UserAddressResponse>> allUserAddress(@PathVariable Long uid) {
-        return ResponseEntity.ok(userAddressService.getAddressByUserId(uid));
+    @GetMapping("/{uid}")
+    public ApiResponse<List<UserAddressResponse>> allUserAddress(@PathVariable Long uid) {
+        var data = userAddressService.getAddressByUserId(uid);
+        return ApiResponse.<List<UserAddressResponse>>builder().message("success").data(data).build();
     }
 
-    @PostMapping("/address/userId={uid}")
-    public ResponseEntity<UserAddressResponse> addAddress(@PathVariable Long uid, @RequestBody UserAddressRequest body) {
-        return ResponseEntity.ok(userAddressService.addUserAddress(body, uid));
+    @PostMapping("/{uid}")
+    public ApiResponse<UserAddressResponse> addAddress(@PathVariable Long uid, @RequestBody UserAddressRequest body) {
+        var data = userAddressService.addUserAddress(body, uid);
+        return ApiResponse.<UserAddressResponse>builder().message("success").data(data).build();
     }
 }
