@@ -6,7 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
-import java.util.List;
+import java.util.Set;
 
 @Data
 @Builder
@@ -16,5 +16,5 @@ public class UserUpdateRequest {
     private String password;
     private String fullname;
     private Date dob;
-    private List<String> roles;
+    private Set<String> roles;
 }
