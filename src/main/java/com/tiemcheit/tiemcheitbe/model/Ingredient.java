@@ -2,27 +2,22 @@ package com.tiemcheit.tiemcheitbe.model;
 
 import jakarta.persistence.*;
 import lombok.*;
-
-import java.util.Set;
-
 @Getter
 @Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
-@Table(name = "permissions")
-public class Permission {
+@Table(name = "ingredients")
+public class Ingredient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    @Column(nullable = false, length = 50, unique = true)
     private String name;
+    private Long quantity;
+    private double price;
 
-    private String description;
-
-    @ManyToMany(mappedBy = "permissions")
-    private Set<Role> roles;
-
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "store_id", nullable = false)
+    private Store store;
 }

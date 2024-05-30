@@ -5,12 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class AuthResponse {
-    private String accessToken;
-    private String refreshToken;
-    private boolean authenticated;
+public class OptionResponse {
+    private Long id;
+    private String name;
+    private Set<OptionValueResponse> optionValues;
 }
