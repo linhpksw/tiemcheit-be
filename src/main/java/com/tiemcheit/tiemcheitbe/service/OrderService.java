@@ -52,6 +52,7 @@ public class OrderService {
         order.setShippingAddress(request.getShippingAddress());
         order.setShippingMethod(request.getShippingMethod()); // Replace with actual data
         order.setPaymentMethod(request.getPaymentMethod()); // Replace with actual data
+        order.setMessage(request.getMessage());
         order.setOrderStatus("Pending"); // Replace with actual data
 
         // Retrieve the user
