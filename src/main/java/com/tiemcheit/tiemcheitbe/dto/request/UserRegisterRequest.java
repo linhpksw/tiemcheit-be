@@ -4,12 +4,12 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
-@Data
+import java.util.Set;
+
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
@@ -32,4 +32,6 @@ public class UserRegisterRequest {
     @NotBlank(message = "PHONE_REQUIRED")
     @Pattern(regexp = "(84|0[35789])([0-9]{8})", message = "PHONE_INVALID")
     private String phone;
+
+    private Set<AddressRequest> addresses;
 }

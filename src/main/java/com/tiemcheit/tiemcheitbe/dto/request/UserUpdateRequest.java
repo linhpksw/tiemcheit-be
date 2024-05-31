@@ -1,14 +1,12 @@
 package com.tiemcheit.tiemcheitbe.dto.request;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.Date;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,4 +15,5 @@ public class UserUpdateRequest {
     private String fullname;
     private Date dob;
     private Set<String> roles;
+    private Set<AddressRequest> addresses;
 }

@@ -1,12 +1,16 @@
 package com.tiemcheit.tiemcheitbe.model;
 
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 
-@Data
 @Entity
 @Table(name = "user_addresses")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Getter
+@Setter
 public class UserAddress {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,5 +25,4 @@ public class UserAddress {
 
     @Column(nullable = false)
     private Boolean isDefault;
-
 }

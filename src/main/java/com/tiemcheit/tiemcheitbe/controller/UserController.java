@@ -3,6 +3,7 @@ package com.tiemcheit.tiemcheitbe.controller;
 import com.tiemcheit.tiemcheitbe.dto.request.UserRegisterRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.UserUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserDetailResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserResponse;
 import com.tiemcheit.tiemcheitbe.service.UserService;
 import jakarta.validation.Valid;
@@ -40,6 +41,14 @@ public class UserController {
                 .data(userService.getUser(username))
                 .build();
     }
+
+    @GetMapping("/{username}/detail")
+    ApiResponse<UserDetailResponse> getUserDetail(@PathVariable("username") String username) {
+        return ApiResponse.<UserDetailResponse>builder()
+                .data(userService.getUserDetail(username))
+                .build();
+    }
+
 
     @PatchMapping("/{username}")
     ApiResponse<UserResponse> updateUser(@PathVariable String username, @RequestBody @Valid UserUpdateRequest request) {
