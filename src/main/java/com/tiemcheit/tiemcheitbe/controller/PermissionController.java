@@ -21,6 +21,23 @@ public class PermissionController {
     ApiResponse<PermissionResponse> create(@RequestBody PermissionRequest request) {
         return ApiResponse.<PermissionResponse>builder()
                 .data(permissionService.create(request))
+                .message("Success")
+                .build();
+    }
+
+    @GetMapping("/{permission}")
+    ApiResponse<PermissionResponse> getByName(@PathVariable String permission) {
+        return ApiResponse.<PermissionResponse>builder()
+                .data(permissionService.getByName(permission))
+                .message("Success")
+                .build();
+    }
+
+    @PutMapping
+    ApiResponse<PermissionResponse> update(@RequestBody PermissionRequest request) {
+        return ApiResponse.<PermissionResponse>builder()
+                .data(permissionService.update(request))
+                .message("Success")
                 .build();
     }
 
@@ -28,12 +45,13 @@ public class PermissionController {
     ApiResponse<List<PermissionResponse>> getAll() {
         return ApiResponse.<List<PermissionResponse>>builder()
                 .data(permissionService.getAll())
+                .message("Success")
                 .build();
     }
 
     @DeleteMapping("/{permission}")
     ApiResponse<Void> delete(@PathVariable String permission) {
         permissionService.deleteByName(permission);
-        return ApiResponse.<Void>builder().build();
+        return ApiResponse.<Void>builder().message("Success").build();
     }
 }
