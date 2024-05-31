@@ -48,18 +48,17 @@ public class UserService {
 
         user.setRoles(roles);
 
-        if (request.getAddresses() != null) {
-            User finalUser = user;
-            Set<UserAddress> addresses = request.getAddresses().stream()
-                    .map(addr -> UserAddress.builder()
-                            .address(addr.getAddress())
-                            .isDefault(addr.getIsDefault())
-                            .user(finalUser)
-                            .build())
-                    .collect(Collectors.toSet());
 
-            user.setAddresses(addresses);
-        }
+        User finalUser = user;
+        Set<UserAddress> addresses = request.getAddresses().stream()
+                .map(addr -> UserAddress.builder()
+                        .address(addr.getAddress())
+                        .isDefault(addr.getIsDefault())
+                        .user(finalUser)
+                        .build())
+                .collect(Collectors.toSet());
+
+        user.setAddresses(addresses);
 
         // Save the user and addresses due to cascade
         user = userRepo.save(user);

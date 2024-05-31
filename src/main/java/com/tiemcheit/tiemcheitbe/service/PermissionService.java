@@ -35,12 +35,6 @@ public class PermissionService {
         return permissions.stream().map(permissionMapper::toPermissionResponse).toList();
     }
 
-    public PermissionResponse getByName(String permission) {
-        var permissionEntity = permissionRepo.findByName(permission)
-                .orElseThrow(() -> new AppException(STR."Permission \{permission} not found", HttpStatus.NOT_FOUND));
-        return permissionMapper.toPermissionResponse(permissionEntity);
-    }
-
     public void deleteByName(String permission) {
         if (!permissionRepo.existsByName(permission)) {
             throw new AppException(STR."Permission \{permission} not exists", HttpStatus.BAD_REQUEST);
@@ -48,19 +42,4 @@ public class PermissionService {
 
         permissionRepo.deleteByName(permission);
     }
-
-    public PermissionResponse update(PermissionRequest request) {
-        String permissionName = request.getName();
-
-        var permissionToUpdate = permissionRepo.findByName(permissionName)
-                .orElseThrow(() -> new AppException(STR."Permission \{permissionName} not found", HttpStatus.NOT_FOUND));
-
-        permissionToUpdate.setName(request.getName());
-        permissionToUpdate.setDescription(request.getDescription());
-
-        permissionToUpdate = permissionRepo.save(permissionToUpdate);
-        return permissionMapper.toPermissionResponse(permissionToUpdate);
-    }
-
-
 }

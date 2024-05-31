@@ -21,7 +21,6 @@ public class RoleController {
     ApiResponse<RoleResponse> create(@RequestBody RoleRequest request) {
         return ApiResponse.<RoleResponse>builder()
                 .data(roleService.create(request))
-                .message("Success")
                 .build();
     }
 
@@ -29,15 +28,6 @@ public class RoleController {
     ApiResponse<List<RoleResponse>> getAll() {
         return ApiResponse.<List<RoleResponse>>builder()
                 .data(roleService.getAll())
-                .message("Success")
-                .build();
-    }
-
-    @GetMapping("/{role}")
-    ApiResponse<RoleResponse> get(@PathVariable String role) {
-        return ApiResponse.<RoleResponse>builder()
-                .data(roleService.get(role))
-                .message("Success")
                 .build();
     }
 
@@ -45,13 +35,12 @@ public class RoleController {
     ApiResponse<RoleResponse> update(@RequestBody RoleRequest request) {
         return ApiResponse.<RoleResponse>builder()
                 .data(roleService.update(request))
-                .message("Success")
                 .build();
     }
 
     @DeleteMapping("/{role}")
     ApiResponse<Void> delete(@PathVariable String role) {
         roleService.delete(role);
-        return ApiResponse.<Void>builder().message("Success").build();
+        return ApiResponse.<Void>builder().build();
     }
 }

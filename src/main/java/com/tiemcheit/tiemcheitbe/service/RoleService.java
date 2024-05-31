@@ -11,7 +11,6 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
 import java.util.List;
@@ -44,16 +43,8 @@ public class RoleService {
         return roleRepo.findAll().stream().map(roleMapper::toRoleResponse).toList();
     }
 
-    @Transactional
     public void delete(String role) {
-        var roleToDelete = roleRepo.findByName(role)
-                .orElseThrow(() -> new AppException(STR."Role \{role} not found", HttpStatus.NOT_FOUND));
-
-        roleToDelete.getPermissions().clear();
-        roleToDelete.getUsers().forEach(user -> user.getRoles().remove(roleToDelete));
-
-        roleRepo.save(roleToDelete); // Updates the association table by removing entries
-        roleRepo.delete(roleToDelete);
+        roleRepo.deleteByName(role);
     }
 
     public RoleResponse update(RoleRequest request) {
@@ -73,11 +64,5 @@ public class RoleService {
         roleToUpdate.setPermissions(foundPermissions);
 
         return roleMapper.toRoleResponse(roleRepo.save(roleToUpdate));
-    }
-
-    public RoleResponse get(String role) {
-        return roleRepo.findByName(role)
-                .map(roleMapper::toRoleResponse)
-                .orElseThrow(() -> new AppException(STR."Role \{role} not found", HttpStatus.NOT_FOUND));
     }
 }
