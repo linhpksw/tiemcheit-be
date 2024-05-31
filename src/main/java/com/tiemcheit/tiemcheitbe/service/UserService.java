@@ -83,15 +83,17 @@ public class UserService {
         }
 
         if (request.getAddresses() != null) {
-            Set<UserAddress> newAddresses = request.getAddresses().stream()
-                    .map(addr -> UserAddress.builder()
-                            .address(addr.getAddress())
-                            .isDefault(addr.getIsDefault())
-                            .user(user)
-                            .build())
-                    .collect(Collectors.toSet());
+            user.getAddresses().clear();  // Clear existing addresses
 
-            user.setAddresses(newAddresses);
+            // Build and add new addresses to the existing collection
+            request.getAddresses().forEach(addr -> {
+                user.getAddresses().add(
+                        UserAddress.builder()
+                                .address(addr.getAddress())
+                                .isDefault(addr.getIsDefault())
+                                .user(user).build());
+                // Add to the existing collection
+            });
         }
 
         User savedUser = userRepo.save(user);
