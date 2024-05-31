@@ -63,6 +63,6 @@ public class User {
     @UpdateTimestamp
     private Date updatedAt;
 
-    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<UserAddress> addresses;
 }
