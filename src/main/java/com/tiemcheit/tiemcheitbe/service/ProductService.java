@@ -31,6 +31,13 @@ public class ProductService {
 
     private final OptionMapper optionMapper;
 
+    public List<ProductResponse> getAllProducts() {
+        return productRepo.findAll()
+                .stream()
+                .map(ProductMapper.INSTANCE::toProductResponse)
+                .collect(Collectors.toList());
+    }
+
     //get All ProductResponse by category id
     public List<ProductResponse> getAllProductsByCategoryId(Long categoryId) {
         List<Product> products = productRepo.findAllByCategoryId(categoryId);
