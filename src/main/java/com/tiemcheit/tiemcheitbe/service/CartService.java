@@ -85,7 +85,7 @@ public class CartService {
         return cartItemRepo.getReferenceById(id).getProduct();
     }
 
-    public void clearCart(Long uid) {
-        cartItemRepo.deleteByUserId(uid);
+    public void clearCart() {
+        cartItemRepo.deleteByUserName(SecurityUtils.getCurrentUsername());
     }
 }

@@ -3,6 +3,7 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.request.OrderRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OrderResponse;
+import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.OrderMapper;
 import com.tiemcheit.tiemcheitbe.model.Order;
 import com.tiemcheit.tiemcheitbe.model.OrderDetail;
@@ -11,7 +12,9 @@ import com.tiemcheit.tiemcheitbe.model.User;
 import com.tiemcheit.tiemcheitbe.repository.OrderRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -34,7 +37,7 @@ public class OrderService {
 
     // check the not found exception after
     public OrderResponse getOrder(Long id) {
-        return orderMapper.toReponse(orderRepo.findById(id).orElseThrow(() -> new RuntimeException("Order not found")));
+        return orderMapper.toReponse(orderRepo.findById(id).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND)));
     }
 
     public void placeOrder(Long uid, OrderRequest request) {
@@ -53,7 +56,7 @@ public class OrderService {
 
         // Retrieve the user
 
-        User user = userRepo.findById(1L).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
         order.setUser(user);
 
         // Add order items
@@ -77,6 +80,6 @@ public class OrderService {
         orderRepo.save(order);
 
         // Clear the user's cart
-        cartService.clearCart(uid);
+        cartService.clearCart();
     }
 }
