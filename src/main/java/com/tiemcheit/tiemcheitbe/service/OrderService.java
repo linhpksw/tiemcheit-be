@@ -15,6 +15,7 @@ import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
@@ -31,16 +32,31 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final CartService cartService;
 
-    public List<OrderResponse> listOrders(User user) {
+    public List<OrderResponse> getUserOrders() {
+        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
         return orderMapper.toResponses(orderRepo.findAllByUserOrderByIdDesc(user));
     }
 
-    // check the not found exception after
-    public OrderResponse getOrder(Long id) {
-        return orderMapper.toReponse(orderRepo.findById(id).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND)));
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<OrderResponse> getAllOrders() {
+        return orderMapper.toResponses(orderRepo.findAll());
     }
 
-    public void placeOrder(Long uid, OrderRequest request) {
+    // check the not found exception after
+    public OrderResponse getOrderDetails(Long orderId) {
+        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+        Order order = orderRepo.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (userHasRole(user, "ADMIN") || order.getUser().getId().equals(user.getId())) {
+            return orderMapper.toReponse(order);
+        } else {
+            // test
+            throw new AppException("Access denied", HttpStatus.FORBIDDEN);
+        }
+
+    }
+
+    public void placeOrder(OrderRequest request) {
         // first get the item from user's cart
         List<CartItemResponse> cartItemList = cartService.allCartItems();
 
@@ -82,5 +98,9 @@ public class OrderService {
 
         // Clear the user's cart
         cartService.clearCart();
+    }
+
+    private boolean userHasRole(User user, String role) {
+        return user.getRoles().stream().anyMatch(r -> r.getName().equals(role));
     }
 }

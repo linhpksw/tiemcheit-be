@@ -5,7 +5,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
 import java.util.List;
 import java.util.Set;
 
@@ -34,15 +33,15 @@ public class Product {
     @Column(nullable = false, length = 256)
     private String image;
 
-    @Column(nullable = false)
-    private Date createAt;
-
-    @Column(nullable = false)
-    private int sold;
+//    @Column(nullable = false)
+//    private Date createAt;
+//
+//    @Column(nullable = false)
+//    private int sold;
 
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;
-    
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<ProductOption> productOptions;
 
