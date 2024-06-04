@@ -10,12 +10,12 @@ import com.tiemcheit.tiemcheitbe.dto.request.IntrospectRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.LogoutRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.RefreshRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.AuthResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.IntrospectResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
-import com.tiemcheit.tiemcheitbe.model.InvalidatedToken;
+import com.tiemcheit.tiemcheitbe.model.ActiveRefreshToken;
 import com.tiemcheit.tiemcheitbe.model.User;
-import com.tiemcheit.tiemcheitbe.repository.InvalidatedTokenRepo;
+import com.tiemcheit.tiemcheitbe.repository.ActiveRefreshTokenRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -39,7 +39,7 @@ import java.util.UUID;
 @RequiredArgsConstructor
 public class AuthService {
     private final UserRepo userRepo;
-    private final InvalidatedTokenRepo invalidatedTokenRepo;
+    private final ActiveRefreshTokenRepo activeRefreshTokenRepo;
 
     @Value("${security.jwt.secret-key}")
     private String secretKey;
@@ -50,20 +50,12 @@ public class AuthService {
     @Value("${security.jwt.refresh-token-expiration-time}")
     private long refreshTokenExpiration;
 
-    public IntrospectResponse introspect(IntrospectRequest request) throws JOSEException, ParseException {
+    public void introspect(IntrospectRequest request) throws ParseException, JOSEException {
         var token = request.getToken();
-        boolean isValid = true;
-
-        try {
-            verifyToken(token, false);
-        } catch (AppException e) {
-            isValid = false;
-        }
-
-        return IntrospectResponse.builder().valid(isValid).build();
+        verifyToken(token, false);
     }
 
-    private SignedJWT verifyToken(String token, boolean isRefresh) throws JOSEException, ParseException {
+    public SignedJWT verifyToken(String token, boolean isRefresh) throws ParseException, JOSEException {
         JWSVerifier verifier = new MACVerifier(secretKey.getBytes());
         SignedJWT signedJWT = SignedJWT.parse(token);
 
@@ -83,39 +75,39 @@ public class AuthService {
 
         if (isRefresh) {
             expiryTime = new Date(issueTime.toInstant().plus(refreshTokenExpiration, ChronoUnit.SECONDS).toEpochMilli());
+
+            if (activeRefreshTokenRepo.findByJti(jti).isEmpty()) {
+                throw new AppException(STR."Refresh token \{token} not found in repository.", HttpStatus.UNAUTHORIZED);
+            }
         }
 
         boolean verified = signedJWT.verify(verifier);
 
-        if (!verified || !expiryTime.after(new Date())) {
-            throw new AppException("Token is invalid", HttpStatus.UNAUTHORIZED);
+        if (!verified) {
+            throw new AppException("Token is not verified", HttpStatus.UNAUTHORIZED);
         }
 
-        if (invalidatedTokenRepo.existsById(jti)) {
-            throw new AppException("Token is invalid", HttpStatus.UNAUTHORIZED);
+        if (!expiryTime.after(new Date())) {
+            throw new AppException("Token is expired", HttpStatus.UNAUTHORIZED);
         }
 
         return signedJWT;
     }
 
-    public AuthResponse authenticate(AuthRequest request) {
+    public AuthResponse authenticate(AuthRequest request, HttpServletResponse response) throws ParseException {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         String username = request.getUsername();
 
-        User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
+        User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
-        if (!authenticated) throw new AppException("Invalid credentials", HttpStatus.FORBIDDEN);
+        if (!authenticated) {
+            throw new AppException("Password is not correct", HttpStatus.FORBIDDEN);
+        }
+        activeRefreshTokenRepo.deleteByUser_Username(username);
 
-        String accessToken = generateToken(user, accessTokenExpiration, "access");
-        String refreshToken = generateToken(user, refreshTokenExpiration, "refresh");
-
-        return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .authenticated(true)
-                .build();
+        return getAuthResponse(user, response);
     }
 
     private String generateToken(User user, Long expirationTime, String tokenType) {
@@ -155,41 +147,42 @@ public class AuthService {
         return stringJoiner.toString();
     }
 
-    public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
+    public AuthResponse refreshToken(RefreshRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         SignedJWT signedJWT = verifyToken(request.getToken(), true);
 
-        String jit = signedJWT.getJWTClaimsSet().getJWTID();
-        Date expiryTime = signedJWT.getJWTClaimsSet().getExpirationTime();
-
-        InvalidatedToken invalidatedToken =
-                InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
-
-        invalidatedTokenRepo.save(invalidatedToken);
+        String jti = signedJWT.getJWTClaimsSet().getJWTID();
+        activeRefreshTokenRepo.deleteByJti(jti);
 
         String username = signedJWT.getJWTClaimsSet().getSubject();
 
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.BAD_REQUEST));
 
+        return getAuthResponse(user, response);
+    }
+
+    private AuthResponse getAuthResponse(User user, HttpServletResponse response) throws ParseException {
         String accessToken = generateToken(user, accessTokenExpiration, "access");
         String refreshToken = generateToken(user, refreshTokenExpiration, "refresh");
+
+        String newJti = extractJtiFromToken(refreshToken);
+        activeRefreshTokenRepo.save(ActiveRefreshToken.builder().jti(newJti).user(user).build());
 
         return AuthResponse.builder()
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
-                .authenticated(true)
                 .build();
     }
 
-    public void logout(LogoutRequest request) throws ParseException, JOSEException {
+    public void logout(LogoutRequest request, HttpServletResponse response) throws ParseException, JOSEException {
         SignedJWT signToken = verifyToken(request.getToken(), true);
         JWTClaimsSet claims = signToken.getJWTClaimsSet();
 
         String jit = claims.getJWTID();
-        Date expiryTime = claims.getExpirationTime();
+        activeRefreshTokenRepo.deleteByJti(jit);
+    }
 
-        InvalidatedToken invalidatedToken =
-                InvalidatedToken.builder().id(jit).expiryTime(expiryTime).build();
-
-        invalidatedTokenRepo.save(invalidatedToken);
+    private String extractJtiFromToken(String token) throws ParseException {
+        SignedJWT signedJWT = SignedJWT.parse(token);
+        return signedJWT.getJWTClaimsSet().getJWTID();
     }
 }

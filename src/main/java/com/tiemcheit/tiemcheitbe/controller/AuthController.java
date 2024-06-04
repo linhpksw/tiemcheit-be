@@ -7,8 +7,8 @@ import com.tiemcheit.tiemcheitbe.dto.request.LogoutRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.RefreshRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.AuthResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.IntrospectResponse;
 import com.tiemcheit.tiemcheitbe.service.AuthService;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,30 +24,28 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    ApiResponse<AuthResponse> login(@RequestBody AuthRequest request) {
-        var data = authService.authenticate(request);
+    ApiResponse<AuthResponse> login(@RequestBody AuthRequest request, HttpServletResponse response) throws ParseException {
+        var data = authService.authenticate(request, response);
         return ApiResponse.<AuthResponse>builder().message("Success").data(data).build();
     }
 
     @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request)
+    ApiResponse<Void> introspect(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
-        var data = authService.introspect(request);
-        return ApiResponse.<IntrospectResponse>builder().data(data).message("Success").build();
+        authService.introspect(request);
+        return ApiResponse.<Void>builder().message("Success").build();
     }
 
     @PostMapping("/refresh")
-    ApiResponse<AuthResponse> refreshToken(@RequestBody RefreshRequest request)
+    ApiResponse<AuthResponse> refreshToken(@RequestBody RefreshRequest request, HttpServletResponse response)
             throws ParseException, JOSEException {
-        var data = authService.refreshToken(request);
+        var data = authService.refreshToken(request, response);
         return ApiResponse.<AuthResponse>builder().data(data).message("Success").build();
     }
 
     @PostMapping("/logout")
-    ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
-        authService.logout(request);
+    ApiResponse<Void> logout(@RequestBody LogoutRequest request, HttpServletResponse response) throws ParseException, JOSEException {
+        authService.logout(request, response);
         return ApiResponse.<Void>builder().message("Success").build();
     }
-
-
 }
