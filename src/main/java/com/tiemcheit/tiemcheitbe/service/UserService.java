@@ -40,6 +40,14 @@ public class UserService {
             throw new AppException("User already exists with this username.", HttpStatus.BAD_REQUEST);
         }
 
+        if (userRepo.existsByEmail(request.getEmail())) {
+            throw new AppException("User already exists with this email.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (userRepo.existsByPhone(request.getPhone())) {
+            throw new AppException("User already exists with this phone number.", HttpStatus.BAD_REQUEST);
+        }
+
         User user = UserMapper.INSTANCE.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 

@@ -4,7 +4,6 @@ import com.tiemcheit.tiemcheitbe.dto.response.CategoryResponse;
 import com.tiemcheit.tiemcheitbe.mapper.CategoryMapper;
 import com.tiemcheit.tiemcheitbe.model.Category;
 import com.tiemcheit.tiemcheitbe.repository.CategoryRepo;
-import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -16,13 +15,6 @@ import java.util.stream.Collectors;
 public class CategoryService {
 
     private final CategoryRepo categoryRepository;
-
-//    public List<CategoryRequest> getAllCategories() {
-//        List<Category> categories = categoryRepository.findAll();
-//        return categories.stream()
-//                .map(this::convertToDto)
-//                .collect(Collectors.toList());
-//    }
 
     public List<CategoryResponse> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();

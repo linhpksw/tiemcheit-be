@@ -15,7 +15,6 @@ import com.tiemcheit.tiemcheitbe.model.ActiveRefreshToken;
 import com.tiemcheit.tiemcheitbe.model.User;
 import com.tiemcheit.tiemcheitbe.repository.ActiveRefreshTokenRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,7 +93,7 @@ public class AuthService {
         return signedJWT;
     }
 
-    public AuthResponse authenticate(AuthRequest request, HttpServletResponse response) throws ParseException {
+    public AuthResponse authenticate(AuthRequest request) throws ParseException {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         String username = request.getUsername();
 
@@ -107,7 +106,7 @@ public class AuthService {
         }
         activeRefreshTokenRepo.deleteByUser_Username(username);
 
-        return getAuthResponse(user, response);
+        return getAuthResponse(user);
     }
 
     private String generateToken(User user, Long expirationTime, String tokenType) {
@@ -147,7 +146,7 @@ public class AuthService {
         return stringJoiner.toString();
     }
 
-    public AuthResponse refreshToken(RefreshRequest request, HttpServletResponse response) throws ParseException, JOSEException {
+    public AuthResponse refreshToken(RefreshRequest request) throws ParseException, JOSEException {
         SignedJWT signedJWT = verifyToken(request.getToken(), true);
 
         String jti = signedJWT.getJWTClaimsSet().getJWTID();
@@ -157,10 +156,10 @@ public class AuthService {
 
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.BAD_REQUEST));
 
-        return getAuthResponse(user, response);
+        return getAuthResponse(user);
     }
 
-    private AuthResponse getAuthResponse(User user, HttpServletResponse response) throws ParseException {
+    private AuthResponse getAuthResponse(User user) throws ParseException {
         String accessToken = generateToken(user, accessTokenExpiration, "access");
         String refreshToken = generateToken(user, refreshTokenExpiration, "refresh");
 
@@ -173,7 +172,7 @@ public class AuthService {
                 .build();
     }
 
-    public void logout(LogoutRequest request, HttpServletResponse response) throws ParseException, JOSEException {
+    public void logout(LogoutRequest request) throws ParseException, JOSEException {
         SignedJWT signToken = verifyToken(request.getToken(), true);
         JWTClaimsSet claims = signToken.getJWTClaimsSet();
 

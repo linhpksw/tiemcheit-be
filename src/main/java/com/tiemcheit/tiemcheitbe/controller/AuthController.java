@@ -8,7 +8,6 @@ import com.tiemcheit.tiemcheitbe.dto.request.RefreshRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.AuthResponse;
 import com.tiemcheit.tiemcheitbe.service.AuthService;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -24,8 +23,8 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    ApiResponse<AuthResponse> login(@RequestBody AuthRequest request, HttpServletResponse response) throws ParseException {
-        var data = authService.authenticate(request, response);
+    ApiResponse<AuthResponse> login(@RequestBody AuthRequest request) throws ParseException {
+        var data = authService.authenticate(request);
         return ApiResponse.<AuthResponse>builder().message("Success").data(data).build();
     }
 
@@ -37,15 +36,15 @@ public class AuthController {
     }
 
     @PostMapping("/refresh")
-    ApiResponse<AuthResponse> refreshToken(@RequestBody RefreshRequest request, HttpServletResponse response)
+    ApiResponse<AuthResponse> refreshToken(@RequestBody RefreshRequest request)
             throws ParseException, JOSEException {
-        var data = authService.refreshToken(request, response);
+        var data = authService.refreshToken(request);
         return ApiResponse.<AuthResponse>builder().data(data).message("Success").build();
     }
 
     @PostMapping("/logout")
-    ApiResponse<Void> logout(@RequestBody LogoutRequest request, HttpServletResponse response) throws ParseException, JOSEException {
-        authService.logout(request, response);
+    ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
+        authService.logout(request);
         return ApiResponse.<Void>builder().message("Success").build();
     }
 }
