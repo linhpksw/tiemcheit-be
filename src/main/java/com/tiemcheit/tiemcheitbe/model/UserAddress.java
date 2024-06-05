@@ -17,7 +17,7 @@ public class UserAddress {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
     private User user;
 
     @Column(nullable = false, length = 256)
