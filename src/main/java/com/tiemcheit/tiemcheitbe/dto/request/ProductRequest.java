@@ -1,7 +1,6 @@
 package com.tiemcheit.tiemcheitbe.dto.request;
 
-import com.tiemcheit.tiemcheitbe.model.ProductIngredient;
-import com.tiemcheit.tiemcheitbe.model.ProductOption;
+import com.tiemcheit.tiemcheitbe.model.Category;
 import lombok.Data;
 
 import java.util.Date;
@@ -15,10 +14,10 @@ public class ProductRequest {
     private String image2;
     private String image3;
     private double price;
-    private Long categoryId;
+    private Category category;
     private int quantity;
     private Date createAt;
     private String description;
-    private Set<ProductOption> productOptions;
-    private Set<ProductIngredient> productIngredients;
+    private Set<Long> optionId;
+    private Set<Long> ingredientId;
 }

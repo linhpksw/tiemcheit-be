@@ -1,14 +1,12 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
+import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
 import com.tiemcheit.tiemcheitbe.service.ProductService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -45,13 +43,13 @@ public class ProductController {
                 .build();
     }
 
-//    @PostMapping("product/create")
-//    public ApiResponse<ProductResponse> createProduct(@RequestBody ProductResponse productResponse) {
-//        return ApiResponse.<ProductResponse>builder()
-//                .data(productService.createProduct(productResponse))
-//                .message("Success")
-//                .build();
-//    }
+    @PostMapping("/create")
+    public ApiResponse<ProductResponse> createProduct(@RequestBody ProductRequest productRequest) {
+        ProductResponse productResponse = productService.create(productRequest);
+        return ApiResponse.<ProductResponse>builder()
+                .data(productResponse)
+                .message("Success")
+                .build();
 
-
+    }
 }
