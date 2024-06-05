@@ -7,7 +7,6 @@ import com.tiemcheit.tiemcheitbe.dto.request.LogoutRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.RefreshRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.AuthResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.IntrospectResponse;
 import com.tiemcheit.tiemcheitbe.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -24,16 +23,16 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/login")
-    ApiResponse<AuthResponse> login(@RequestBody AuthRequest request) {
+    ApiResponse<AuthResponse> login(@RequestBody AuthRequest request) throws ParseException {
         var data = authService.authenticate(request);
         return ApiResponse.<AuthResponse>builder().message("Success").data(data).build();
     }
 
     @PostMapping("/introspect")
-    ApiResponse<IntrospectResponse> introspect(@RequestBody IntrospectRequest request)
+    ApiResponse<Void> introspect(@RequestBody IntrospectRequest request)
             throws ParseException, JOSEException {
-        var data = authService.introspect(request);
-        return ApiResponse.<IntrospectResponse>builder().data(data).message("Success").build();
+        authService.introspect(request);
+        return ApiResponse.<Void>builder().message("Success").build();
     }
 
     @PostMapping("/refresh")
@@ -48,6 +47,4 @@ public class AuthController {
         authService.logout(request);
         return ApiResponse.<Void>builder().message("Success").build();
     }
-
-
 }

@@ -18,11 +18,6 @@ public class CartController {
 
     private final CartService cartService;
 
-//    @Autowired
-//    public CartController(CartService cartService) {
-//        this.cartService = cartService;
-//    }
-
     @GetMapping("")
     public ApiResponse<List<CartItemResponse>> allCartItems() {
         var data = cartService.allCartItems();
@@ -32,9 +27,9 @@ public class CartController {
     }
 
     @PostMapping("")
-    public ApiResponse<CartItemRequest> addToCart(@RequestBody CartItemRequest cartItemRequest) {
+    public ApiResponse<CartItemResponse> addToCart(@RequestBody CartItemRequest cartItemRequest) {
         var data = cartService.addToCart(cartItemRequest);
-        return ApiResponse.<CartItemRequest>builder()
+        return ApiResponse.<CartItemResponse>builder()
                 .message("Success")
                 .data(data).build();
     }

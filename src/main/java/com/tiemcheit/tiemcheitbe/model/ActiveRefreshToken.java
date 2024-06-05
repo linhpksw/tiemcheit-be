@@ -1,28 +1,26 @@
 package com.tiemcheit.tiemcheitbe.model;
 
 import jakarta.persistence.*;
-import lombok.*;
-
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Entity
-@Table(name = "user_addresses")
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter
-@Setter
-public class UserAddress {
+@Data
+@Table(name = "active_refresh_tokens")
+public class ActiveRefreshToken {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false, unique = true)
+    private String jti;
+
     @ManyToOne
     @JoinColumn(name = "username", referencedColumnName = "username", nullable = false)
     private User user;
-
-    @Column(nullable = false, length = 256)
-    private String address;
-
-    @Column(nullable = false)
-    private Boolean isDefault;
 }
