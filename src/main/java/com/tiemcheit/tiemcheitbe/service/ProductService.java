@@ -9,8 +9,10 @@ import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
 import com.tiemcheit.tiemcheitbe.model.Product;
+import com.tiemcheit.tiemcheitbe.model.ProductImage;
 import com.tiemcheit.tiemcheitbe.model.ProductIngredient;
 import com.tiemcheit.tiemcheitbe.model.ProductOption;
+import com.tiemcheit.tiemcheitbe.repository.ProductImageRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductIngredientRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductOptionRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
@@ -32,6 +34,7 @@ public class ProductService {
     private final ProductRepo productRepo;
     private final ProductOptionRepo productOptionRepo;
     private final ProductIngredientRepo productIngredientRepo;
+    private final ProductImageRepo productImageRepo;
 
     private final OptionMapper optionMapper;
 
@@ -82,14 +85,27 @@ public class ProductService {
                 .map(IngredientMapper.INSTANCE::toIngredientResponse)
                 .toList();
 
+        List<String> imageList = productImageRepo.findAllByProductId(product.getId())
+                .stream()
+                .map(ProductImage::getImage)
+                .toList();
+
         return ProductDetailResponse.builder()
                 .id(product.getId())
                 .name(product.getName())
                 .description(product.getDescription())
-                .image(product.getImage())
+                .image1(imageList.get(0))
+                .image2(imageList.get(1))
+                .image3(imageList.get(2))
                 .price(product.getPrice())
                 .optionList(optionList)
                 .ingredientList(ingredientResponseList)
                 .build();
     }
+
+    //create a new product
+    public Product create(Product product) {
+        return productRepo.save(product);
+    }
+
 }

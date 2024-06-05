@@ -45,5 +45,13 @@ public class ProductController {
                 .build();
     }
 
+//    @PostMapping("product/create")
+//    public ApiResponse<ProductResponse> createProduct(@RequestBody ProductResponse productResponse) {
+//        return ApiResponse.<ProductResponse>builder()
+//                .data(productService.createProduct(productResponse))
+//                .message("Success")
+//                .build();
+//    }
+
 
 }

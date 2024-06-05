@@ -1,6 +1,5 @@
 package com.tiemcheit.tiemcheitbe.dto.response;
 
-import com.tiemcheit.tiemcheitbe.model.Option;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +15,9 @@ public class ProductDetailResponse {
     private Long id;
     private String name;
     private String description;
-    private String image;
+    private String image1;
+    private String image2;
+    private String image3;
     private double price;
     private List<OptionResponse> optionList;
     private List<IngredientResponse> ingredientList;
