@@ -45,11 +45,17 @@ public class ProductController {
 
     @PostMapping("/create")
     public ApiResponse<ProductResponse> createProduct(@RequestBody ProductRequest productRequest) {
-        ProductResponse productResponse = productService.create(productRequest);
         return ApiResponse.<ProductResponse>builder()
-                .data(productResponse)
+                .data(productService.create(productRequest))
                 .message("Success")
                 .build();
+    }
 
+    @PutMapping("/update/{id}")
+    public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
+        return ApiResponse.<ProductResponse>builder()
+                .data(productService.update(productRequest, id))
+                .message("Success")
+                .build();
     }
 }

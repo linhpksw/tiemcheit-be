@@ -23,4 +23,9 @@ public class CategoryService {
                 .collect(Collectors.toList());
     }
 
+    public CategoryResponse getCategoryById(Long id) {
+        Category category = categoryRepository.getReferenceById(id);
+        return CategoryMapper.INSTANCE.toCategoryResponse(category);
+    }
+
 }

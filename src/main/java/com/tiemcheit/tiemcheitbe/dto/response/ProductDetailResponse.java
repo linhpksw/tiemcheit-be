@@ -1,5 +1,6 @@
 package com.tiemcheit.tiemcheitbe.dto.response;
 
+import com.tiemcheit.tiemcheitbe.model.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,6 +20,8 @@ public class ProductDetailResponse {
     private String image2;
     private String image3;
     private double price;
+    private int quantity;
+    private Category category;
     private List<OptionResponse> optionList;
     private List<IngredientResponse> ingredientList;
 }
