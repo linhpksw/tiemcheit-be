@@ -17,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -54,6 +55,18 @@ public class OrderService {
             throw new AppException("Access denied", HttpStatus.FORBIDDEN);
         }
 
+    }
+
+    public List<OrderResponse> getOrdersByDateRange(Date startDate, Date endDate) {
+        return orderMapper.toResponses(orderRepo.findAllByOrderDateBetween(startDate, endDate));
+    }
+
+    public List<OrderResponse> getOrdersByStatus(String status) {
+        return orderMapper.toResponses(orderRepo.findAllByOrderStatus(status));
+    }
+
+    public List<OrderResponse> getOrdersByDateRangeAndStatus(Date startDate, Date endDate, String status) {
+        return orderMapper.toResponses(orderRepo.findAllByOrderDateBetweenAndOrderStatus(startDate, endDate, status));
     }
 
     public void placeOrder(OrderRequest request) {
@@ -98,6 +111,18 @@ public class OrderService {
 
         // Clear the user's cart
         cartService.clearCart();
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, String status) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        // Update the status
+        order.setOrderStatus(status);
+
+        // Save the updated order
+        orderRepo.save(order);
     }
 
     private boolean userHasRole(User user, String role) {

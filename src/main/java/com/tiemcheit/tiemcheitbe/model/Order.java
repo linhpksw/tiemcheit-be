@@ -33,7 +33,7 @@ public class Order {
     @Column(nullable = false, name = "payment_method", length = 20)
     private String paymentMethod;
     // test
-    @Column(nullable = false, name = "order_status", length = 10)
+    @Column(nullable = false, name = "order_status", length = 20)
     private String orderStatus;
 
     @Column(nullable = true, name = "message", length = 256)
