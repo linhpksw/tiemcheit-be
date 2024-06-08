@@ -35,9 +35,9 @@ public class Product {
 
 //    @Column(nullable = false)
 //    private Date createAt;
-//
-//    @Column(nullable = false)
-//    private int sold;
+
+    @Column(nullable = false)
+    private int sold;
 
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;

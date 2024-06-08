@@ -26,14 +26,6 @@ public class CartService {
     private final CartItemRepo cartItemRepo;
     private final UserRepo userRepo;
     private final CartItemMapper cartItemMapper;
-    private final UserService userService;
-
-//    @Autowired
-//    public CartService(CartItemRepo cartItemRepo, CartItemMapper cartItemMapper, UserService userService) {
-//        this.cartItemRepo = cartItemRepo;
-//        this.cartItemMapper = cartItemMapper;
-//        this.userService = userService;
-//    }
 
     public List<CartItemResponse> allCartItems() {
         List<CartItem> cartItems = cartItemRepo.findAll();
@@ -48,7 +40,7 @@ public class CartService {
         return cartItemMapper.toCartItemResponses(userCartItems);
     }
 
-    public CartItemRequest addToCart(CartItemRequest cartItemRequest) {
+    public CartItemResponse addToCart(CartItemRequest cartItemRequest) {
         List<CartItem> cartItems = cartItemRepo.findAll();
         for (CartItem ci : cartItems) {
             if (Objects.equals(ci.getUser().getUsername(), SecurityUtils.getCurrentUsername()) &&
@@ -61,7 +53,7 @@ public class CartService {
         CartItem cartItem = cartItemMapper.toEntity(cartItemRequest);
         cartItem.setUser(userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND)));
         CartItem savedCartItem = cartItemRepo.save(cartItem);
-        return cartItemMapper.toCartItemRequest(savedCartItem);
+        return cartItemMapper.toCartItemResponse(savedCartItem);
     }
 
     public void deleteCartItem(CartItemDeleteRequest cartItemDeleteRequest) {
