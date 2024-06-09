@@ -69,7 +69,7 @@ public class OrderService {
         return orderMapper.toResponses(orderRepo.findAllByOrderDateBetweenAndOrderStatus(startDate, endDate, status));
     }
 
-    public void placeOrder(OrderRequest request) {
+    public Long placeOrder(OrderRequest request) {
         // first get the item from user's cart
         List<CartItemResponse> cartItemList = cartService.allCartItems();
 
@@ -106,11 +106,11 @@ public class OrderService {
 
         order.setOrderDetails(orderDetails);
 
-        // Save the order and order details
-        orderRepo.save(order);
-
         // Clear the user's cart
         cartService.clearCart();
+
+        // Save the order and order details
+        return orderRepo.save(order).getId();
     }
 
     @Transactional

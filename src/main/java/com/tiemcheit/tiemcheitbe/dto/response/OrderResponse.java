@@ -7,6 +7,7 @@ import java.util.List;
 
 @Data
 public class OrderResponse {
+    private Long id;
     private UserResponse user;
     private Date orderDate;
     private String shippingAddress;

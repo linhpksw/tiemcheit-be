@@ -71,9 +71,11 @@ public class OrderController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<Void> addOrder(@RequestBody OrderRequest request) {
-        orderService.placeOrder(request);
-        return ApiResponse.<Void>builder().message("Success").build();
+    public ApiResponse<Long> addOrder(@RequestBody OrderRequest request) {
+        return ApiResponse.<Long>builder()
+                .data(orderService.placeOrder(request))
+                .message("Success")
+                .build();
     }
 
     @PatchMapping("/{orderId}/status")
