@@ -8,50 +8,51 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
 
 @RestController
-@RequestMapping("/permission")
+@RequestMapping("/permissions")
 @RequiredArgsConstructor
 @Slf4j
 public class PermissionController {
     private final PermissionService permissionService;
 
     @PostMapping
-    ApiResponse<PermissionResponse> create(@RequestBody PermissionRequest request) {
+    ApiResponse<PermissionResponse> createPermission(@RequestBody PermissionRequest request) {
         return ApiResponse.<PermissionResponse>builder()
-                .data(permissionService.create(request))
+                .data(permissionService.createPermission(request))
                 .message("Success")
                 .build();
     }
 
-    @GetMapping("/{permission}")
-    ApiResponse<PermissionResponse> getByName(@PathVariable String permission) {
+    @GetMapping("/{permissionName}")
+    ApiResponse<PermissionResponse> getPermission(@PathVariable String permissionName) {
         return ApiResponse.<PermissionResponse>builder()
-                .data(permissionService.getByName(permission))
+                .data(permissionService.getPermission(permissionName))
                 .message("Success")
                 .build();
     }
 
-    @PutMapping
-    ApiResponse<PermissionResponse> update(@RequestBody PermissionRequest request) {
+    @PutMapping("/{permissionName}")
+    ApiResponse<PermissionResponse> updatePermission(@RequestBody PermissionRequest request, @PathVariable String permissionName) {
         return ApiResponse.<PermissionResponse>builder()
-                .data(permissionService.update(request))
+                .data(permissionService.updatePermission(request, permissionName))
                 .message("Success")
                 .build();
     }
 
-    @GetMapping("/all")
-    ApiResponse<List<PermissionResponse>> getAll() {
-        return ApiResponse.<List<PermissionResponse>>builder()
-                .data(permissionService.getAll())
-                .message("Success")
-                .build();
-    }
 
-    @DeleteMapping("/{permission}")
-    ApiResponse<Void> delete(@PathVariable String permission) {
-        permissionService.deleteByName(permission);
+    @DeleteMapping("/{permissionName}")
+    ApiResponse<Void> deletePermission(@PathVariable String permissionName) {
+        permissionService.deletePermission(permissionName);
         return ApiResponse.<Void>builder().message("Success").build();
+    }
+
+    @GetMapping
+    ApiResponse<Set<PermissionResponse>> getPermissions() {
+        return ApiResponse.<Set<PermissionResponse>>builder()
+                .data(permissionService.getPermissions())
+                .message("Success")
+                .build();
     }
 }
