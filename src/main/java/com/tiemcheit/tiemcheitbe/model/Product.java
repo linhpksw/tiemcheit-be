@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -31,14 +31,13 @@ public class Product {
     @Column(nullable = false)
     private Double price;
 
-    @Column(nullable = false, length = 256)
-    private String image;
+    @Column(nullable = false)
+    private LocalDate createAt = LocalDate.now();
 
     @Column(nullable = false)
-    private Date createAt;
+    private int quantity;
 
-    @Column(nullable = false)
-    private int sold;
+    private int sold = 0;
 
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;

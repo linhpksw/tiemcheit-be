@@ -22,8 +22,10 @@ import org.springframework.web.filter.CorsFilter;
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
-            "/auth/login", "/auth/register", "/auth/refresh", "/auth/logout", "/auth/authenticate", "/auth/introspect",
-            "cart/**", "/filter/**", "/product/**", "/option/**", "/category/**", "/order/**"
+            "/auth/login", "/user/register", "/auth/refresh", "/auth/logout", "/auth/authenticate", "/auth/introspect",
+            "/auth/password-reset", "cart/**",
+            "/filter/**",
+            "/product/**", "/option/**", "/category/**", "/order/**", "/ingredient/**"
     };
 
     private final CustomJwtDecoder customJwtDecoder;

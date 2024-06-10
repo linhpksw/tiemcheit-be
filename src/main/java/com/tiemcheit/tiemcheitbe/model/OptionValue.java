@@ -1,6 +1,5 @@
 package com.tiemcheit.tiemcheitbe.model;
 
-import com.tiemcheit.tiemcheitbe.model.compositeId.OptionValueId;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +10,7 @@ import lombok.*;
 @AllArgsConstructor
 @Entity
 @Table(name = "option_values")
-@IdClass(OptionValueId.class)
+//@IdClass(OptionValueId.class)
 public class OptionValue {
 
     @Id
@@ -20,7 +19,7 @@ public class OptionValue {
     private Option option;
 
     @Id
-    private Long value_id;
+    private Long id;
 
-    private String value_name;
+    private String name;
 }
