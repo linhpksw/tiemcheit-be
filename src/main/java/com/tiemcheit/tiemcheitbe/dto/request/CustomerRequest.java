@@ -4,7 +4,6 @@ import lombok.Data;
 
 @Data
 public class CustomerRequest {
-    private Long id;
-    private String status;
-    private Long role;
+    private String username;
+    private UserUpdateRequest updateData;
 }
