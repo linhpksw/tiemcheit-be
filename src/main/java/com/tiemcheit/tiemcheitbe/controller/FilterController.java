@@ -17,11 +17,12 @@ public class FilterController {
     @Autowired
     private ProductService productService;
 
-    @GetMapping("")
+    @GetMapping("products")
     public List<ProductResponse> searchProducts(
             @RequestParam Map<String, String> params,
             @RequestParam(required = false, defaultValue = "id") String sortBy,
             @RequestParam(required = false, defaultValue = "asc") String direction) {
         return productService.getProductByConditionsAndSort(params, sortBy, direction);
     }
+
 }

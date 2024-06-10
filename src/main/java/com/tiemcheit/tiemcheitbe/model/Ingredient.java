@@ -16,6 +16,7 @@ public class Ingredient {
     private String name;
     private Long quantity;
     private double price;
+    private String status = "AVAILABLE";
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "store_id", nullable = false)
