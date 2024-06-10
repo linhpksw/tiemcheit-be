@@ -1,7 +1,10 @@
 package com.tiemcheit.tiemcheitbe.config;
 
+import com.tiemcheit.tiemcheitbe.dto.request.PermissionRequest;
+import com.tiemcheit.tiemcheitbe.model.Permission;
 import com.tiemcheit.tiemcheitbe.model.Role;
 import com.tiemcheit.tiemcheitbe.model.User;
+import com.tiemcheit.tiemcheitbe.repository.PermissionRepo;
 import com.tiemcheit.tiemcheitbe.repository.RoleRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ import java.util.Set;
 @Slf4j
 public class ApplicationInitConfig {
     private final RoleRepo roleRepo;
+    private final PermissionRepo permissionRepo;
     private final UserRepo userRepo;
     private final PasswordEncoder passwordEncoder;
 
@@ -34,6 +38,14 @@ public class ApplicationInitConfig {
             List<String> roles = List.of("CUSTOMER", "EMPLOYEE", "ADMIN");
             roles.forEach(this::createRoleIfNotFound);
 
+            List<PermissionRequest> permissions = List.of(
+                    new PermissionRequest("READ_STH", "This permission allows user to read something."),
+                    new PermissionRequest("DELETE_STH", "This permission allows user to delete something."),
+                    new PermissionRequest("UPDATE_STH", "This permission allows user to update something.")
+            );
+
+            permissions.forEach(this::createPermissionIfNotFound);
+
             userRepo.findByUsername("admin").ifPresentOrElse(user -> log.info("Admin user already exists: {}", user.getUsername()),
                     () -> {
                         User admin = User.builder().username("admin").password(passwordEncoder.encode("12345678")).fullname("Admin").phone("0917654321").email("admin@gmail.com").roles(Set.of(roleRepo.findByName("ADMIN").orElseThrow())).build();
@@ -43,6 +55,19 @@ public class ApplicationInitConfig {
                     }
             );
         };
+    }
+
+    private void createPermissionIfNotFound(PermissionRequest permissionRequest) {
+        permissionRepo.findByName(permissionRequest.getName()).ifPresentOrElse(
+                perm -> log.info("Permission already exists: {}", perm.getName()),
+                () -> {
+                    permissionRepo.save(Permission.builder()
+                            .name(permissionRequest.getName())
+                            .description(permissionRequest.getDescription())
+                            .build());
+                    log.info("Created new permission: {}", permissionRequest.getName());
+                }
+        );
     }
 
     private void createRoleIfNotFound(String roleName) {

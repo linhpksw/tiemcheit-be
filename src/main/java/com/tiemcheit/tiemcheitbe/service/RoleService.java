@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.RoleRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.RoleUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.RoleResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.RoleMapper;
@@ -14,8 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.HashSet;
-import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -25,14 +26,14 @@ public class RoleService {
     private final PermissionRepo permissionRepo;
     private final RoleMapper roleMapper;
 
-    public RoleResponse create(RoleRequest request) {
-        if (roleRepo.existsByName(request.getName())) {
-            throw new AppException(STR."Role \{request.getName()} already exists", HttpStatus.BAD_REQUEST);
+    public RoleResponse createRole(RoleRequest roleRequest) {
+        if (roleRepo.existsByName(roleRequest.getName())) {
+            throw new AppException(STR."Role \{roleRequest.getName()} already exists", HttpStatus.BAD_REQUEST);
         }
 
-        var role = roleMapper.toRole(request);
+        var role = roleMapper.toRole(roleRequest);
 
-        var permissions = permissionRepo.findAllByNameIn(request.getPermissions());
+        var permissions = permissionRepo.findAllByNameIn(roleRequest.getPermissions());
 
         role.setPermissions(new HashSet<>(permissions));
 
@@ -40,12 +41,12 @@ public class RoleService {
         return roleMapper.toRoleResponse(role);
     }
 
-    public List<RoleResponse> getAll() {
-        return roleRepo.findAll().stream().map(roleMapper::toRoleResponse).toList();
+    public Set<RoleResponse> getRoles() {
+        return roleRepo.findAll().stream().map(roleMapper::toRoleResponse).collect(Collectors.toSet());
     }
 
     @Transactional
-    public void delete(String role) {
+    public void deleteRole(String role) {
         var roleToDelete = roleRepo.findByName(role)
                 .orElseThrow(() -> new AppException(STR."Role \{role} not found", HttpStatus.NOT_FOUND));
 
@@ -56,9 +57,7 @@ public class RoleService {
         roleRepo.delete(roleToDelete);
     }
 
-    public RoleResponse update(RoleRequest request) {
-        String roleName = request.getName();
-
+    public RoleResponse updateRole(RoleUpdateRequest request, String roleName) {
         var roleToUpdate = roleRepo.findByName(roleName)
                 .orElseThrow(() -> new AppException(STR."Role \{roleName} not found", HttpStatus.NOT_FOUND));
 
@@ -71,11 +70,12 @@ public class RoleService {
         }
 
         roleToUpdate.setPermissions(foundPermissions);
+        roleToUpdate.setDescription(request.getDescription());
 
         return roleMapper.toRoleResponse(roleRepo.save(roleToUpdate));
     }
 
-    public RoleResponse get(String role) {
+    public RoleResponse getRole(String role) {
         return roleRepo.findByName(role)
                 .map(roleMapper::toRoleResponse)
                 .orElseThrow(() -> new AppException(STR."Role \{role} not found", HttpStatus.NOT_FOUND));

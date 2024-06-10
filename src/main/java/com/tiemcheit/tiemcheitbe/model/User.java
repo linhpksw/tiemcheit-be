@@ -40,13 +40,16 @@ public class User {
     @Column(length = 50)
     private Date dob = null;
 
-    @Builder.Default
     @Column(length = 10)
+    private String gender;
+
+    @Builder.Default
+    @Column(length = 20)
     private String status = "ACTIVE";
 
     @Builder.Default
     @Column(length = 1)
-    private boolean isActivated = false;
+    private Boolean isActivated = false;
 
     @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(

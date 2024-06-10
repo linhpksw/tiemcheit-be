@@ -11,7 +11,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -20,7 +21,7 @@ public class PermissionService {
     private final PermissionRepo permissionRepo;
     private final PermissionMapper permissionMapper;
 
-    public PermissionResponse create(PermissionRequest request) {
+    public PermissionResponse createPermission(PermissionRequest request) {
         if (permissionRepo.existsByName(request.getName())) {
             throw new AppException(STR."Permission \{request.getName()} already exists", HttpStatus.BAD_REQUEST);
         }
@@ -30,18 +31,20 @@ public class PermissionService {
         return permissionMapper.toPermissionResponse(permission);
     }
 
-    public List<PermissionResponse> getAll() {
+    public Set<PermissionResponse> getPermissions() {
         var permissions = permissionRepo.findAll();
-        return permissions.stream().map(permissionMapper::toPermissionResponse).toList();
+        return permissions.stream()
+                .map(permissionMapper::toPermissionResponse)
+                .collect(Collectors.toSet());
     }
 
-    public PermissionResponse getByName(String permission) {
+    public PermissionResponse getPermission(String permission) {
         var permissionEntity = permissionRepo.findByName(permission)
                 .orElseThrow(() -> new AppException(STR."Permission \{permission} not found", HttpStatus.NOT_FOUND));
         return permissionMapper.toPermissionResponse(permissionEntity);
     }
 
-    public void deleteByName(String permission) {
+    public void deletePermission(String permission) {
         if (!permissionRepo.existsByName(permission)) {
             throw new AppException(STR."Permission \{permission} not exists", HttpStatus.BAD_REQUEST);
         }
@@ -49,11 +52,16 @@ public class PermissionService {
         permissionRepo.deleteByName(permission);
     }
 
-    public PermissionResponse update(PermissionRequest request) {
-        String permissionName = request.getName();
-
+    public PermissionResponse updatePermission(PermissionRequest request, String permissionName) {
         var permissionToUpdate = permissionRepo.findByName(permissionName)
                 .orElseThrow(() -> new AppException(STR."Permission \{permissionName} not found", HttpStatus.NOT_FOUND));
+
+        permissionRepo.findByName(request.getName())
+                .ifPresent(permission -> {
+                    if (!permission.getName().equals(permissionName)) {
+                        throw new AppException(STR."Permission \{request.getName()} already exists", HttpStatus.BAD_REQUEST);
+                    }
+                });
 
         permissionToUpdate.setName(request.getName());
         permissionToUpdate.setDescription(request.getDescription());

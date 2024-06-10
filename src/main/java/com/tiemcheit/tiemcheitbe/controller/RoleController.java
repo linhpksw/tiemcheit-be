@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.RoleRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.RoleUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.RoleResponse;
 import com.tiemcheit.tiemcheitbe.service.RoleService;
@@ -8,50 +9,52 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
+import java.util.Set;
 
 @RequiredArgsConstructor
 @Slf4j
 @RestController
-@RequestMapping("/role")
+@RequestMapping("/roles")
 public class RoleController {
     private final RoleService roleService;
 
     @PostMapping
-    ApiResponse<RoleResponse> create(@RequestBody RoleRequest request) {
+    ApiResponse<RoleResponse> createRole(@RequestBody RoleRequest request) {
         return ApiResponse.<RoleResponse>builder()
-                .data(roleService.create(request))
+                .data(roleService.createRole(request))
                 .message("Success")
                 .build();
     }
 
-    @GetMapping("/all")
-    ApiResponse<List<RoleResponse>> getAll() {
-        return ApiResponse.<List<RoleResponse>>builder()
-                .data(roleService.getAll())
-                .message("Success")
-                .build();
-    }
-
-    @GetMapping("/{role}")
-    ApiResponse<RoleResponse> get(@PathVariable String role) {
+    @GetMapping("/{roleName}")
+    ApiResponse<RoleResponse> getRole(@PathVariable String roleName) {
         return ApiResponse.<RoleResponse>builder()
-                .data(roleService.get(role))
+                .data(roleService.getRole(roleName))
                 .message("Success")
                 .build();
     }
 
-    @PutMapping
-    ApiResponse<RoleResponse> update(@RequestBody RoleRequest request) {
+    @PutMapping("/{roleName}")
+    ApiResponse<RoleResponse> updateRole(@RequestBody RoleUpdateRequest request, @PathVariable String roleName) {
         return ApiResponse.<RoleResponse>builder()
-                .data(roleService.update(request))
+                .data(roleService.updateRole(request, roleName))
                 .message("Success")
                 .build();
     }
 
-    @DeleteMapping("/{role}")
-    ApiResponse<Void> delete(@PathVariable String role) {
-        roleService.delete(role);
+    @DeleteMapping("/{roleName}")
+    ApiResponse<Void> deleteRole(@PathVariable String roleName) {
+        roleService.deleteRole(roleName);
         return ApiResponse.<Void>builder().message("Success").build();
     }
+
+    @GetMapping
+    ApiResponse<Set<RoleResponse>> getRoles() {
+        return ApiResponse.<Set<RoleResponse>>builder()
+                .data(roleService.getRoles())
+                .message("Success")
+                .build();
+    }
+
+
 }
