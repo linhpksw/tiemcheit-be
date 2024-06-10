@@ -1,13 +1,11 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
+import com.tiemcheit.tiemcheitbe.dto.request.CustomerRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CustomerResponse;
 import com.tiemcheit.tiemcheitbe.service.CustomerService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,6 +27,14 @@ public class CustomerController {
     @GetMapping("/{uid}")
     public ApiResponse<CustomerResponse> getCustomerInfo(@PathVariable Long uid) {
         var data = customerService.getCustomerById(uid);
+        return ApiResponse.<CustomerResponse>builder()
+                .message("Success")
+                .data(data).build();
+    }
+
+    @PatchMapping("")
+    public ApiResponse<CustomerResponse> editCustomerIndo(@RequestBody CustomerRequest customerRequest) {
+        var data = customerService.updateCustomer(customerRequest);
         return ApiResponse.<CustomerResponse>builder()
                 .message("Success")
                 .data(data).build();
