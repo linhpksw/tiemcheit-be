@@ -43,6 +43,9 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;
 
+    @OneToMany(mappedBy = "product")
+    private List<WishlistItem> wishlistItems;
+
     @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private Set<ProductOption> productOptions;
 
