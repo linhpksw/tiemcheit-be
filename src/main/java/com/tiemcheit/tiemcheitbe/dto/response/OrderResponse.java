@@ -8,7 +8,7 @@ import java.util.List;
 @Data
 public class OrderResponse {
     private Long id;
-    private UserResponse user;
+    private UserInfoResponse user;
     private Date orderDate;
     private String shippingAddress;
     private String shippingMethod;

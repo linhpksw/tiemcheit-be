@@ -5,6 +5,6 @@ import lombok.Data;
 @Data
 public class WishlistItemResponse {
     private int id;
-    private UserResponse user;
+    private UserInfoResponse user;
     private ProductResponse product;
 }

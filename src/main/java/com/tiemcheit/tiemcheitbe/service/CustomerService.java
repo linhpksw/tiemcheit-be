@@ -8,6 +8,7 @@ import com.tiemcheit.tiemcheitbe.model.User;
 import com.tiemcheit.tiemcheitbe.repository.RoleRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ public class CustomerService {
     private final RoleRepo roleRepo;
     private final UserMapper userMapper;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<CustomerResponse> allCustomer() {
         List<User> customers = userRepo.findUsersByRole("CUSTOMER");
         List<CustomerResponse> customerResponses = new ArrayList<>();
