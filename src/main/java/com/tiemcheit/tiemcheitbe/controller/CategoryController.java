@@ -17,8 +17,7 @@ import java.util.List;
 public class CategoryController {
     private final CategoryService categoryService;
 
-    // this request is:  http://localhost:8080/category/getAll
-    @GetMapping("/getAll")
+    @GetMapping("")
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         return ApiResponse.<List<CategoryResponse>>builder()
                 .data(categoryService.getAllCategories())
@@ -26,8 +25,7 @@ public class CategoryController {
                 .build();
     }
 
-    // this request is:  http://localhost:8080/category/get/{id}
-    @GetMapping("/get/{id}")
+    @GetMapping("/{id}")
     public ApiResponse<CategoryResponse> getCategoryById(@PathVariable Long id) {
         return ApiResponse.<CategoryResponse>builder()
                 .data(categoryService.getCategoryById(id))

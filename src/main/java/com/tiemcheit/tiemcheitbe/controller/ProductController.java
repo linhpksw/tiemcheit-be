@@ -14,48 +14,46 @@ import java.util.List;
 @RequestMapping("/product")
 @AllArgsConstructor
 public class ProductController {
+    private static final String SUCCESS_MSG = "Success";
     private final ProductService productService;
 
-    // this request is:  http://localhost:8080/product/getAll
-    @GetMapping("/getAll")
+    @GetMapping("")
     public ApiResponse<List<ProductResponse>> getAllProducts() {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getAllProducts())
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
 
-    // this request is:  http://localhost:8080/product/getAllByCategory/{id}
-    @GetMapping("/getAllByCategory/{id}")
+    @GetMapping("/category/{id}")
     public ApiResponse<List<ProductResponse>> getAllProductsByCategoryID(@PathVariable Long id) {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getAllProductsByCategoryId(id))
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
 
-    // this request is:  http://localhost:8080/product/getDetail/{id}
-    @GetMapping("/getDetail/{id}")
+    @GetMapping("/{id}")
     public ApiResponse<ProductDetailResponse> getProductDetailById(@PathVariable Long id) {
         return ApiResponse.<ProductDetailResponse>builder()
                 .data(productService.getProductDetailById(id))
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
 
-    @PostMapping("/create")
-    public ApiResponse<ProductResponse> createProduct(@RequestBody ProductRequest productRequest) {
+    @PostMapping("")
+    public ApiResponse<ProductResponse> addProduct(@RequestBody ProductRequest productRequest) {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.create(productRequest))
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.update(productRequest, id))
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
 }

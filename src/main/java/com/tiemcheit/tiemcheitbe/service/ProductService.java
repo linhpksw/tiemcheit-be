@@ -25,7 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +38,6 @@ public class ProductService {
     private final IngredientRepo ingredientRepo;
 
     private final OptionMapper optionMapper;
-    private final CategoryRepo categoryRepo;
 
     public List<ProductResponse> getAllProducts() {
         return productRepo.findAll()
@@ -49,7 +47,7 @@ public class ProductService {
                     productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
                     return productResponse;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
 
@@ -62,7 +60,7 @@ public class ProductService {
                     productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
                     return productResponse;
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
 
@@ -79,7 +77,7 @@ public class ProductService {
                     productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
                     return productResponse;
                 })
-                .collect(Collectors.toList());
+                .toList();
 
     }
 
@@ -129,7 +127,6 @@ public class ProductService {
             throw new AppException("Product is null", HttpStatus.BAD_REQUEST);
         }
 
-//        Category category = categoryRepo.getReferenceById(productRequest.getCategoryId());
         List<String> imageList = List.of(productRequest.getImage1(), productRequest.getImage2(), productRequest.getImage3());
 
         product.setCategory(productRequest.getCategory());
