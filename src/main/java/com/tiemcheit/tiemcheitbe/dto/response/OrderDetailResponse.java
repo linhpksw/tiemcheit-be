@@ -7,6 +7,6 @@ public class OrderDetailResponse {
     private Long id;
     private double price;
     private int quantity;
-    private OrderResponse order;
+    //private OrderResponse order;
     private ProductResponse product;
 }
