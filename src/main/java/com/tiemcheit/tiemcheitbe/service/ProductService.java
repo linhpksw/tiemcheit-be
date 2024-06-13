@@ -17,6 +17,8 @@ import com.tiemcheit.tiemcheitbe.repository.*;
 import com.tiemcheit.tiemcheitbe.service.specification.ProductSpecification;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
@@ -81,6 +83,18 @@ public class ProductService {
 
     }
 
+    //get bestseller product
+    public List<ProductResponse> getTopBestsellers(int top) {
+        Pageable topProduct = PageRequest.of(0, top);
+        return productRepo.findTopBestsellers(topProduct)
+                .stream()
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    return productResponse;
+                })
+                .toList();
+    }
 
     //get ProductDetailResponse by product id
     public ProductDetailResponse getProductDetailById(Long productId) {
@@ -110,9 +124,7 @@ public class ProductService {
 
         productDetailResponse.setOptionList(optionList);
         productDetailResponse.setIngredientList(ingredientResponseList);
-        productDetailResponse.setImage1(imageList.get(0));
-        productDetailResponse.setImage2(imageList.get(1));
-        productDetailResponse.setImage3(imageList.get(2));
+        productDetailResponse.setImageList(imageList);
 
         return productDetailResponse;
     }
@@ -127,7 +139,7 @@ public class ProductService {
             throw new AppException("Product is null", HttpStatus.BAD_REQUEST);
         }
 
-        List<String> imageList = List.of(productRequest.getImage1(), productRequest.getImage2(), productRequest.getImage3());
+        List<String> imageList = productRequest.getImageList();
 
         product.setCategory(productRequest.getCategory());
         //save product to product table
@@ -169,13 +181,10 @@ public class ProductService {
 
     private void updateProductImages(ProductRequest productRequest, Product product) {
         productImageRepo.deleteAllByProductId(product.getId());
-        List<String> imageList = List.of(productRequest.getImage1(), productRequest.getImage2(), productRequest.getImage3());
+        List<String> imageList = productRequest.getImageList();
         List<ProductImage> productImages = imageList.stream()
                 .map(image -> ProductImage.builder().image(image).product(product).build())
                 .toList();
-        if (productImages.size() > 3) {
-            throw new AppException("Image list must not exceed 3 images", HttpStatus.BAD_REQUEST);
-        }
         productImageRepo.saveAll(productImages);
     }
 

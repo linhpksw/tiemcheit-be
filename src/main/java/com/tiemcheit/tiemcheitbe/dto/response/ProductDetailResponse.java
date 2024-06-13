@@ -16,9 +16,7 @@ public class ProductDetailResponse {
     private Long id;
     private String name;
     private String description;
-    private String image1;
-    private String image2;
-    private String image3;
+    private List<String> imageList;
     private double price;
     private int quantity;
     private Category category;

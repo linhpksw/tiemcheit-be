@@ -41,6 +41,14 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/top/{top}")
+    public ApiResponse<List<ProductResponse>> getBestSellerProducts(@PathVariable int top) {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getTopBestsellers(top))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
     @PostMapping("")
     public ApiResponse<ProductResponse> addProduct(@RequestBody ProductRequest productRequest) {
         return ApiResponse.<ProductResponse>builder()
