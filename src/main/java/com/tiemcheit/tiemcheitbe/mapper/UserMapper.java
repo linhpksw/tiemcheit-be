@@ -1,9 +1,8 @@
 package com.tiemcheit.tiemcheitbe.mapper;
 
 import com.tiemcheit.tiemcheitbe.dto.request.UserRegisterRequest;
-import com.tiemcheit.tiemcheitbe.dto.response.CartUserResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.UserDetailResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.UserResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserProfileResponse;
 import com.tiemcheit.tiemcheitbe.model.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.factory.Mappers;
@@ -14,9 +13,8 @@ public interface UserMapper {
 
     User toUser(UserRegisterRequest request);
 
-    UserResponse toUserResponse(User user);
+    UserInfoResponse toUserInfoResponse(User user);
 
-    CartUserResponse toCartUserResponse(User user);
+    UserProfileResponse toUserProfileResponse(User user);
 
-    UserDetailResponse toUserDetailResponse(User user);
 }

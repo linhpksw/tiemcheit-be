@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
@@ -20,8 +21,7 @@ public class ProductController {
     private final ProductService productService;
     private final ReviewService reviewService;
 
-    // this request is:  http://localhost:8080/product/getAll
-    @GetMapping("/getAll")
+    @GetMapping("")
     public ApiResponse<List<ProductResponse>> getAllProducts() {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getAllProducts())
@@ -29,8 +29,7 @@ public class ProductController {
                 .build();
     }
 
-    // this request is:  http://localhost:8080/product/getAllByCategory/{id}
-    @GetMapping("/getAllByCategory/{id}")
+    @GetMapping("/category/{id}")
     public ApiResponse<List<ProductResponse>> getAllProductsByCategoryID(@PathVariable Long id) {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getAllProductsByCategoryId(id))
@@ -38,11 +37,26 @@ public class ProductController {
                 .build();
     }
 
-    // this request is:  http://localhost:8080/product/getDetail/{id}
-    @GetMapping("/getDetail/{id}")
+    @GetMapping("/{id}")
     public ApiResponse<ProductDetailResponse> getProductDetailById(@PathVariable Long id) {
         return ApiResponse.<ProductDetailResponse>builder()
                 .data(productService.getProductDetailById(id))
+                .message("Success")
+                .build();
+    }
+
+    @PostMapping("")
+    public ApiResponse<ProductResponse> addProduct(@RequestBody ProductRequest productRequest) {
+        return ApiResponse.<ProductResponse>builder()
+                .data(productService.create(productRequest))
+                .message("Success")
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
+        return ApiResponse.<ProductResponse>builder()
+                .data(productService.update(productRequest, id))
                 .message("Success")
                 .build();
     }

@@ -1,10 +1,9 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
-import com.tiemcheit.tiemcheitbe.dto.request.UserRegisterRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.UserUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.UserDetailResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.UserResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserProfileResponse;
 import com.tiemcheit.tiemcheitbe.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -14,54 +13,67 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/user")
+@RequestMapping
 @RequiredArgsConstructor
 @Slf4j
 public class UserController {
     private final UserService userService;
 
-    @PostMapping("/register")
-    ApiResponse<UserResponse> register(@RequestBody @Valid UserRegisterRequest request) {
-        return ApiResponse.<UserResponse>builder()
+    @GetMapping("/users/{username}")
+    ApiResponse<UserInfoResponse> getUserInfo(@PathVariable String username) {
+        return ApiResponse.<UserInfoResponse>builder()
+                .data(userService.getUserInfo(username))
                 .message("Success")
-                .data(userService.registerUser(request))
                 .build();
     }
 
-    @GetMapping("/all")
-    ApiResponse<List<UserResponse>> getUsers() {
-        return ApiResponse.<List<UserResponse>>builder()
-                .data(userService.getUsers())
+    @GetMapping("/users")
+    ApiResponse<List<UserInfoResponse>> getUsersInfo() {
+        return ApiResponse.<List<UserInfoResponse>>builder()
+                .data(userService.getUsersInfo())
+                .message("Success")
+                .build();
+    }
+
+    @PatchMapping("/users/{username}/profile")
+    ApiResponse<UserProfileResponse> updateUserProfile(@PathVariable String username, @RequestBody @Valid UserUpdateRequest request) {
+        return ApiResponse.<UserProfileResponse>builder()
+                .data(userService.updateUserProfile(username, request))
+                .build();
+    }
+
+    @GetMapping("/users/{username}/profile")
+    ApiResponse<UserProfileResponse> getUserProfile(@PathVariable("username") String username) {
+        return ApiResponse.<UserProfileResponse>builder()
+                .data(userService.getUserProfile(username))
+                .build();
+    }
+
+    @GetMapping("/users/profile")
+    ApiResponse<List<UserProfileResponse>> getUsersProfile() {
+        return ApiResponse.<List<UserProfileResponse>>builder()
+                .data(userService.getUsersProfile())
                 .build();
     }
 
     @GetMapping("/{username}")
-    ApiResponse<UserResponse> getUser(@PathVariable("username") String username) {
-        return ApiResponse.<UserResponse>builder()
-                .data(userService.getUser(username))
+    ApiResponse<UserInfoResponse> getInfo(@PathVariable String username) {
+        return ApiResponse.<UserInfoResponse>builder()
+                .data(userService.getUserInfo(username))
                 .build();
     }
 
-    @GetMapping("/{username}/detail")
-    ApiResponse<UserDetailResponse> getUserDetail(@PathVariable("username") String username) {
-        return ApiResponse.<UserDetailResponse>builder()
-                .data(userService.getUserDetail(username))
+    @GetMapping("/{username}/profile")
+    ApiResponse<UserProfileResponse> getProfile(@PathVariable String username) {
+        return ApiResponse.<UserProfileResponse>builder()
+                .data(userService.getUserProfile(username))
                 .build();
     }
 
-
-    @PatchMapping("/{username}")
-    ApiResponse<UserResponse> updateUser(@PathVariable String username, @RequestBody @Valid UserUpdateRequest request) {
-        return ApiResponse.<UserResponse>builder()
-                .data(userService.updateUser(username, request))
-                .build();
-    }
-
-    @DeleteMapping("/{username}")
-    ApiResponse<String> deleteUser(@PathVariable String username) {
-        userService.deleteUser(username);
-        return ApiResponse.<String>builder()
-                .message("User has been deleted")
+    @PatchMapping("/{username}/profile")
+    ApiResponse<UserProfileResponse> updateProfile(@PathVariable String username, @RequestBody @Valid UserUpdateRequest request) {
+        return ApiResponse.<UserProfileResponse>builder()
+                .data(userService.updateUserProfile(username, request))
                 .build();
     }
 }

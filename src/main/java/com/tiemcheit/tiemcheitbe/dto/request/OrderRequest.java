@@ -11,6 +11,4 @@ public class OrderRequest {
     private String shippingMethod;
     private String paymentMethod;
     private String message;
-    //private String orderStatus;
-    //private List<OrderDetailResponse> orderDetails;
 }

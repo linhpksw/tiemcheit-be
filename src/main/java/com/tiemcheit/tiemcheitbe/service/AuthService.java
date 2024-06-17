@@ -5,15 +5,17 @@ import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.MACVerifier;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
-import com.tiemcheit.tiemcheitbe.dto.request.AuthRequest;
-import com.tiemcheit.tiemcheitbe.dto.request.IntrospectRequest;
-import com.tiemcheit.tiemcheitbe.dto.request.LogoutRequest;
-import com.tiemcheit.tiemcheitbe.dto.request.RefreshRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.*;
 import com.tiemcheit.tiemcheitbe.dto.response.AuthResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
 import com.tiemcheit.tiemcheitbe.model.ActiveRefreshToken;
+import com.tiemcheit.tiemcheitbe.model.Role;
 import com.tiemcheit.tiemcheitbe.model.User;
+import com.tiemcheit.tiemcheitbe.model.UserAddress;
 import com.tiemcheit.tiemcheitbe.repository.ActiveRefreshTokenRepo;
+import com.tiemcheit.tiemcheitbe.repository.RoleRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,15 +25,15 @@ import org.springframework.security.authentication.AuthenticationServiceExceptio
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.CollectionUtils;
 
 import java.nio.charset.StandardCharsets;
 import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -39,6 +41,9 @@ import java.util.UUID;
 public class AuthService {
     private final UserRepo userRepo;
     private final ActiveRefreshTokenRepo activeRefreshTokenRepo;
+    private final PasswordEncoder passwordEncoder;
+    private final RoleRepo roleRepo;
+    private final UserMapper userMapper;
 
     @Value("${security.jwt.secret-key}")
     private String secretKey;
@@ -48,6 +53,52 @@ public class AuthService {
 
     @Value("${security.jwt.refresh-token-expiration-time}")
     private long refreshTokenExpiration;
+
+    @Transactional
+    public UserInfoResponse register(UserRegisterRequest request) {
+        User existingUser = userRepo.findByUsername(request.getUsername()).orElse(null);
+        if (existingUser != null) {
+            if (!"DELETED".equals(existingUser.getStatus())) {
+                throw new AppException("User already exists with this username.", HttpStatus.BAD_REQUEST);
+            } else {
+                throw new AppException("This account has been deleted.", HttpStatus.FORBIDDEN);
+            }
+        }
+
+        if (userRepo.existsByEmail(request.getEmail())) {
+            throw new AppException("User already exists with this email.", HttpStatus.BAD_REQUEST);
+        }
+
+        if (userRepo.existsByPhone(request.getPhone())) {
+            throw new AppException("User already exists with this phone number.", HttpStatus.BAD_REQUEST);
+        }
+
+        User user = UserMapper.INSTANCE.toUser(request);
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+
+        HashSet<Role> roles = new HashSet<>();
+        roleRepo.findByName("CUSTOMER").ifPresent(roles::add);
+
+        user.setRoles(roles);
+
+        if (request.getAddresses() != null) {
+            User finalUser = user;
+            Set<UserAddress> addresses = request.getAddresses().stream()
+                    .map(addr -> UserAddress.builder()
+                            .address(addr.getAddress())
+                            .isDefault(addr.getIsDefault())
+                            .user(finalUser)
+                            .build())
+                    .collect(Collectors.toSet());
+
+            user.setAddresses(addresses);
+        }
+
+        // Save the user and addresses due to cascade
+        user = userRepo.save(user);
+
+        return userMapper.toUserInfoResponse(user);
+    }
 
     public void introspect(IntrospectRequest request) throws ParseException, JOSEException {
         var token = request.getToken();
@@ -99,6 +150,10 @@ public class AuthService {
 
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
+        if ("DELETED".equals(user.getStatus())) {
+            throw new AppException("This account has been deleted.", HttpStatus.FORBIDDEN);
+        }
+
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
 
         if (!authenticated) {
@@ -138,7 +193,7 @@ public class AuthService {
 
         if (!CollectionUtils.isEmpty(user.getRoles()))
             user.getRoles().forEach(role -> {
-                stringJoiner.add("ROLE_" + role.getName());
+                stringJoiner.add(STR."ROLE_\{role.getName()}");
                 if (!CollectionUtils.isEmpty(role.getPermissions()))
                     role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
             });
@@ -183,5 +238,37 @@ public class AuthService {
     private String extractJtiFromToken(String token) throws ParseException {
         SignedJWT signedJWT = SignedJWT.parse(token);
         return signedJWT.getJWTClaimsSet().getJWTID();
+    }
+
+    public void resetPassword(ResetPasswordRequest request) {
+        String username = request.getUsername();
+
+        User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new AppException("Current password is not correct", HttpStatus.FORBIDDEN);
+        }
+
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        userRepo.save(user);
+    }
+
+    public void deactivate(DeactivateRequest request) throws ParseException, JOSEException {
+        String username = request.getUsername();
+
+        User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new AppException("Current password is not correct", HttpStatus.FORBIDDEN);
+        }
+
+        user.setStatus("DELETED");
+        userRepo.save(user);
+
+        SignedJWT signToken = verifyToken(request.getToken(), true);
+        JWTClaimsSet claims = signToken.getJWTClaimsSet();
+
+        String jit = claims.getJWTID();
+        activeRefreshTokenRepo.deleteByJti(jit);
     }
 }

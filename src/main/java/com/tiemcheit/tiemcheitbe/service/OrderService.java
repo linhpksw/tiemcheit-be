@@ -15,7 +15,9 @@ import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -31,16 +33,43 @@ public class OrderService {
     private final OrderMapper orderMapper;
     private final CartService cartService;
 
-    public List<OrderResponse> listOrders(User user) {
+    public List<OrderResponse> getUserOrders() {
+        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
         return orderMapper.toResponses(orderRepo.findAllByUserOrderByIdDesc(user));
     }
 
-    // check the not found exception after
-    public OrderResponse getOrder(Long id) {
-        return orderMapper.toReponse(orderRepo.findById(id).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND)));
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<OrderResponse> getAllOrders() {
+        return orderMapper.toResponses(orderRepo.findAll());
     }
 
-    public void placeOrder(Long uid, OrderRequest request) {
+    // check the not found exception after
+    public OrderResponse getOrderDetails(Long orderId) {
+        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+        Order order = orderRepo.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+
+        if (userHasRole(user, "ADMIN") || order.getUser().getId().equals(user.getId())) {
+            return orderMapper.toReponse(order);
+        } else {
+            // test
+            throw new AppException("Access denied", HttpStatus.FORBIDDEN);
+        }
+
+    }
+
+    public List<OrderResponse> getOrdersByDateRange(Date startDate, Date endDate) {
+        return orderMapper.toResponses(orderRepo.findAllByOrderDateBetween(startDate, endDate));
+    }
+
+    public List<OrderResponse> getOrdersByStatus(String status) {
+        return orderMapper.toResponses(orderRepo.findAllByOrderStatus(status));
+    }
+
+    public List<OrderResponse> getOrdersByDateRangeAndStatus(Date startDate, Date endDate, String status) {
+        return orderMapper.toResponses(orderRepo.findAllByOrderDateBetweenAndOrderStatus(startDate, endDate, status));
+    }
+
+    public Long placeOrder(OrderRequest request) {
         // first get the item from user's cart
         List<CartItemResponse> cartItemList = cartService.allCartItems();
 
@@ -77,10 +106,26 @@ public class OrderService {
 
         order.setOrderDetails(orderDetails);
 
-        // Save the order and order details
-        orderRepo.save(order);
-
         // Clear the user's cart
         cartService.clearCart();
+
+        // Save the order and order details
+        return orderRepo.save(order).getId();
+    }
+
+    @Transactional
+    public void updateOrderStatus(Long orderId, String status) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        // Update the status
+        order.setOrderStatus(status);
+
+        // Save the updated order
+        orderRepo.save(order);
+    }
+
+    private boolean userHasRole(User user, String role) {
+        return user.getRoles().stream().anyMatch(r -> r.getName().equals(role));
     }
 }

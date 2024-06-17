@@ -1,5 +1,6 @@
 package com.tiemcheit.tiemcheitbe.service;
 
+import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.IngredientResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OptionResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
@@ -9,21 +10,21 @@ import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
 import com.tiemcheit.tiemcheitbe.model.Product;
+import com.tiemcheit.tiemcheitbe.model.ProductImage;
 import com.tiemcheit.tiemcheitbe.model.ProductIngredient;
 import com.tiemcheit.tiemcheitbe.model.ProductOption;
-import com.tiemcheit.tiemcheitbe.repository.ProductIngredientRepo;
-import com.tiemcheit.tiemcheitbe.repository.ProductOptionRepo;
-import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
+import com.tiemcheit.tiemcheitbe.repository.*;
 import com.tiemcheit.tiemcheitbe.service.specification.ProductSpecification;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,22 +33,34 @@ public class ProductService {
     private final ProductRepo productRepo;
     private final ProductOptionRepo productOptionRepo;
     private final ProductIngredientRepo productIngredientRepo;
+    private final ProductImageRepo productImageRepo;
+    private final OptionRepo optionRepo;
+    private final IngredientRepo ingredientRepo;
 
     private final OptionMapper optionMapper;
 
     public List<ProductResponse> getAllProducts() {
         return productRepo.findAll()
                 .stream()
-                .map(ProductMapper.INSTANCE::toProductResponse)
-                .collect(Collectors.toList());
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    return productResponse;
+                })
+                .toList();
     }
+
 
     //get All ProductResponse by category id
     public List<ProductResponse> getAllProductsByCategoryId(Long categoryId) {
         List<Product> products = productRepo.findAllByCategoryId(categoryId);
         return products.stream()
-                .map(ProductMapper.INSTANCE::toProductResponse)
-                .collect(Collectors.toList());
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    return productResponse;
+                })
+                .toList();
     }
 
 
@@ -59,14 +72,22 @@ public class ProductService {
 
         return productRepo.findAll(specification, sort)
                 .stream()
-                .map(ProductMapper.INSTANCE::toProductResponse)
-                .collect(Collectors.toList());
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    return productResponse;
+                })
+                .toList();
 
     }
+
 
     //get ProductDetailResponse by product id
     public ProductDetailResponse getProductDetailById(Long productId) {
         Product product = productRepo.findById(productId).orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+
+        ProductDetailResponse productDetailResponse = ProductMapper.INSTANCE.toProductDetailResponse(product);
+
 
         List<OptionResponse> optionList = productOptionRepo.findAllByProductId(product.getId())
                 .stream()
@@ -82,14 +103,102 @@ public class ProductService {
                 .map(IngredientMapper.INSTANCE::toIngredientResponse)
                 .toList();
 
-        return ProductDetailResponse.builder()
-                .id(product.getId())
-                .name(product.getName())
-                .description(product.getDescription())
-                .image(product.getImage())
-                .price(product.getPrice())
-                .optionList(optionList)
-                .ingredientList(ingredientResponseList)
-                .build();
+        List<String> imageList = productImageRepo.findAllByProductId(product.getId())
+                .stream()
+                .map(ProductImage::getImage)
+                .toList();
+
+        productDetailResponse.setOptionList(optionList);
+        productDetailResponse.setIngredientList(ingredientResponseList);
+        productDetailResponse.setImage1(imageList.get(0));
+        productDetailResponse.setImage2(imageList.get(1));
+        productDetailResponse.setImage3(imageList.get(2));
+
+        return productDetailResponse;
     }
+
+
+    //create a new product
+    @PreAuthorize("hasRole('ADMIN')")
+    public ProductResponse create(ProductRequest productRequest) {
+        //save product to product table
+        Product product = ProductMapper.INSTANCE.toProduct(productRequest);
+        if (product == null) {
+            throw new AppException("Product is null", HttpStatus.BAD_REQUEST);
+        }
+
+        List<String> imageList = List.of(productRequest.getImage1(), productRequest.getImage2(), productRequest.getImage3());
+
+        product.setCategory(productRequest.getCategory());
+        //save product to product table
+        Product savedProduct = productRepo.save(product);
+        updateProductImages(productRequest, savedProduct);
+        updateProductOptions(productRequest, savedProduct);
+        updateProductIngredients(productRequest, savedProduct);
+
+        ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(savedProduct);
+        productResponse.setImage(imageList.getFirst());
+        return productResponse;
+    }
+
+
+    //update a product
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public ProductResponse update(ProductRequest productRequest, Long id) {
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+
+        product.setName(productRequest.getName());
+        product.setDescription(productRequest.getDescription());
+        product.setPrice(productRequest.getPrice());
+        product.setQuantity(productRequest.getQuantity());
+
+        Product updatedProduct = productRepo.save(product);
+
+        updateProductImages(productRequest, updatedProduct);
+        updateProductOptions(productRequest, updatedProduct);
+        updateProductIngredients(productRequest, updatedProduct);
+
+
+        ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(updatedProduct);
+        productResponse.setImage(productImageRepo.findAllByProductId(updatedProduct.getId()).getFirst().getImage());
+        return productResponse;
+    }
+
+
+    private void updateProductImages(ProductRequest productRequest, Product product) {
+        productImageRepo.deleteAllByProductId(product.getId());
+        List<String> imageList = List.of(productRequest.getImage1(), productRequest.getImage2(), productRequest.getImage3());
+        List<ProductImage> productImages = imageList.stream()
+                .map(image -> ProductImage.builder().image(image).product(product).build())
+                .toList();
+        if (productImages.size() > 3) {
+            throw new AppException("Image list must not exceed 3 images", HttpStatus.BAD_REQUEST);
+        }
+        productImageRepo.saveAll(productImages);
+    }
+
+    private void updateProductOptions(ProductRequest productRequest, Product product) {
+        productOptionRepo.deleteAllByProductId(product.getId());
+        List<ProductOption> productOptions = productRequest.getOptionId().stream()
+                .map(optionId -> ProductOption.builder().option(optionRepo.getReferenceById(optionId)).product(product).build())
+                .toList();
+        if (productOptions == null) {
+            throw new AppException("Product options is null", HttpStatus.BAD_REQUEST);
+        }
+        productOptionRepo.saveAll(productOptions);
+    }
+
+    private void updateProductIngredients(ProductRequest productRequest, Product product) {
+        productIngredientRepo.deleteAllByProductId(product.getId());
+        List<ProductIngredient> productIngredients = productRequest.getIngredientId().stream()
+                .map(ingredientId -> ProductIngredient.builder().ingredient(ingredientRepo.getReferenceById(ingredientId)).product(product).build())
+                .toList();
+        if (productIngredients == null) {
+            throw new AppException("Product ingredients is null", HttpStatus.BAD_REQUEST);
+        }
+        productIngredientRepo.saveAll(productIngredients);
+    }
+
 }

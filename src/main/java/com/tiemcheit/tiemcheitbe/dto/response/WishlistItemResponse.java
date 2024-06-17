@@ -3,9 +3,8 @@ package com.tiemcheit.tiemcheitbe.dto.response;
 import lombok.Data;
 
 @Data
-public class CartItemResponse {
+public class WishlistItemResponse {
     private int id;
     private UserInfoResponse user;
     private ProductResponse product;
-    private int quantity;
 }
