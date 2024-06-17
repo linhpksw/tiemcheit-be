@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/order")
+@RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
 
@@ -33,7 +33,7 @@ public class OrderController {
                 .build();
     }
 
-    @GetMapping("/admin/all")
+    @GetMapping("/admin")
     public ApiResponse<List<OrderResponse>> getAllOrder() {
         return ApiResponse.<List<OrderResponse>>builder()
                 .data(orderService.getAllOrders())
@@ -41,31 +41,25 @@ public class OrderController {
                 .build();
     }
 
-    @GetMapping("/date-range")
-    public ApiResponse<List<OrderResponse>> getOrdersByDateRange(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate) {
-        return ApiResponse.<List<OrderResponse>>builder()
-                .data(orderService.getOrdersByDateRange(startDate, endDate))
-                .message("Success")
-                .build();
-    }
-
-    @GetMapping("/status")
-    public ApiResponse<List<OrderResponse>> getOrdersByStatus(@RequestParam String status) {
-        return ApiResponse.<List<OrderResponse>>builder()
-                .data(orderService.getOrdersByStatus(status))
-                .message("Success")
-                .build();
-    }
 
     @GetMapping("/filter")
     public ApiResponse<List<OrderResponse>> getOrdersByDateRangeAndStatus(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
+            @RequestParam(required = false) String status) {
+        return ApiResponse.<List<OrderResponse>>builder()
+                .data(orderService.getFilterOrders(startDate, endDate, status))
+                .message("Success")
+                .build();
+    }
+
+    @GetMapping("/admin/filter")
+    public ApiResponse<List<OrderResponse>> getFilterOrdersByAdmin(
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
             @RequestParam String status) {
         return ApiResponse.<List<OrderResponse>>builder()
-                .data(orderService.getOrdersByDateRangeAndStatus(startDate, endDate, status))
+                .data(orderService.getFilterOrdersByAdmin(startDate, endDate, status))
                 .message("Success")
                 .build();
     }
@@ -79,8 +73,8 @@ public class OrderController {
     }
 
     @PatchMapping("/{orderId}/status")
-    public ApiResponse<Void> addOrder(@PathVariable Long orderId,
-                                      @RequestParam String status) {
+    public ApiResponse<Void> updateOrderByUser(@PathVariable Long orderId,
+                                               @RequestParam String status) {
         orderService.updateOrderStatus(orderId, status);
         return ApiResponse.<Void>builder().message("Success").build();
     }

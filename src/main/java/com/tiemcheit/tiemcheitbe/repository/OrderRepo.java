@@ -12,14 +12,16 @@ import java.util.List;
 
 @Repository
 public interface OrderRepo extends JpaRepository<Order, Long> {
+
+    @Query("SELECT o FROM Order o ORDER BY o.orderDate DESC")
+    List<Order> findAllByUserOrderDateDesc();
+
     List<Order> findAllByUserOrderByIdDesc(User user);
 
-    @Query("SELECT o FROM Order o WHERE o.orderDate BETWEEN :startDate AND :endDate")
-    List<Order> findAllByOrderDateBetween(@Param("startDate") Date startDate, @Param("endDate") Date endDate);
+    @Query("SELECT o FROM Order o WHERE o.user.id = :userId AND (:startDate IS NULL OR o.orderDate >= :startDate) AND (:endDate IS NULL OR o.orderDate <= :endDate) AND (:status IS NULL OR o.orderStatus = :status) ORDER BY o.orderDate DESC")
+    List<Order> findAllByUserIdAndOptionalFilters(@Param("userId") Long userId, @Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("status") String status);
 
-    @Query("SELECT o FROM Order o WHERE o.orderStatus = :status")
-    List<Order> findAllByOrderStatus(@Param("status") String status);
+    @Query("SELECT o FROM Order o WHERE (:startDate IS NULL OR o.orderDate >= :startDate) AND (:endDate IS NULL OR o.orderDate <= :endDate) AND (:status IS NULL OR o.orderStatus = :status) ORDER BY o.orderDate DESC")
+    List<Order> findAllByOptionalFilters(@Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("status") String status);
 
-    @Query("SELECT o FROM Order o WHERE o.orderDate BETWEEN :startDate AND :endDate AND o.orderStatus = :status")
-    List<Order> findAllByOrderDateBetweenAndOrderStatus(@Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("status") String status);
 }
