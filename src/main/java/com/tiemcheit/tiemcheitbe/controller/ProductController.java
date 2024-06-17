@@ -1,5 +1,6 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
+import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
@@ -66,16 +67,20 @@ public class ProductController {
             @RequestParam Map<String, String> params,
             @RequestParam(required = false, defaultValue = "id") String sortBy,
             @RequestParam(required = false, defaultValue = "asc") String direction) {
-            return ApiResponse.<List<ProductResponse>>builder()
-                    .data(productService.getProductByConditionsAndSort(params, sortBy, direction))
-                    .message("Success")
-                    .build();
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getProductByConditionsAndSort(params, sortBy, direction))
+                .message("Success")
+                .build();
     }
+
     @GetMapping("/{id}/reviews")
     public ApiResponse<List<UserReviewResponse>> getReviewsByProductId(@PathVariable("id") long productId) {
         return ApiResponse.<List<UserReviewResponse>>builder()
                 .data(reviewService.getReviewsOfProduct(productId))
                 .message("Success")
+                .build();
+    }
+
     @GetMapping("/top/{top}")
     public ApiResponse<List<ProductResponse>> getBestSellerProducts(@PathVariable int top) {
         return ApiResponse.<List<ProductResponse>>builder()
@@ -91,19 +96,12 @@ public class ProductController {
                 .message(SUCCESS_MSG)
                 .build();
     }
+
     @PutMapping("/{id}/reviews")
     public ApiResponse<UserReviewResponse> addReview(@PathVariable("id") long orderDetailId, @RequestBody UserReviewRequest userReviewRequest) {
         return ApiResponse.<UserReviewResponse>builder()
                 .data(reviewService.addReview(orderDetailId, userReviewRequest))
                 .message("Success")
                 .build();
-    }
-
-    @GetMapping("/filter")
-    public List<ProductResponse> searchProducts(
-            @RequestParam Map<String, String> params,
-            @RequestParam(required = false, defaultValue = "id") String sortBy,
-            @RequestParam(required = false, defaultValue = "asc") String direction) {
-        return productService.getProductByConditionsAndSort(params, sortBy, direction);
     }
 }

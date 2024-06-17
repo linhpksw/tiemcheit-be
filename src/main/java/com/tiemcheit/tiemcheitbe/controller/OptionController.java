@@ -12,7 +12,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/option")
+@RequestMapping("/options")
 public class OptionController {
     private static final String SUCCESS_MSG = "Success";
     private final OptionService optionService;
