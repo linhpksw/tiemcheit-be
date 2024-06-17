@@ -3,19 +3,18 @@ package com.tiemcheit.tiemcheitbe.dto.request;
 import com.tiemcheit.tiemcheitbe.model.Category;
 import lombok.Data;
 
-import java.util.Set;
+import java.util.List;
 
 @Data
 public class ProductRequest {
     private Long id;
     private String name;
-    private String image1;
-    private String image2;
-    private String image3;
-    private double price;
+    private List<String> imageList;
+    private Double price;
     private Category category;
-    private int quantity;
+    private Integer quantity;
     private String description;
-    private Set<Long> optionId;
-    private Set<Long> ingredientId;
+    private List<Long> optionId;
+    private List<ProductIngredientRequest> productIngredients;
+    private String status;
 }

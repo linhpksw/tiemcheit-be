@@ -31,16 +31,15 @@ public class Product {
     @Column(nullable = false)
     private Double price;
 
-    @Column(nullable = false, length = 256)
-    private String image;
-
     @Column(nullable = false)
     private Date createAt;
 
     @Column(nullable = false)
-    private int quantity;
+    private Integer quantity;
 
-    private int sold = 0;
+    private Integer sold = 0;
+
+    private String status;
 
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;
@@ -48,9 +47,9 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<WishlistItem> wishlistItems;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<ProductOption> productOptions;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
     private Set<ProductIngredient> productIngredients;
 }
