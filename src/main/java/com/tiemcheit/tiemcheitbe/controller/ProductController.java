@@ -29,6 +29,22 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/status/active-disabled")
+    public ApiResponse<List<ProductResponse>> getAllProductsByActiveAndDisabledStatus() {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getAllProductsByActiveAndDisabledStatus())
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
+    @GetMapping("/status/{status}")
+    public ApiResponse<List<ProductResponse>> getAllProductsByStatus(@PathVariable String status) {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getAllProductsByStatus(status))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
     @GetMapping("/category/{id}")
     public ApiResponse<List<ProductResponse>> getAllProductsByCategoryID(@PathVariable Long id) {
         return ApiResponse.<List<ProductResponse>>builder()
@@ -60,6 +76,19 @@ public class ProductController {
         return ApiResponse.<List<UserReviewResponse>>builder()
                 .data(reviewService.getReviewsOfProduct(productId))
                 .message("Success")
+    @GetMapping("/top/{top}")
+    public ApiResponse<List<ProductResponse>> getBestSellerProducts(@PathVariable int top) {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getTopBestsellers(top))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
+    @PostMapping("")
+    public ApiResponse<ProductResponse> addProduct(@RequestBody ProductRequest productRequest) {
+        return ApiResponse.<ProductResponse>builder()
+                .data(productService.create(productRequest))
+                .message(SUCCESS_MSG)
                 .build();
     }
     @PutMapping("/{id}/reviews")
@@ -68,5 +97,13 @@ public class ProductController {
                 .data(reviewService.addReview(orderDetailId, userReviewRequest))
                 .message("Success")
                 .build();
+    }
+
+    @GetMapping("/filter")
+    public List<ProductResponse> searchProducts(
+            @RequestParam Map<String, String> params,
+            @RequestParam(required = false, defaultValue = "id") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String direction) {
+        return productService.getProductByConditionsAndSort(params, sortBy, direction);
     }
 }
