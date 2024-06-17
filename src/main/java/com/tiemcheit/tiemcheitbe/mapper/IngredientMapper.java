@@ -11,5 +11,6 @@ public interface IngredientMapper {
     IngredientMapper INSTANCE = Mappers.getMapper(IngredientMapper.class);
 
     IngredientResponse toIngredientResponse(Ingredient ingredient);
-    Ingredient toIngredient(IngredientRequest ingredientRequest);
+
+    Ingredient toIngredient(IngredientRequest request);
 }
