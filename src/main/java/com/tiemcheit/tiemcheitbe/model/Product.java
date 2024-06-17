@@ -31,9 +31,6 @@ public class Product {
     @Column(nullable = false)
     private Double price;
 
-    @Column(nullable = false, length = 256)
-    private String image;
-
     @Column(nullable = false)
     private Date createAt;
 
