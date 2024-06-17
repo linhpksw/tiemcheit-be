@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @Builder
 public class UserReviewResponse {
     private long id;
-    private UserResponse user;
+    private UserInfoResponse user;
     private int ratingValue;
     private String comment;
     private LocalDateTime createTime;
