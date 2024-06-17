@@ -17,9 +17,10 @@ public class ProductDetailResponse {
     private String name;
     private String description;
     private List<String> imageList;
-    private double price;
-    private int quantity;
+    private Double price;
+    private Integer quantity;
     private Category category;
     private List<OptionResponse> optionList;
     private List<IngredientResponse> ingredientList;
+    private String status;
 }

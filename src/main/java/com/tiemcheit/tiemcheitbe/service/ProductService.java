@@ -8,11 +8,9 @@ import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
+import com.tiemcheit.tiemcheitbe.mapper.ProductIngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
-import com.tiemcheit.tiemcheitbe.model.Product;
-import com.tiemcheit.tiemcheitbe.model.ProductImage;
-import com.tiemcheit.tiemcheitbe.model.ProductIngredient;
-import com.tiemcheit.tiemcheitbe.model.ProductOption;
+import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.*;
 import com.tiemcheit.tiemcheitbe.service.specification.ProductSpecification;
 import jakarta.transaction.Transactional;
@@ -39,22 +37,26 @@ public class ProductService {
     private final OptionRepo optionRepo;
     private final IngredientRepo ingredientRepo;
 
-    private final OptionMapper optionMapper;
 
-    public List<ProductResponse> getAllProducts() {
-        return productRepo.findAll()
+    private final OptionMapper optionMapper;
+    private final ProductIngredientMapper productIngredientMapper;
+
+    //=============================================FOR CLIENTS=======================================================
+    //get all products by active and disabled status
+    public List<ProductResponse> getAllProductsByActiveAndDisabledStatus() {
+        return productRepo.findAllByActiveAndDisabledStatus()
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).get(0).getImage());
                     return productResponse;
                 })
                 .toList();
     }
 
-
     //get All ProductResponse by category id
     public List<ProductResponse> getAllProductsByCategoryId(Long categoryId) {
+
         List<Product> products = productRepo.findAllByCategoryId(categoryId);
         return products.stream()
                 .map(product -> {
@@ -65,10 +67,8 @@ public class ProductService {
                 .toList();
     }
 
-
-    public List<ProductResponse> getProductByConditionsAndSort(Map<String, String> conditions,
-                                                               String sortField,
-                                                               String sortDirection) {
+    //get all products by conditions and sort
+    public List<ProductResponse> getProductByConditionsAndSort(Map<String, String> conditions, String sortField, String sortDirection) {
         Specification<Product> specification = ProductSpecification.getSpecification(conditions);
         Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField);
 
@@ -98,18 +98,27 @@ public class ProductService {
 
     //get ProductDetailResponse by product id
     public ProductDetailResponse getProductDetailById(Long productId) {
+        /*
+         * check if product is existed, then check status of product is inactive or not
+         * if product is inactive, throw exception and return null
+         * => to prevent client get inactive product
+         * */
         Product product = productRepo.findById(productId).orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+        if (product.getStatus().equals("inactive")) {
+            throw new AppException("Product is inactive", HttpStatus.BAD_REQUEST);
+        }
 
+        //map product to ProductDetailResponse
         ProductDetailResponse productDetailResponse = ProductMapper.INSTANCE.toProductDetailResponse(product);
 
-
+        //get option list, ingredient list, image list of product
         List<OptionResponse> optionList = productOptionRepo.findAllByProductId(product.getId())
                 .stream()
                 .map(ProductOption::getOption)
                 .map(optionMapper::toOptionResponse)
                 .toList();
 
-
+        //get ingredient list of product
         List<IngredientResponse> ingredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
                 .stream()
                 .map(ProductIngredient::getIngredient)
@@ -117,11 +126,13 @@ public class ProductService {
                 .map(IngredientMapper.INSTANCE::toIngredientResponse)
                 .toList();
 
+        //get image list of product
         List<String> imageList = productImageRepo.findAllByProductId(product.getId())
                 .stream()
                 .map(ProductImage::getImage)
                 .toList();
 
+        //set option list, ingredient list, image list to productDetailResponse
         productDetailResponse.setOptionList(optionList);
         productDetailResponse.setIngredientList(ingredientResponseList);
         productDetailResponse.setImageList(imageList);
@@ -129,6 +140,30 @@ public class ProductService {
         return productDetailResponse;
     }
 
+    //=============================================FOR ADMINS=======================================================
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<ProductResponse> getAllProductsByStatus(String status) {
+        return productRepo.findAllByStatus(status)
+                .stream()
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).get(0).getImage());
+                    return productResponse;
+                })
+                .toList();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<ProductResponse> getAllProducts() {
+        return productRepo.findAll()
+                .stream()
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    return productResponse;
+                })
+                .toList();
+    }
 
     //create a new product
     @PreAuthorize("hasRole('ADMIN')")
@@ -153,31 +188,45 @@ public class ProductService {
         return productResponse;
     }
 
-
     //update a product
     @PreAuthorize("hasRole('ADMIN')")
     @Transactional
     public ProductResponse update(ProductRequest productRequest, Long id) {
         Product product = productRepo.findById(id)
                 .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
-
-        product.setName(productRequest.getName());
-        product.setDescription(productRequest.getDescription());
-        product.setPrice(productRequest.getPrice());
-        product.setQuantity(productRequest.getQuantity());
+        if (!productRequest.getName().isEmpty()) {
+            product.setName(productRequest.getName());
+        }
+        if (!productRequest.getDescription().isEmpty()) {
+            product.setDescription(productRequest.getDescription());
+        }
+        if (!productRequest.getStatus().isEmpty()) {
+            product.setStatus(productRequest.getStatus());
+        }
+        if (productRequest.getPrice() != null) {
+            product.setPrice(productRequest.getPrice());
+        }
+        if (productRequest.getQuantity() != null) {
+            product.setQuantity(productRequest.getQuantity());
+        }
 
         Product updatedProduct = productRepo.save(product);
+        if (productRequest.getImageList() != null) {
+            updateProductImages(productRequest, updatedProduct);
+        }
 
-        updateProductImages(productRequest, updatedProduct);
-        updateProductOptions(productRequest, updatedProduct);
-        updateProductIngredients(productRequest, updatedProduct);
+        if (productRequest.getOptionId() != null) {
+            updateProductOptions(productRequest, updatedProduct);
+        }
 
+        if (productRequest.getProductIngredients() != null) {
+            updateProductIngredients(productRequest, updatedProduct);
+        }
 
         ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(updatedProduct);
         productResponse.setImage(productImageRepo.findAllByProductId(updatedProduct.getId()).getFirst().getImage());
         return productResponse;
     }
-
 
     private void updateProductImages(ProductRequest productRequest, Product product) {
         productImageRepo.deleteAllByProductId(product.getId());
@@ -200,14 +249,29 @@ public class ProductService {
     }
 
     private void updateProductIngredients(ProductRequest productRequest, Product product) {
-        productIngredientRepo.deleteAllByProductId(product.getId());
-        List<ProductIngredient> productIngredients = productRequest.getIngredientId().stream()
-                .map(ingredientId -> ProductIngredient.builder().ingredient(ingredientRepo.getReferenceById(ingredientId)).product(product).build())
+
+        // Cập nhật vào bảng product_ingredients
+        List<ProductIngredient> productIngredients = productRequest.getProductIngredients().stream()
+                .map(productIngredientRequest -> {
+                    ProductIngredient productIngredient = productIngredientMapper.toProductIngredient(productIngredientRequest);
+
+                    // Lấy đối tượng Ingredient từ ID
+                    Ingredient ingredient = ingredientRepo.findById(productIngredientRequest.getIngredient().getId())
+                            .orElseThrow(() -> new AppException("Không tìm thấy nguyên liệu", HttpStatus.NOT_FOUND));
+
+                    // Thiết lập các thuộc tính cho productIngredient
+                    productIngredient.setIngredient(ingredient);
+                    productIngredient.setProduct(product);
+
+                    return productIngredient;
+                })
                 .toList();
-        if (productIngredients == null) {
-            throw new AppException("Product ingredients is null", HttpStatus.BAD_REQUEST);
+
+        if (productIngredients.isEmpty()) {
+            throw new AppException("Danh sách thành phần sản phẩm trống", HttpStatus.BAD_REQUEST);
         }
+
+        // Lưu danh sách các thành phần sản phẩm mới
         productIngredientRepo.saveAll(productIngredients);
     }
-
 }
