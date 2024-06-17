@@ -1,21 +1,25 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
-import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserReviewResponse;
 import com.tiemcheit.tiemcheitbe.service.ProductService;
+import com.tiemcheit.tiemcheitbe.service.ReviewService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
-@RequestMapping("/product")
+@RequestMapping("/products")
 @AllArgsConstructor
 public class ProductController {
     private static final String SUCCESS_MSG = "Success";
     private final ProductService productService;
+    private final ReviewService reviewService;
 
     @GetMapping("")
     public ApiResponse<List<ProductResponse>> getAllProducts() {
@@ -41,19 +45,28 @@ public class ProductController {
                 .build();
     }
 
-    @PostMapping("")
-    public ApiResponse<ProductResponse> addProduct(@RequestBody ProductRequest productRequest) {
-        return ApiResponse.<ProductResponse>builder()
-                .data(productService.create(productRequest))
-                .message(SUCCESS_MSG)
+    @GetMapping("filter")
+    public ApiResponse<List<ProductResponse>> searchProducts(
+            @RequestParam Map<String, String> params,
+            @RequestParam(required = false, defaultValue = "id") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String direction) {
+            return ApiResponse.<List<ProductResponse>>builder()
+                    .data(productService.getProductByConditionsAndSort(params, sortBy, direction))
+                    .message("Success")
+                    .build();
+    }
+    @GetMapping("/{id}/reviews")
+    public ApiResponse<List<UserReviewResponse>> getReviewsByProductId(@PathVariable("id") long productId) {
+        return ApiResponse.<List<UserReviewResponse>>builder()
+                .data(reviewService.getReviewsOfProduct(productId))
+                .message("Success")
                 .build();
     }
-
-    @PutMapping("/{id}")
-    public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
-        return ApiResponse.<ProductResponse>builder()
-                .data(productService.update(productRequest, id))
-                .message(SUCCESS_MSG)
+    @PutMapping("/{id}/reviews")
+    public ApiResponse<UserReviewResponse> addReview(@PathVariable("id") long orderDetailId, @RequestBody UserReviewRequest userReviewRequest) {
+        return ApiResponse.<UserReviewResponse>builder()
+                .data(reviewService.addReview(orderDetailId, userReviewRequest))
+                .message("Success")
                 .build();
     }
 }

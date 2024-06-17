@@ -25,7 +25,7 @@ public class SecurityConfig {
             "/auth/login", "/user/register", "/auth/refresh", "/auth/logout", "/auth/authenticate", "/auth/introspect",
             "/auth/password-reset", "cart/**",
             "/filter/**",
-            "/product/**", "/option/**", "/category/**", "/order/**", "/ingredient/**"
+            "/products/**", "/option/**", "/category/**", "/order/**", "/ingredients/**"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
