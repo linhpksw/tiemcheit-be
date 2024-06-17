@@ -13,7 +13,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/order")
+@RequestMapping("/orders")
 public class OrderController {
     private final OrderService orderService;
 
@@ -37,6 +37,14 @@ public class OrderController {
     public ApiResponse<List<OrderResponse>> getAllOrder() {
         return ApiResponse.<List<OrderResponse>>builder()
                 .data(orderService.getAllOrders())
+                .message("Success")
+                .build();
+    }
+
+    @GetMapping("/user/{uid}")
+    public ApiResponse<List<OrderResponse>> getOrderByUser(@PathVariable Long uid) {
+        return ApiResponse.<List<OrderResponse>>builder()
+                .data(orderService.getOrdersByUser(uid))
                 .message("Success")
                 .build();
     }
