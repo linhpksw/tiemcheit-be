@@ -1,7 +1,6 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
-import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
@@ -18,6 +17,7 @@ import java.util.Map;
 @RequestMapping("/products")
 @AllArgsConstructor
 public class ProductController {
+    private static final String SUCCESS_MSG = "Success";
     private final ProductService productService;
     private final ReviewService reviewService;
 
@@ -25,7 +25,7 @@ public class ProductController {
     public ApiResponse<List<ProductResponse>> getAllProducts() {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getAllProducts())
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
 
@@ -33,7 +33,7 @@ public class ProductController {
     public ApiResponse<List<ProductResponse>> getAllProductsByCategoryID(@PathVariable Long id) {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getAllProductsByCategoryId(id))
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
 
@@ -41,7 +41,7 @@ public class ProductController {
     public ApiResponse<ProductDetailResponse> getProductDetailById(@PathVariable Long id) {
         return ApiResponse.<ProductDetailResponse>builder()
                 .data(productService.getProductDetailById(id))
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
 

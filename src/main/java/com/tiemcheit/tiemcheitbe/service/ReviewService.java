@@ -1,7 +1,7 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
-import com.tiemcheit.tiemcheitbe.dto.response.*;
+import com.tiemcheit.tiemcheitbe.dto.response.UserReviewResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
 import com.tiemcheit.tiemcheitbe.mapper.UserReviewMapper;
@@ -39,7 +39,7 @@ public class ReviewService {
                     UserReviewResponse userReviewResponse = new UserReviewResponse();
                     userReviewResponse.setComment(review.getComment());
                     userReviewResponse.setRatingValue(review.getRatingValue());
-                    userReviewResponse.setUser(UserMapper.INSTANCE.toUserResponse(review.getUser()));
+                    userReviewResponse.setUser(UserMapper.INSTANCE.toUserInfoResponse(review.getUser()));
                     userReviewResponse.setCreateTime(review.getCreateTime());
                     userReviewResponse.setUpdatedTime(review.getUpdatedTime());
                     return userReviewResponse;
@@ -47,10 +47,11 @@ public class ReviewService {
                 .collect(Collectors.toList());
 
     }
+
     public UserReviewResponse addReview(long orderDetailId, UserReviewRequest userReviewRequest) {
 
 
-        var orderDetail = orderDetailRepo.findById(orderDetailId).orElseThrow(()-> new AppException("Order not found", HttpStatus.NOT_FOUND));
+        var orderDetail = orderDetailRepo.findById(orderDetailId).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND));
         var username = SecurityUtils.getCurrentUsername();
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
@@ -62,8 +63,6 @@ public class ReviewService {
 
         return userReviewMapper.toUserReviewResponse(userReview);
     }
-
-
 
 
 }

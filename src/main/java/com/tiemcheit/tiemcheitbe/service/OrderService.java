@@ -40,7 +40,7 @@ public class OrderService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<OrderResponse> getAllOrders() {
-        return orderMapper.toResponses(orderRepo.findAll());
+        return orderMapper.toResponses(orderRepo.findAllByUserOrderDateDesc());
     }
 
     // check the not found exception after
@@ -57,16 +57,13 @@ public class OrderService {
 
     }
 
-    public List<OrderResponse> getOrdersByDateRange(Date startDate, Date endDate) {
-        return orderMapper.toResponses(orderRepo.findAllByOrderDateBetween(startDate, endDate));
+    public List<OrderResponse> getFilterOrders(Date startDate, Date endDate, String status) {
+        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+        return orderMapper.toResponses(orderRepo.findAllByUserIdAndOptionalFilters(user.getId(), startDate, endDate, status));
     }
 
-    public List<OrderResponse> getOrdersByStatus(String status) {
-        return orderMapper.toResponses(orderRepo.findAllByOrderStatus(status));
-    }
-
-    public List<OrderResponse> getOrdersByDateRangeAndStatus(Date startDate, Date endDate, String status) {
-        return orderMapper.toResponses(orderRepo.findAllByOrderDateBetweenAndOrderStatus(startDate, endDate, status));
+    public List<OrderResponse> getFilterOrdersByAdmin(Date startDate, Date endDate, String status) {
+        return orderMapper.toResponses(orderRepo.findAllByOptionalFilters(startDate, endDate, status));
     }
 
     public Long placeOrder(OrderRequest request) {
@@ -82,7 +79,7 @@ public class OrderService {
         order.setShippingMethod(request.getShippingMethod()); // Replace with actual data
         order.setPaymentMethod(request.getPaymentMethod()); // Replace with actual data
         order.setMessage(request.getMessage());
-        order.setOrderStatus("Pending"); // Replace with actual data
+        order.setOrderStatus("Order Received"); // Replace with actual data
 
         // Retrieve the user
 

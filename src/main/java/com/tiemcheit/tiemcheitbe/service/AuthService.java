@@ -10,10 +10,7 @@ import com.tiemcheit.tiemcheitbe.dto.response.AuthResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
-import com.tiemcheit.tiemcheitbe.model.ActiveRefreshToken;
-import com.tiemcheit.tiemcheitbe.model.Role;
-import com.tiemcheit.tiemcheitbe.model.User;
-import com.tiemcheit.tiemcheitbe.model.UserAddress;
+import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.ActiveRefreshTokenRepo;
 import com.tiemcheit.tiemcheitbe.repository.RoleRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
@@ -44,6 +41,7 @@ public class AuthService {
     private final PasswordEncoder passwordEncoder;
     private final RoleRepo roleRepo;
     private final UserMapper userMapper;
+    private final VerificationService verificationService;
 
     @Value("${security.jwt.secret-key}")
     private String secretKey;
@@ -73,12 +71,11 @@ public class AuthService {
             throw new AppException("User already exists with this phone number.", HttpStatus.BAD_REQUEST);
         }
 
-        User user = UserMapper.INSTANCE.toUser(request);
+        User user = userMapper.toUser(request);
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
         HashSet<Role> roles = new HashSet<>();
         roleRepo.findByName("CUSTOMER").ifPresent(roles::add);
-
         user.setRoles(roles);
 
         if (request.getAddresses() != null) {
@@ -94,7 +91,13 @@ public class AuthService {
             user.setAddresses(addresses);
         }
 
-        // Save the user and addresses due to cascade
+
+        List<VerificationCode> verificationCodes = new ArrayList<>();
+        verificationCodes.add(verificationService.generateVerificationCode(user));
+        user.setVerificationCodes(verificationCodes);
+
+        verificationService.sendVerificationCode(user.getEmail(), verificationCodes.getFirst().getCode());
+
         user = userRepo.save(user);
 
         return userMapper.toUserInfoResponse(user);
@@ -152,6 +155,10 @@ public class AuthService {
 
         if ("DELETED".equals(user.getStatus())) {
             throw new AppException("This account has been deleted.", HttpStatus.FORBIDDEN);
+        }
+
+        if (!user.getIsActivated()) {
+            throw new AppException(STR."This account has not been activated. Please enter verification code sent to the email \{user.getEmail()}", HttpStatus.FORBIDDEN);
         }
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
@@ -271,4 +278,6 @@ public class AuthService {
         String jit = claims.getJWTID();
         activeRefreshTokenRepo.deleteByJti(jit);
     }
+
+
 }
