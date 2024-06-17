@@ -6,6 +6,7 @@ import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.AuthResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
 import com.tiemcheit.tiemcheitbe.service.AuthService;
+import com.tiemcheit.tiemcheitbe.service.VerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -20,6 +21,19 @@ import java.text.ParseException;
 @RequestMapping("/auth")
 public class AuthController {
     private final AuthService authService;
+    private final VerificationService verificationService;
+
+    @PostMapping("/verification")
+    ApiResponse<Void> verify(@RequestBody @Valid VerifyRequest request) {
+        verificationService.verifyCode(request.getEmail(), request.getCode());
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
+    @PostMapping("/resend-verification")
+    ApiResponse<Void> resendVerification(@RequestBody @Valid ResendVerificationRequest request) {
+        verificationService.resendVerificationCode(request.getEmail());
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
 
     @PostMapping("/register")
     ApiResponse<UserInfoResponse> register(@RequestBody @Valid UserRegisterRequest request) {
