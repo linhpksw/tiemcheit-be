@@ -90,4 +90,72 @@ public class CouponService {
         }
         couponRepository.saveAll(coupons);
     }
+
+    public double applyCouponToCart(String code, List<Product> products) {
+        Coupon coupon = couponRepository.findByCode(code);
+        String discountType = coupon.getDiscounts().getFirst().getType();
+        double totalCost = 0;
+        if (coupon == null || !isCouponValid(coupon)) {
+            return 0.0; // Coupon not valid or applicable
+        }
+
+        double totalDiscountAmount = 0.0;
+
+
+        for (Product product : products) {
+            if (!discountType.equals("total")) {
+                totalDiscountAmount += applyProductDiscount(coupon.getDiscounts(), product);
+            }
+            totalCost += product.getPrice();
+        }
+
+        if (discountType.equals("total")) {
+            Discount discount = coupon.getDiscounts().getFirst();
+            // apply for percent discount
+            if ("percent".equalsIgnoreCase(discount.getValueType())) {
+                totalDiscountAmount = totalCost * (discount.getValueFixed() / 100.0);
+            }
+            // apply for specific value discount
+            else if ("fixed".equalsIgnoreCase(discount.getValueType())) {
+                totalDiscountAmount += discount.getValueFixed();
+            }
+        }
+
+        return totalDiscountAmount;
+    }
+
+    private boolean isCouponValid(Coupon coupon) {
+        // Implement validation logic here (e.g., check expiration date, usage limits)
+        return true; // Placeholder
+    }
+
+    private double applyProductDiscount(List<Discount> discounts, Product product) {
+        double discountAmount = 0.0;
+        boolean canApply;
+
+        for (Discount discount : discounts) {
+            // check product for discount
+            if (product.getId().equals(discount.getProduct().getId())) {
+                canApply = true;
+            }
+
+            // check product for discount
+            else canApply = product.getCategory().getId().equals(discount.getCategory().getId());
+
+            // apply discount
+            if (canApply) {
+                // apply for percent discount
+                if ("percent".equalsIgnoreCase(discount.getValueType())) {
+                    discountAmount += product.getPrice() * (discount.getValueFixed() / 100.0);
+                }
+                // apply for specific value discount
+                else if ("fixed".equalsIgnoreCase(discount.getValueType())) {
+                    discountAmount += discount.getValueFixed();
+                }
+            }
+        }
+
+        return discountAmount;
+    }
+
 }
