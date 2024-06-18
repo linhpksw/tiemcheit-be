@@ -5,7 +5,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
-import java.util.Date;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 
@@ -32,7 +32,7 @@ public class Product {
     private Double price;
 
     @Column(nullable = false)
-    private Date createAt;
+    private LocalDate createAt;
 
     @Column(nullable = false)
     private Integer quantity;
