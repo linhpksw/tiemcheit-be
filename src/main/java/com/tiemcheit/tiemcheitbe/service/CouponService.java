@@ -1,7 +1,6 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.CouponRequest;
-import com.tiemcheit.tiemcheitbe.dto.request.DiscountRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CouponResponse;
 import com.tiemcheit.tiemcheitbe.mapper.CouponMapper;
 import com.tiemcheit.tiemcheitbe.model.Category;
@@ -15,7 +14,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,7 +44,7 @@ public class CouponService {
         coupon.setDescription(request.getDescription());
         coupon.setLimitAccountUses(request.getLimitAccountUses());
         coupon.setLimitUses(request.getLimitUses());
-        coupon.setActive(true); // Set other required fields
+        coupon.setActive(false); // Set other required fields
         coupon.setDateCreated(new Date()); // Example
         coupon.setDateUpdated(new Date()); // Example
         coupon.setUseCount(0); // Example
@@ -79,69 +77,17 @@ public class CouponService {
             discount.setCoupon(coupon);
             return discount;
         }).collect(Collectors.toList());
-//        List<Discount> discounts = new ArrayList<>();
-//        for (DiscountRequest discountRequest : request.getDiscounts()) {
-//            Discount discount = new Discount();
-//            discount.setType(discountRequest.getType());
-//            discount.setValueType(discountRequest.getValueType());
-//            discount.setValueFixed(discountRequest.getValueFixed());
-//
-//            switch (discountRequest.getType()) {
-//                case "category":
-//                    Category category = categoryRepository.findById(discountRequest.getCategoryId())
-//                            .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
-//                    discount.setCategory(category);
-//                    break;
-//                case "product":
-//                    Product product = productRepository.findById(discountRequest.getProductId())
-//                            .orElseThrow(() -> new IllegalArgumentException("Invalid product ID"));
-//                    discount.setProduct(product);
-//                    break;
-//                case "total":
-//                case "ship":
-//                    // No additional fields to set
-//                    break;
-//                default:
-//                    throw new IllegalArgumentException("Invalid discount type");
-//            }
-//
-//            discount.setCoupon(coupon); // Set the coupon reference
-//            discounts.add(discount);
-//        }
 
         coupon.setDiscounts(discounts);
         return couponMapper.toResponse(couponRepository.save(coupon));
     }
 
-    private List<Discount> validateDiscounts(List<DiscountRequest> discountRequests, Coupon coupon) {
-        List<Discount> discounts = new ArrayList<>();
-        for (DiscountRequest discountRequest : discountRequests) {
-            Discount discount = new Discount();
-            discount.setType(discountRequest.getType());
-            discount.setValueType(discountRequest.getValueType());
-            discount.setValueFixed(discountRequest.getValueFixed());
-
-            switch (discountRequest.getType()) {
-                case "category":
-                    Category category = categoryRepository.findById(discountRequest.getCategoryId())
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
-                    discount.setCategory(category);
-                    break;
-                case "product":
-                    Product product = productRepository.findById(discountRequest.getProductId())
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid product ID"));
-                    discount.setProduct(product);
-                    break;
-                case "total":
-                case "ship":
-                    // No additional fields to set
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid discount type");
-            }
-            discount.setCoupon(coupon);
-            discounts.add(discount);
+    @Transactional
+    public void activateCoupons(List<Long> couponIds) {
+        List<Coupon> coupons = couponRepository.findAllById(couponIds);
+        for (Coupon coupon : coupons) {
+            coupon.setActive(true);
         }
-        return discounts;
+        couponRepository.saveAll(coupons);
     }
 }

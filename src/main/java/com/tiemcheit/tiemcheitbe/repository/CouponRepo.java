@@ -11,4 +11,6 @@ import java.util.List;
 public interface CouponRepo extends JpaRepository<Coupon, Long> {
     @Query("SELECT c FROM Coupon c ORDER BY c.id")
     List<Coupon> findAllCoupon();
+
+    List<Coupon> findAllById(Iterable<Long> ids);
 }

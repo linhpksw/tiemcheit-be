@@ -32,4 +32,10 @@ public class CouponController {
                 .message("Success")
                 .build();
     }
+
+    @PutMapping("/activate")
+    public ApiResponse<Void> activateCoupons(@RequestBody List<Long> couponIds) {
+        couponService.activateCoupons(couponIds);
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
 }
