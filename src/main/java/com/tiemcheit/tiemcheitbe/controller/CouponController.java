@@ -1,0 +1,35 @@
+package com.tiemcheit.tiemcheitbe.controller;
+
+import com.tiemcheit.tiemcheitbe.dto.request.CouponRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.CouponResponse;
+import com.tiemcheit.tiemcheitbe.service.CouponService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+
+@RestController
+@RequiredArgsConstructor
+@RequestMapping("/coupons")
+public class CouponController {
+
+    private final CouponService couponService;
+
+    @GetMapping
+    public ApiResponse<List<CouponResponse>> getAllCoupons() {
+        return ApiResponse.<List<CouponResponse>>builder()
+                .data(couponService.getAllCoupon())
+                .message("Success")
+                .build();
+    }
+
+    @PostMapping
+    public ApiResponse<CouponResponse> createCoupon(@RequestBody CouponRequest coupon) {
+
+        return ApiResponse.<CouponResponse>builder()
+                .data(couponService.createCoupon(coupon))
+                .message("Success")
+                .build();
+    }
+}
