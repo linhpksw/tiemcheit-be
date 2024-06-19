@@ -20,9 +20,9 @@ public class AuthController {
     private final AuthService authService;
     private final VerificationService verificationService;
 
-    @PostMapping("forgot-password")
-    ApiResponse<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
-        authService.forgotPassword(request);
+    @PostMapping("/send-forgot-code")
+    ApiResponse<Void> sendForgotCode(@RequestBody @Valid ForgotPasswordRequest request) {
+        authService.sendForgotCode(request);
         return ApiResponse.<Void>builder().message("Success").build();
     }
 
@@ -34,7 +34,7 @@ public class AuthController {
 
     @PostMapping("/verification")
     ApiResponse<Void> verify(@RequestBody @Valid VerifyRequest request) {
-        verificationService.verifyCode(request.getEmail(), request.getCode());
+        verificationService.verifyCode(request.getEmail(), request.getCode(), request.getType());
         return ApiResponse.<Void>builder().message("Success").build();
     }
 
@@ -78,9 +78,15 @@ public class AuthController {
         return ApiResponse.<Void>builder().message("Success").build();
     }
 
+    @PostMapping("/change-password")
+    ApiResponse<Void> changePassword(@RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request.getUsername(), request.getCurrentPassword(), request.getNewPassword());
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
     @PostMapping("/reset-password")
     ApiResponse<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
-        authService.resetPassword(request);
+        authService.resetPassword(request.getEmail(), request.getNewPassword());
         return ApiResponse.<Void>builder().message("Success").build();
     }
 

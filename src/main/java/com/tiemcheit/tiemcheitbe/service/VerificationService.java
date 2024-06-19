@@ -29,6 +29,8 @@ public class VerificationService {
         int num = 100000 + random.nextInt(900000); // 6-digit code
         int expiryTime = 1000 * 60 * 60; // 1 hour
 
+        log.info("Generated verification code: {}", num);
+
         return VerificationCode.builder()
                 .code(String.valueOf(num))
                 .user(user)
@@ -36,9 +38,11 @@ public class VerificationService {
                 .build();
     }
 
-    public void verifyCode(String email, String code) throws AppException {
+    public void verifyCode(String email, String code, String type) throws AppException {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        log.info("User: {}", user);
 
         boolean codeFound = user.getVerificationCodes().stream()
                 .anyMatch(vc -> vc.getCode().equals(code) && !vc.isExpired());
@@ -47,7 +51,9 @@ public class VerificationService {
             throw new AppException("Verification code not found or expired", HttpStatus.BAD_REQUEST);
         }
 
-        user.setIsActivated(true);
+        if (type.equals("verify")) {
+            user.setIsActivated(true);
+        }
 
         verificationCodeRepo.deleteByUserId(user.getId());
         user.getVerificationCodes().clear();

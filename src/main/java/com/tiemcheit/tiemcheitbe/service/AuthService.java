@@ -319,16 +319,22 @@ public class AuthService {
         return signedJWT.getJWTClaimsSet().getJWTID();
     }
 
-    public void resetPassword(ResetPasswordRequest request) {
-        String username = request.getUsername();
+    public void changePassword(String username, String currentPassword, String newPassword) {
 
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
             throw new AppException("Current password is not correct", HttpStatus.FORBIDDEN);
         }
 
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPassword(passwordEncoder.encode(newPassword));
+        userRepo.save(user);
+    }
+
+    public void resetPassword(String email, String newPassword) {
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        user.setPassword(passwordEncoder.encode(newPassword));
         userRepo.save(user);
     }
 
@@ -352,16 +358,19 @@ public class AuthService {
     }
 
 
-    public void forgotPassword(ForgotPasswordRequest request) {
+    public void sendForgotCode(ForgotPasswordRequest request) {
         String email = request.getEmail();
 
         User user = userRepo.findByEmail(email).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        List<VerificationCode> verificationCodes = user.getVerificationCodes();
-        if (verificationCodes.isEmpty()) {
-            verificationCodes.add(verificationService.generateVerificationCode(user));
-        }
+        List<VerificationCode> verificationCodes = new ArrayList<>();
+        verificationCodes.add(verificationService.generateVerificationCode(user));
+        user.setVerificationCodes(verificationCodes);
 
         verificationService.sendVerificationCode(user.getEmail(), verificationCodes.getFirst().getCode());
+
+        userRepo.save(user);
     }
+
+
 }
