@@ -16,6 +16,8 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o ORDER BY o.orderDate DESC")
     List<Order> findAllByUserOrderDateDesc();
 
+    List<Order> findAllByUser(User user);
+
     List<Order> findAllByUserOrderByIdDesc(User user);
 
     @Query("SELECT o FROM Order o WHERE o.user.id = :userId AND (:startDate IS NULL OR o.orderDate >= :startDate) AND (:endDate IS NULL OR o.orderDate <= :endDate) AND (:status IS NULL OR o.orderStatus = :status) ORDER BY o.orderDate DESC")
