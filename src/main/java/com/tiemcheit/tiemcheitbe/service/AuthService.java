@@ -7,13 +7,13 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.tiemcheit.tiemcheitbe.dto.request.*;
 import com.tiemcheit.tiemcheitbe.dto.response.AuthResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.ExchangeTokenResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.GoogleUserResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
-import com.tiemcheit.tiemcheitbe.repository.ActiveRefreshTokenRepo;
-import com.tiemcheit.tiemcheitbe.repository.RoleRepo;
-import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import com.tiemcheit.tiemcheitbe.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,12 +36,27 @@ import java.util.stream.Collectors;
 @Slf4j
 @RequiredArgsConstructor
 public class AuthService {
+
     private final UserRepo userRepo;
     private final ActiveRefreshTokenRepo activeRefreshTokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepo roleRepo;
     private final UserMapper userMapper;
     private final VerificationService verificationService;
+    private final OAuth2Client oAuth2Client;
+    private final UserClient userClient;
+
+    @Value("${oauth2.client-id}")
+    private String clientId;
+
+    @Value("${oauth2.client-secret}")
+    private String clientSecret;
+
+    @Value("${oauth2.redirect-uri}")
+    private String redirectUri;
+
+    @Value("${oauth2.grant-type}")
+    private String grantType;
 
     @Value("${security.jwt.secret-key}")
     private String secretKey;
@@ -51,6 +66,63 @@ public class AuthService {
 
     @Value("${security.jwt.refresh-token-expiration-time}")
     private long refreshTokenExpiration;
+
+    public AuthResponse oauth2(String code) throws ParseException {
+        ExchangeTokenRequest request = ExchangeTokenRequest.builder()
+                .code(code)
+                .clientId(clientId)
+                .clientSecret(clientSecret)
+                .grantType(grantType)
+                .redirectUri(redirectUri)
+                .build();
+
+        ExchangeTokenResponse response = oAuth2Client.exchangeToken(request);
+
+//        log.info("Response: {}", response);
+
+        String token = response.getAccessToken();
+        GoogleUserResponse googleUserInfo = userClient.getGoogleUserInfo("json", token);
+
+//        log.info("Google user info: {}", googleUserInfo);
+
+        User user = userRepo.findByEmail(googleUserInfo.getEmail()).orElseGet(() -> {
+            String baseUsername = googleUserInfo.getEmail().split("@")[0];
+            baseUsername = baseUsername.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+
+            String username = generateUniqueUsername(baseUsername);
+
+            User newUser = User.builder()
+                    .username(username)
+                    .email(googleUserInfo.getEmail())
+                    .fullname(googleUserInfo.getName())
+                    .isActivated(true)
+                    .build();
+
+            HashSet<Role> roles = new HashSet<>();
+            roleRepo.findByName("CUSTOMER").ifPresent(roles::add);
+            newUser.setRoles(roles);
+
+            return userRepo.save(newUser);
+        });
+
+        user.setIsActivated(true);
+
+        if ("DELETED".equals(user.getStatus())) {
+            throw new AppException("This account has been deleted.", HttpStatus.FORBIDDEN);
+        }
+
+        return getAuthResponse(user);
+    }
+
+    private String generateUniqueUsername(String baseUsername) {
+        String username = baseUsername;
+        int counter = 0;
+        while (userRepo.existsByUsername(username)) {
+            counter++;
+            username = baseUsername + counter;
+        }
+        return username;
+    }
 
     @Transactional
     public UserInfoResponse register(UserRegisterRequest request) {
@@ -90,7 +162,6 @@ public class AuthService {
 
             user.setAddresses(addresses);
         }
-
 
         List<VerificationCode> verificationCodes = new ArrayList<>();
         verificationCodes.add(verificationService.generateVerificationCode(user));
@@ -149,9 +220,10 @@ public class AuthService {
 
     public AuthResponse authenticate(AuthRequest request) throws ParseException {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
-        String username = request.getUsername();
+        String credential = request.getCredential();
 
-        User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+        User user = userRepo.findByCredential(credential).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
 
         if ("DELETED".equals(user.getStatus())) {
             throw new AppException("This account has been deleted.", HttpStatus.FORBIDDEN);
@@ -166,7 +238,7 @@ public class AuthService {
         if (!authenticated) {
             throw new AppException("Password is not correct", HttpStatus.FORBIDDEN);
         }
-        activeRefreshTokenRepo.deleteByUser_Username(username);
+        activeRefreshTokenRepo.deleteByUser_Username(user.getUsername());
 
         return getAuthResponse(user);
     }
@@ -280,4 +352,16 @@ public class AuthService {
     }
 
 
+    public void forgotPassword(ForgotPasswordRequest request) {
+        String email = request.getEmail();
+
+        User user = userRepo.findByEmail(email).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        List<VerificationCode> verificationCodes = user.getVerificationCodes();
+        if (verificationCodes.isEmpty()) {
+            verificationCodes.add(verificationService.generateVerificationCode(user));
+        }
+
+        verificationService.sendVerificationCode(user.getEmail(), verificationCodes.getFirst().getCode());
+    }
 }

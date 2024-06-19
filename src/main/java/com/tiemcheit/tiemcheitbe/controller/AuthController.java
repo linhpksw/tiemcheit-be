@@ -9,10 +9,7 @@ import com.tiemcheit.tiemcheitbe.service.AuthService;
 import com.tiemcheit.tiemcheitbe.service.VerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
@@ -22,6 +19,18 @@ import java.text.ParseException;
 public class AuthController {
     private final AuthService authService;
     private final VerificationService verificationService;
+
+    @PostMapping("forgot-password")
+    ApiResponse<Void> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+        authService.forgotPassword(request);
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
+    @PostMapping("/oauth2")
+    ApiResponse<AuthResponse> oauth2(@RequestParam("code") String code) throws ParseException {
+        var data = authService.oauth2(code);
+        return ApiResponse.<AuthResponse>builder().data(data).message("Success").build();
+    }
 
     @PostMapping("/verification")
     ApiResponse<Void> verify(@RequestBody @Valid VerifyRequest request) {
