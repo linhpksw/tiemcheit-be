@@ -9,6 +9,10 @@ import java.util.Set;
 @Data
 @Builder
 public class UserProfileResponse {
+    private Long id;
+    private Long orderNumber;
+    private Double orderTotal;
+
     private String username;
     private String fullname;
     private String email;

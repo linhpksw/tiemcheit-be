@@ -41,7 +41,14 @@ public class OrderController {
                 .build();
     }
 
-
+@GetMapping("/user/{uid}")
+    public ApiResponse<List<OrderResponse>> getOrderByUser(@PathVariable Long uid) {
+        return ApiResponse.<List<OrderResponse>>builder()
+                .data(orderService.getOrdersByUser(uid))
+                .message("Success")
+                .build();
+    }
+    
     @GetMapping("/filter")
     public ApiResponse<List<OrderResponse>> getOrdersByDateRangeAndStatus(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,

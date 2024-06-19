@@ -43,6 +43,12 @@ public class OrderService {
         return orderMapper.toResponses(orderRepo.findAllByUserOrderDateDesc());
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<OrderResponse> getOrdersByUser(Long uid) {
+        User user = userRepo.getReferenceById(uid);
+        return orderMapper.toResponses(orderRepo.findAllByUser(user));
+    }
+
     // check the not found exception after
     public OrderResponse getOrderDetails(Long orderId) {
         User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));

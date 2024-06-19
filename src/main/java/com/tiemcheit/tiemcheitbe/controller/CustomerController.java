@@ -33,7 +33,7 @@ public class CustomerController {
     }
 
     @PatchMapping("")
-    public ApiResponse<UserProfileResponse> editCustomerIndo(@RequestBody CustomerRequest customerRequest) {
+    public ApiResponse<UserProfileResponse> editCustomerInfo(@RequestBody CustomerRequest customerRequest) {
         var data = customerService.updateCustomer(customerRequest);
         return ApiResponse.<UserProfileResponse>builder()
                 .message("Success")
