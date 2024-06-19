@@ -11,8 +11,8 @@ import java.util.Optional;
 
 @Repository
 public interface UserRepo extends JpaRepository<User, Long> {
-
-    boolean existsByUsername(String username);
+    @Query("SELECT u FROM User u WHERE u.username = :credential OR u.email = :credential OR u.phone = :credential")
+    Optional<User> findByCredential(@Param("credential") String credential);
 
     boolean existsByEmail(String email);
 
@@ -20,12 +20,10 @@ public interface UserRepo extends JpaRepository<User, Long> {
 
     Optional<User> findByUsername(String username);
 
-    void deleteByUsername(String username);
-
     Optional<User> findByEmail(String email);
-
-    Optional<User> findByPhone(String phone);
 
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = :roleName")
     List<User> findUsersByRole(@Param("roleName") String roleName);
+
+    boolean existsByUsername(String username);
 }
