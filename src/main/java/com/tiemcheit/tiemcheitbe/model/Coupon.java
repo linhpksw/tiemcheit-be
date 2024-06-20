@@ -15,7 +15,7 @@ public class Coupon {
     private Long id;
 
     private String name;
-    private boolean active;
+    private String status;
 
     @Column(nullable = false, unique = true)
     private String code;

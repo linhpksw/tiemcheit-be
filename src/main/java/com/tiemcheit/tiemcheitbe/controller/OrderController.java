@@ -72,7 +72,7 @@ public class OrderController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<Long> addOrder(@RequestBody OrderRequest request, @RequestParam String code) {
+    public ApiResponse<Long> addOrder(@RequestBody OrderRequest request, @RequestParam(required = false) String code) {
         return ApiResponse.<Long>builder()
                 .data(orderService.placeOrder(request, code))
                 .message("Success")

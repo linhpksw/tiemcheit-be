@@ -1,17 +1,14 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.CouponRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CouponResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.CouponMapper;
-import com.tiemcheit.tiemcheitbe.model.Category;
-import com.tiemcheit.tiemcheitbe.model.Coupon;
-import com.tiemcheit.tiemcheitbe.model.Discount;
-import com.tiemcheit.tiemcheitbe.model.Product;
-import com.tiemcheit.tiemcheitbe.repository.CategoryRepo;
-import com.tiemcheit.tiemcheitbe.repository.CouponRepo;
-import com.tiemcheit.tiemcheitbe.repository.DiscountRepo;
-import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
+import com.tiemcheit.tiemcheitbe.model.*;
+import com.tiemcheit.tiemcheitbe.repository.*;
+import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
@@ -32,7 +29,9 @@ public class CouponService {
     private final CategoryRepo categoryRepository;
 
     private final ProductRepo productRepository;
-    private final DiscountRepo discountRepo;
+    private final OrderRepo orderRepo;
+    private final CartService cartService;
+    private final UserRepo userRepo;
 
     @Transactional
     public List<CouponResponse> getAllCoupon() {
@@ -54,7 +53,7 @@ public class CouponService {
         coupon.setDescription(request.getDescription());
         coupon.setLimitAccountUses(request.getLimitAccountUses());
         coupon.setLimitUses(request.getLimitUses());
-        coupon.setActive(false); // Set other required fields
+        coupon.setStatus("inactive"); // Set other required fields
         coupon.setDateCreated(new Date()); // Example
         coupon.setDateUpdated(new Date()); // Example
         coupon.setUseCount(0); // Example
@@ -101,30 +100,46 @@ public class CouponService {
     public void activateCoupons(List<Long> couponIds) {
         List<Coupon> coupons = couponRepository.findAllById(couponIds);
         for (Coupon coupon : coupons) {
-            coupon.setActive(true);
+            coupon.setStatus("active");
         }
         couponRepository.saveAll(coupons);
     }
 
-    public double applyCouponToCart(String code, List<Product> products) {
+    @Transactional
+    public void disableCoupons(Coupon coupon) {
+        coupon.setStatus("disabled");
+        couponRepository.save(coupon);
+    }
+
+
+    public double applyCouponToCart(String code) {
+        List<CartItemResponse> cartItemList = cartService.allCartItems();
         Coupon coupon = couponRepository.findByCode(code);
         if (coupon == null) {
             throw new AppException("Coupon not found", HttpStatus.BAD_REQUEST);
         }
-        if (!isCouponValid(coupon)) {
+        // Check if the coupon has reached the total usage limit
+        if (coupon.getUseCount() >= coupon.getLimitUses()) {
             throw new AppException("Coupon is not valid anymore", HttpStatus.BAD_REQUEST);
         }
+        // Check if the user has reached the account usage limit for this coupon
+        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+        List<Order> orders = orderRepo.findByUserIdAndCouponId(user.getId(), coupon.getId());
+        if (orders.size() >= coupon.getLimitAccountUses()) {
+            throw new AppException("You have access the user's limit uses", HttpStatus.BAD_REQUEST);
+        }
+
         String discountType = coupon.getDiscounts().getFirst().getType();
         double totalCost = 0;
 
         double totalDiscountAmount = 0.0;
 
 
-        for (Product product : products) {
+        for (CartItemResponse item : cartItemList) {
             if (!discountType.equals("total")) {
-                totalDiscountAmount += applyProductDiscount(coupon.getDiscounts(), product);
+                totalDiscountAmount += applyProductDiscount(coupon.getDiscounts(), item.getProduct());
             }
-            totalCost += product.getPrice();
+            totalCost += item.getProduct().getPrice() * item.getQuantity();
         }
 
         if (discountType.equals("total")) {
@@ -142,12 +157,8 @@ public class CouponService {
         return totalDiscountAmount;
     }
 
-    private boolean isCouponValid(Coupon coupon) {
-        // Implement validation logic here (e.g., check expiration date, usage limits)
-        return true; // Placeholder
-    }
 
-    private double applyProductDiscount(List<Discount> discounts, Product product) {
+    private double applyProductDiscount(List<Discount> discounts, ProductResponse product) {
         double discountAmount = 0.0;
         boolean canApply;
 
@@ -174,5 +185,19 @@ public class CouponService {
         }
 
         return discountAmount;
+    }
+
+    public boolean canUseCoupon(Long userId, Long couponId) {
+        Coupon coupon = couponRepository.findById(couponId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid coupon ID"));
+
+        // Check if the coupon has reached the total usage limit
+        if (coupon.getUseCount() >= coupon.getLimitUses()) {
+            return false;
+        }
+
+        // Check if the user has reached the account usage limit for this coupon
+        List<Order> orders = orderRepo.findByUserIdAndCouponId(userId, couponId);
+        return orders.size() < coupon.getLimitAccountUses();
     }
 }

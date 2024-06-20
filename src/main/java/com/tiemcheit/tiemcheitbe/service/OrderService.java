@@ -5,10 +5,7 @@ import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OrderResponse;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.OrderMapper;
-import com.tiemcheit.tiemcheitbe.model.Order;
-import com.tiemcheit.tiemcheitbe.model.OrderDetail;
-import com.tiemcheit.tiemcheitbe.model.Product;
-import com.tiemcheit.tiemcheitbe.model.User;
+import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.OrderRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
@@ -89,7 +86,9 @@ public class OrderService {
         order.setOrderStatus("Order Received"); // Replace with actual data
         // set coupon to order if having code
         if (code != null) {
-            order.setCoupon(couponService.getCouponByCode(code));
+            Coupon coupon = couponService.getCouponByCode(code);
+            order.setCoupon(coupon);
+            coupon.setUseCount(coupon.getUseCount() + 1);
         }
         order.setDiscountPrice(request.getDiscountPrice());
 

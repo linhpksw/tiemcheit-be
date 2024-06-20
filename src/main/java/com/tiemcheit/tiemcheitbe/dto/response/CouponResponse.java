@@ -7,8 +7,9 @@ import java.util.List;
 
 @Data
 public class CouponResponse {
+    private Long id;
     private String name;
-    private boolean active;
+    private String status;
     private String code;
     private Date dateCreated;
     private Date dateExpired;
