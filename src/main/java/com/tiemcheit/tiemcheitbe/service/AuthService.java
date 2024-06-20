@@ -129,18 +129,18 @@ public class AuthService {
         User existingUser = userRepo.findByUsername(request.getUsername()).orElse(null);
         if (existingUser != null) {
             if (!"DELETED".equals(existingUser.getStatus())) {
-                throw new AppException("User already exists with this username.", HttpStatus.BAD_REQUEST);
+                throw new AppException("User already exists with this username", HttpStatus.BAD_REQUEST);
             } else {
                 throw new AppException("This account has been deleted.", HttpStatus.FORBIDDEN);
             }
         }
 
         if (userRepo.existsByEmail(request.getEmail())) {
-            throw new AppException("User already exists with this email.", HttpStatus.BAD_REQUEST);
+            throw new AppException("User already exists with this email", HttpStatus.BAD_REQUEST);
         }
 
         if (userRepo.existsByPhone(request.getPhone())) {
-            throw new AppException("User already exists with this phone number.", HttpStatus.BAD_REQUEST);
+            throw new AppException("User already exists with this phone", HttpStatus.BAD_REQUEST);
         }
 
         User user = userMapper.toUser(request);
@@ -226,11 +226,15 @@ public class AuthService {
 
 
         if ("DELETED".equals(user.getStatus())) {
-            throw new AppException("This account has been deleted.", HttpStatus.FORBIDDEN);
+            throw new AppException("This account has been deleted", HttpStatus.FORBIDDEN);
         }
 
         if (!user.getIsActivated()) {
             throw new AppException(STR."This account has not been activated. Please enter verification code sent to the email \{user.getEmail()}", HttpStatus.FORBIDDEN);
+        }
+
+        if (user.getPassword() == null) {
+            throw new AppException("This account doesn't register password. Please login using Google and update your password in Profile page", HttpStatus.FORBIDDEN);
         }
 
         boolean authenticated = passwordEncoder.matches(request.getPassword(), user.getPassword());
@@ -319,11 +323,10 @@ public class AuthService {
         return signedJWT.getJWTClaimsSet().getJWTID();
     }
 
-    public void changePassword(String username, String currentPassword, String newPassword) {
-
+    public void changePassword(String username, String currentPassword, String newPassword, Boolean isHavePassword) {
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        if (!passwordEncoder.matches(currentPassword, user.getPassword())) {
+        if (isHavePassword && !passwordEncoder.matches(currentPassword, user.getPassword())) {
             throw new AppException("Current password is not correct", HttpStatus.FORBIDDEN);
         }
 

@@ -64,13 +64,13 @@ public class VerificationService {
         emailService.sendVerificationCode(email, code);
     }
 
-    public void resendVerificationCode(String email) {
+    public void resendVerificationCode(String email, String type) {
         User user = userRepo.findByEmail(email).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        if (user.getIsActivated()) {
+        if (type.equals("verify") && user.getIsActivated()) {
             throw new AppException("User is already activated", HttpStatus.BAD_REQUEST);
         }
-
+        
         verificationCodeRepo.deleteByUserId(user.getId());
         user.getVerificationCodes().clear();
 

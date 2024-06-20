@@ -20,7 +20,8 @@ public class UserProfileResponse {
     private Date dob;
     private String gender;
     private String status;
-    private boolean isActivated;
+    private Boolean isHavePassword;
+    private Boolean isActivated;
     private Date createdAt;
     private Date updatedAt;
     private Set<AddressResponse> addresses;

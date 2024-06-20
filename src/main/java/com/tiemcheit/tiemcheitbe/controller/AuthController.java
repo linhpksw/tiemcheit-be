@@ -40,7 +40,7 @@ public class AuthController {
 
     @PostMapping("/resend-verification")
     ApiResponse<Void> resendVerification(@RequestBody @Valid ResendVerificationRequest request) {
-        verificationService.resendVerificationCode(request.getEmail());
+        verificationService.resendVerificationCode(request.getEmail(), request.getType());
         return ApiResponse.<Void>builder().message("Success").build();
     }
 
@@ -80,7 +80,7 @@ public class AuthController {
 
     @PostMapping("/change-password")
     ApiResponse<Void> changePassword(@RequestBody ChangePasswordRequest request) {
-        authService.changePassword(request.getUsername(), request.getCurrentPassword(), request.getNewPassword());
+        authService.changePassword(request.getUsername(), request.getCurrentPassword(), request.getNewPassword(), request.getIsHavePassword());
         return ApiResponse.<Void>builder().message("Success").build();
     }
 

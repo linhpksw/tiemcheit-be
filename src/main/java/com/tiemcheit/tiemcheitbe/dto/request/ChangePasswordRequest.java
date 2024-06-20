@@ -20,4 +20,6 @@ public class ChangePasswordRequest {
 
     @NotBlank(message = "New password is required")
     private String newPassword;
+
+    private Boolean isHavePassword;
 }

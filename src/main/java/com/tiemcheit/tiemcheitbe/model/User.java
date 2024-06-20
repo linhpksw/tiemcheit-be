@@ -28,6 +28,9 @@ public class User {
     @Column(length = 256)
     private String password;
 
+    @Column(nullable = false)
+    private Boolean isHavePassword = false;
+
     @Column(length = 50, nullable = false)
     private String fullname;
 
@@ -75,4 +78,10 @@ public class User {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<VerificationCode> verificationCodes;
+
+    @PrePersist
+    @PreUpdate
+    private void updateIsHavePassword() {
+        this.isHavePassword = this.password != null && !this.password.isEmpty();
+    }
 }
