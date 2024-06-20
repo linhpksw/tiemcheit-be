@@ -55,9 +55,9 @@ public class OrderController {
 
     @GetMapping("/admin/filter")
     public ApiResponse<List<OrderResponse>> getFilterOrdersByAdmin(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
-            @RequestParam String status) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
+            @RequestParam(required = false) String status) {
         return ApiResponse.<List<OrderResponse>>builder()
                 .data(orderService.getFilterOrdersByAdmin(startDate, endDate, status))
                 .message("Success")
