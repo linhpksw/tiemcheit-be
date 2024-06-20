@@ -10,6 +10,7 @@ import java.util.List;
 @Repository
 public interface ProductIngredientRepo extends JpaRepository<ProductIngredient, ProductIngredientId> {
     List<ProductIngredient> findAllByProductId(Long product_id);
+    List<ProductIngredient> findAllByIngredientId(Long ingredient_id);
 
     void deleteAllByProductId(Long product_id);
 

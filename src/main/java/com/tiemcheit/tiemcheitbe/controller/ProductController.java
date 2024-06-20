@@ -62,14 +62,6 @@ public class ProductController {
                 .build();
     }
 
-    @PostMapping("")
-    public ApiResponse<ProductResponse> addProduct(@RequestBody ProductRequest productRequest) {
-        return ApiResponse.<ProductResponse>builder()
-                .data(productService.create(productRequest))
-                .message("Success")
-                .build();
-    }
-
     @PutMapping("/{id}")
     public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
         return ApiResponse.<ProductResponse>builder()
@@ -113,11 +105,19 @@ public class ProductController {
                 .build();
     }
 
-    @PutMapping("/{id}/reviews")
+    @PostMapping("/{id}/reviews")
     public ApiResponse<UserReviewResponse> addReview(@PathVariable("id") long orderDetailId, @RequestBody UserReviewRequest userReviewRequest) {
         return ApiResponse.<UserReviewResponse>builder()
                 .data(reviewService.addReview(orderDetailId, userReviewRequest))
                 .message("Success")
                 .build();
     }
+//    @GetMapping("outOfStock")
+//    public ApiResponse<List<ProductResponse>> getOutOfStockProducts() {
+//        return ApiResponse.<ProductResponse>builder()
+//                .data("")
+//                .message(SUCCESS_MSG)
+//                .build();
+//    }
+
 }

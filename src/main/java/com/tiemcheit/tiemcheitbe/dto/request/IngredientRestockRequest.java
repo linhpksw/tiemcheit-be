@@ -10,6 +10,5 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @Builder
 public class IngredientRestockRequest {
-    private String ingredientName;
     private int quantity;
 }
