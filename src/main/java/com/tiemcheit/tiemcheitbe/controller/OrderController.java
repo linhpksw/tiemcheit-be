@@ -65,9 +65,9 @@ public class OrderController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<Long> addOrder(@RequestBody OrderRequest request) {
+    public ApiResponse<Long> addOrder(@RequestBody OrderRequest request, @RequestParam String code) {
         return ApiResponse.<Long>builder()
-                .data(orderService.placeOrder(request))
+                .data(orderService.placeOrder(request, code))
                 .message("Success")
                 .build();
     }

@@ -8,7 +8,7 @@ import java.util.List;
 
 @Entity
 @Data
-@Table(name = "coupon")
+@Table(name = "coupon", uniqueConstraints = @UniqueConstraint(columnNames = "code"))
 public class Coupon {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -16,7 +16,10 @@ public class Coupon {
 
     private String name;
     private boolean active;
+
+    @Column(nullable = false, unique = true)
     private String code;
+
     private Date dateCreated;
     private Date dateExpired;
     private Date dateUpdated;

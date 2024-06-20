@@ -10,8 +10,10 @@ import com.tiemcheit.tiemcheitbe.model.Discount;
 import com.tiemcheit.tiemcheitbe.model.Product;
 import com.tiemcheit.tiemcheitbe.repository.CategoryRepo;
 import com.tiemcheit.tiemcheitbe.repository.CouponRepo;
+import com.tiemcheit.tiemcheitbe.repository.DiscountRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,10 +32,16 @@ public class CouponService {
     private final CategoryRepo categoryRepository;
 
     private final ProductRepo productRepository;
+    private final DiscountRepo discountRepo;
 
     @Transactional
     public List<CouponResponse> getAllCoupon() {
         return couponMapper.toResponses(couponRepository.findAllCoupon());
+    }
+
+    @Transactional
+    public Coupon getCouponByCode(String code) {
+        return couponRepository.findByCode(code);
     }
 
     @Transactional
@@ -81,7 +89,12 @@ public class CouponService {
         }).collect(Collectors.toList());
 
         coupon.setDiscounts(discounts);
-        return couponMapper.toResponse(couponRepository.save(coupon));
+
+        try {
+            return couponMapper.toResponse(couponRepository.save(coupon));
+        } catch (DataIntegrityViolationException e) {
+            throw new AppException("Coupon code must be unique", HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Transactional
@@ -95,14 +108,14 @@ public class CouponService {
 
     public double applyCouponToCart(String code, List<Product> products) {
         Coupon coupon = couponRepository.findByCode(code);
-        String discountType = coupon.getDiscounts().getFirst().getType();
-        double totalCost = 0;
         if (coupon == null) {
             throw new AppException("Coupon not found", HttpStatus.BAD_REQUEST);
         }
         if (!isCouponValid(coupon)) {
             throw new AppException("Coupon is not valid anymore", HttpStatus.BAD_REQUEST);
         }
+        String discountType = coupon.getDiscounts().getFirst().getType();
+        double totalCost = 0;
 
         double totalDiscountAmount = 0.0;
 
@@ -162,5 +175,4 @@ public class CouponService {
 
         return discountAmount;
     }
-
 }

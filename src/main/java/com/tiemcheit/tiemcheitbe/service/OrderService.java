@@ -32,6 +32,7 @@ public class OrderService {
     private final UserRepo userRepo;
     private final OrderMapper orderMapper;
     private final CartService cartService;
+    private final CouponService couponService;
 
     public List<OrderResponse> getUserOrders() {
         User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
@@ -66,7 +67,7 @@ public class OrderService {
         return orderMapper.toResponses(orderRepo.findAllByOptionalFilters(startDate, endDate, status));
     }
 
-    public Long placeOrder(OrderRequest request) {
+    public Long placeOrder(OrderRequest request, String code) {
         // first get the item from user's cart
         List<CartItemResponse> cartItemList = cartService.allCartItems();
 
@@ -80,6 +81,11 @@ public class OrderService {
         order.setPaymentMethod(request.getPaymentMethod()); // Replace with actual data
         order.setMessage(request.getMessage());
         order.setOrderStatus("Order Received"); // Replace with actual data
+        // set coupon to order if having code
+        if (code != null) {
+            order.setCoupon(couponService.getCouponByCode(code));
+        }
+        order.setDiscountPrice(request.getDiscountPrice());
 
         // Retrieve the user
 

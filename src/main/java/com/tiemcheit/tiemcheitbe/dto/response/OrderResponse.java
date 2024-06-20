@@ -15,4 +15,5 @@ public class OrderResponse {
     private String paymentMethod;
     private String orderStatus;
     private List<OrderDetailResponse> orderDetails;
+    private Double discountPrice;
 }
