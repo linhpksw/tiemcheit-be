@@ -47,9 +47,12 @@ public class Product {
     @OneToMany(mappedBy = "product")
     private List<WishlistItem> wishlistItems;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<ProductImage> productImages;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<ProductOption> productOptions;
 
-    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<ProductIngredient> productIngredients;
 }

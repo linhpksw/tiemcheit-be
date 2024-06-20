@@ -13,8 +13,10 @@ import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.*;
 import com.tiemcheit.tiemcheitbe.service.specification.ProductSpecification;
+import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -36,10 +38,13 @@ public class ProductService {
     private final ProductImageRepo productImageRepo;
     private final OptionRepo optionRepo;
     private final IngredientRepo ingredientRepo;
+    private final UserRepo userRepo;
 
 
     private final OptionMapper optionMapper;
     private final ProductIngredientMapper productIngredientMapper;
+    private final OrderRepo orderRepo;
+    private final OrderDetailRepo orderDetailRepo;
 
     //=============================================FOR CLIENTS=======================================================
     //get all products by active and disabled status
@@ -140,6 +145,57 @@ public class ProductService {
         return productDetailResponse;
     }
 
+    public Page<ProductResponse> getProductsWithPagination(int page, int size) {
+        return productRepo.findAll(PageRequest.of(page, size))
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    return productResponse;
+                });
+    }
+
+    public Page<ProductResponse> getProductsWithPaginationAndSort(int page, int size, Map<String, String> conditions, String sortField, String sortDirection) {
+        Specification<Product> specification = ProductSpecification.getSpecification(conditions);
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField);
+        Page<Product> productPage = productRepo.findAll(specification, PageRequest.of(page, size, sort));
+
+        return productPage.map(product -> {
+            ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+            List<ProductImage> images = productImageRepo.findAllByProductId(product.getId());
+
+            if (!images.isEmpty()) {
+                productResponse.setImage(images.get(0).getImage());
+            } else {
+                productResponse.setImage(null);
+            }
+
+            return productResponse;
+        });
+    }
+
+    public List<ProductResponse> getHistoryOrderProduct() {
+        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Order> orders = orderRepo.findAllByUserOrderByIdDesc(user);
+
+        List<Product> distinctProducts = orders.stream()
+                .flatMap(order -> orderDetailRepo.findAllByOrderId(order.getId()).stream())
+                .map(orderDetail -> productRepo.findById(orderDetail.getProduct().getId())
+                        .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND)))
+                .distinct()
+                .toList();
+
+        return distinctProducts.stream()
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+
+                    return productResponse;
+                })
+                .toList();
+    }
+
     //=============================================FOR ADMINS=======================================================
     @PreAuthorize("hasRole('ADMIN')")
     public List<ProductResponse> getAllProductsByStatus(String status) {
@@ -226,6 +282,14 @@ public class ProductService {
         ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(updatedProduct);
         productResponse.setImage(productImageRepo.findAllByProductId(updatedProduct.getId()).getFirst().getImage());
         return productResponse;
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public Boolean delete(Long id) {
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+        productRepo.delete(product);
+        return true;
     }
 
     private void updateProductImages(ProductRequest productRequest, Product product) {

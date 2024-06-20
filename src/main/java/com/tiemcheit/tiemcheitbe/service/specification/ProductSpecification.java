@@ -57,6 +57,10 @@ public class ProductSpecification {
                 specification = specification.and(hasCategories(categoryIds));
             }
         }
+
+        if (params.containsKey("status")) {
+            specification = specification.and((root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), params.get("status")));
+        }
         return specification;
     }
 }
