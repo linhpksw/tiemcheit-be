@@ -2,6 +2,7 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.CouponRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CouponResponse;
+import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.CouponMapper;
 import com.tiemcheit.tiemcheitbe.model.Category;
 import com.tiemcheit.tiemcheitbe.model.Coupon;
@@ -11,6 +12,7 @@ import com.tiemcheit.tiemcheitbe.repository.CategoryRepo;
 import com.tiemcheit.tiemcheitbe.repository.CouponRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -95,8 +97,11 @@ public class CouponService {
         Coupon coupon = couponRepository.findByCode(code);
         String discountType = coupon.getDiscounts().getFirst().getType();
         double totalCost = 0;
-        if (coupon == null || !isCouponValid(coupon)) {
-            return 0.0; // Coupon not valid or applicable
+        if (coupon == null) {
+            throw new AppException("Coupon not found", HttpStatus.BAD_REQUEST);
+        }
+        if (!isCouponValid(coupon)) {
+            throw new AppException("Coupon is not valid anymore", HttpStatus.BAD_REQUEST);
         }
 
         double totalDiscountAmount = 0.0;
