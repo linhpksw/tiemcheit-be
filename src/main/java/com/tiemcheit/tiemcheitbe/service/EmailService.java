@@ -18,7 +18,7 @@ public class EmailService {
 
             helper.setFrom("noreply@tiemcheit.com");
             helper.setTo(to);
-            helper.setSubject("Xác minh tài khoản của bạn với Tiệm chè IT");
+            helper.setSubject("Mã xác minh Tiệm chè IT");
 
             String htmlMsg = "<!DOCTYPE html>" +
                     "<html>" +

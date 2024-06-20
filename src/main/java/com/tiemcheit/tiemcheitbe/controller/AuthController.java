@@ -9,10 +9,7 @@ import com.tiemcheit.tiemcheitbe.service.AuthService;
 import com.tiemcheit.tiemcheitbe.service.VerificationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.text.ParseException;
 
@@ -23,15 +20,27 @@ public class AuthController {
     private final AuthService authService;
     private final VerificationService verificationService;
 
+    @PostMapping("/send-forgot-code")
+    ApiResponse<Void> sendForgotCode(@RequestBody @Valid ForgotPasswordRequest request) {
+        authService.sendForgotCode(request);
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
+    @PostMapping("/oauth2")
+    ApiResponse<AuthResponse> oauth2(@RequestParam("code") String code) throws ParseException {
+        var data = authService.oauth2(code);
+        return ApiResponse.<AuthResponse>builder().data(data).message("Success").build();
+    }
+
     @PostMapping("/verification")
     ApiResponse<Void> verify(@RequestBody @Valid VerifyRequest request) {
-        verificationService.verifyCode(request.getEmail(), request.getCode());
+        verificationService.verifyCode(request.getEmail(), request.getCode(), request.getType());
         return ApiResponse.<Void>builder().message("Success").build();
     }
 
     @PostMapping("/resend-verification")
     ApiResponse<Void> resendVerification(@RequestBody @Valid ResendVerificationRequest request) {
-        verificationService.resendVerificationCode(request.getEmail());
+        verificationService.resendVerificationCode(request.getEmail(), request.getType());
         return ApiResponse.<Void>builder().message("Success").build();
     }
 
@@ -69,9 +78,15 @@ public class AuthController {
         return ApiResponse.<Void>builder().message("Success").build();
     }
 
+    @PostMapping("/change-password")
+    ApiResponse<Void> changePassword(@RequestBody ChangePasswordRequest request) {
+        authService.changePassword(request.getUsername(), request.getCurrentPassword(), request.getNewPassword(), request.getIsHavePassword());
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
     @PostMapping("/reset-password")
     ApiResponse<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
-        authService.resetPassword(request);
+        authService.resetPassword(request.getEmail(), request.getNewPassword());
         return ApiResponse.<Void>builder().message("Success").build();
     }
 

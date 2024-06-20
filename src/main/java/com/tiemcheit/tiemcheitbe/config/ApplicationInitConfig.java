@@ -48,7 +48,14 @@ public class ApplicationInitConfig {
 
             userRepo.findByUsername("admin").ifPresentOrElse(user -> log.info("Admin user already exists: {}", user.getUsername()),
                     () -> {
-                        User admin = User.builder().username("admin").password(passwordEncoder.encode("12345678")).fullname("Admin").phone("0917654321").email("admin@gmail.com").roles(Set.of(roleRepo.findByName("ADMIN").orElseThrow())).build();
+                        User admin = User.builder()
+                                .username("admin")
+                                .password(passwordEncoder.encode("12345678"))
+                                .fullname("Admin")
+                                .isActivated(true)
+                                .phone("0917654321")
+                                .email("admin@gmail.com")
+                                .roles(Set.of(roleRepo.findByName("ADMIN").orElseThrow())).build();
 
                         userRepo.save(admin);
                         log.info("Created new admin user: {}", admin.getUsername());

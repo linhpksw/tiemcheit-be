@@ -25,13 +25,16 @@ public class User {
     @Column(nullable = false, unique = true, length = 50)
     private String username;
 
-    @Column(nullable = false, length = 256)
+    @Column(length = 256)
     private String password;
+
+    @Column(nullable = false)
+    private Boolean isHavePassword = false;
 
     @Column(length = 50, nullable = false)
     private String fullname;
 
-    @Column(length = 10, unique = true, nullable = false)
+    @Column(length = 10, unique = true)
     private String phone;
 
     @Column(length = 50, unique = true, nullable = false)
@@ -75,4 +78,10 @@ public class User {
 
     @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<VerificationCode> verificationCodes;
+
+    @PrePersist
+    @PreUpdate
+    private void updateIsHavePassword() {
+        this.isHavePassword = this.password != null && !this.password.isEmpty();
+    }
 }

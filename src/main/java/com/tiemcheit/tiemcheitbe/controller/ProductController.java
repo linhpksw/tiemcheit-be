@@ -97,6 +97,14 @@ public class ProductController {
                 .build();
     }
 
+    @PutMapping("/{id}")
+    public ApiResponse<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest productRequest) {
+        return ApiResponse.<ProductResponse>builder()
+                .data(productService.update(productRequest, id))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
     @PutMapping("/{id}/reviews")
     public ApiResponse<UserReviewResponse> addReview(@PathVariable("id") long orderDetailId, @RequestBody UserReviewRequest userReviewRequest) {
         return ApiResponse.<UserReviewResponse>builder()

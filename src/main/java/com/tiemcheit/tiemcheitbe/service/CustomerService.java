@@ -6,6 +6,7 @@ import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.RoleMapper;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
 import com.tiemcheit.tiemcheitbe.model.Role;
+import com.tiemcheit.tiemcheitbe.repository.OrderRepo;
 import com.tiemcheit.tiemcheitbe.repository.RoleRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class CustomerService {
 
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
+    private final OrderRepo orderRepo;
     private final UserMapper userMapper;
     private final UserService userService;
     private final RoleMapper roleMapper;
@@ -33,6 +35,8 @@ public class CustomerService {
         Role role = roleRepo.findByName("CUSTOMER").orElseThrow(() -> new AppException("Role not found.", HttpStatus.NOT_FOUND));
         for (UserProfileResponse u : users) {
             if (u.getRoles().contains(roleMapper.toRoleResponse(role))) {
+                u.setOrderNumber(orderRepo.countByUser_Id(u.getId()));
+                u.setOrderTotal(orderRepo.getTotalAmountSpentByUser(u.getId()));
                 customers.add(u);
             }
         }
