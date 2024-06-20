@@ -15,6 +15,7 @@ public class Ingredient {
     private Long id;
     private String name;
     private Long quantity;
+    private String image;
     private double price;
     private String status = "AVAILABLE";
 

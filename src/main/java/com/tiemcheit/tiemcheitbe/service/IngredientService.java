@@ -47,12 +47,13 @@ public class IngredientService {
     }
     public IngredientResponse update(long id, IngredientRequest request) {
         var ingredient = ingredientRepo.findById(id)
-                .orElseThrow(() -> new AppException(STR."Role \{request.getName()} not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException(STR."Ingredient \{request.getName()} not found", HttpStatus.NOT_FOUND));
 
         ingredient.setName(request.getName());
         ingredient.setStatus(request.getStatus());
         ingredient.setQuantity(request.getQuantity());
         ingredient.setPrice(request.getPrice());
+        ingredient.setImage(request.getImage());
 
 
         return IngredientMapper.INSTANCE.toIngredientResponse(ingredientRepo.save(ingredient));
@@ -66,15 +67,14 @@ public class IngredientService {
     }
     public IngredientResponse restock(long id, IngredientRestockRequest request){
         var ingredient = ingredientRepo.findById(id)
-                .orElseThrow(() -> new AppException(STR."Ingredient \{request.getIngredientName()} already exists", HttpStatus.BAD_REQUEST));
+                .orElseThrow(() -> new AppException("Ingredient already exists", HttpStatus.BAD_REQUEST));
         ingredient.setQuantity(ingredient.getQuantity()+request.getQuantity());
         return IngredientMapper.INSTANCE.toIngredientResponse(ingredientRepo.save(ingredient));
     }
 
 
-    public Optional<IngredientResponse> getIngredientById(Long id) {
-        return ingredientRepo.findById(id)
-                .map(IngredientMapper.INSTANCE::toIngredientResponse);
+    public IngredientResponse getIngredientById(Long id) {
+        return ingredientRepo.findById(id).map(IngredientMapper.INSTANCE::toIngredientResponse).orElse(null);
     }
     public List<IngredientResponse> getIngredientsByStoreId(Long store_id) {
         return ingredientRepo.findAllByStoreId(store_id)

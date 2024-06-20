@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ReviewRepo extends JpaRepository<UserReview, Long> {
     List<UserReview> findAllByOrderDetailId(Long orderDetailId);
+
+
 }

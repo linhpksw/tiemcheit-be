@@ -18,5 +18,6 @@ public class IngredientRequest {
     private Long quantity;
     private double price;
     private String status;
+    private String image;
     private Long id;
 }

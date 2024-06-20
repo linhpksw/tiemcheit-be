@@ -25,6 +25,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -93,6 +94,19 @@ public class ProductService {
                     productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
                     return productResponse;
                 })
+                .toList();
+    }
+    //get product of an ingredients
+    public List<ProductResponse> getProductsOfIngredient(Long ingredientId) {
+        List<ProductIngredient> productIngredients = productIngredientRepo.findAllByIngredientId(ingredientId);
+        var productFound = productIngredients
+                .stream().
+                map(ProductIngredient::getProduct).
+                distinct().
+                toList();
+        return productFound
+                .stream()
+                .map(ProductMapper.INSTANCE::toProductResponse)
                 .toList();
     }
 
@@ -227,6 +241,7 @@ public class ProductService {
         productResponse.setImage(productImageRepo.findAllByProductId(updatedProduct.getId()).getFirst().getImage());
         return productResponse;
     }
+
 
     private void updateProductImages(ProductRequest productRequest, Product product) {
         productImageRepo.deleteAllByProductId(product.getId());
