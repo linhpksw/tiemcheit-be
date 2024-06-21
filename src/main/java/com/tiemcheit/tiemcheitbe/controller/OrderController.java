@@ -41,14 +41,14 @@ public class OrderController {
                 .build();
     }
 
-@GetMapping("/user/{uid}")
+    @GetMapping("/user/{uid}")
     public ApiResponse<List<OrderResponse>> getOrderByUser(@PathVariable Long uid) {
         return ApiResponse.<List<OrderResponse>>builder()
                 .data(orderService.getOrdersByUser(uid))
                 .message("Success")
                 .build();
     }
-    
+
     @GetMapping("/filter")
     public ApiResponse<List<OrderResponse>> getOrdersByDateRangeAndStatus(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
@@ -62,9 +62,9 @@ public class OrderController {
 
     @GetMapping("/admin/filter")
     public ApiResponse<List<OrderResponse>> getFilterOrdersByAdmin(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
-            @RequestParam String status) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
+            @RequestParam(required = false) String status) {
         return ApiResponse.<List<OrderResponse>>builder()
                 .data(orderService.getFilterOrdersByAdmin(startDate, endDate, status))
                 .message("Success")
