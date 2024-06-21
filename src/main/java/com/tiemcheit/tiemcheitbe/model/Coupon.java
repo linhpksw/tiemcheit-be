@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Data
@@ -16,7 +17,7 @@ public class Coupon {
     private String name;
     private String status;
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false, columnDefinition = "VARCHAR(255) COLLATE utf8_bin")
     private String code;
 
     private Date dateCreated;
@@ -24,8 +25,8 @@ public class Coupon {
     private Date dateUpdated;
     private Date dateValid;
     private String description;
-    @OneToOne(mappedBy = "coupon", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private Discount discount;
+    @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Discount> discounts;
     private int limitAccountUses;
     private int limitUses;
     private int useCount;

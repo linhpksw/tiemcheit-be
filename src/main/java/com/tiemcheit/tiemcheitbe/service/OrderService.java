@@ -87,7 +87,8 @@ public class OrderService {
         if (code != null) {
             Coupon coupon = couponService.getCouponByCode(code);
             order.setCoupon(coupon);
-            coupon.setUseCount(coupon.getUseCount() + 1);
+            if (coupon != null)
+                coupon.setUseCount(coupon.getUseCount() + 1);
         }
         order.setDiscountPrice(request.getDiscountPrice());
 

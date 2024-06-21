@@ -10,6 +10,7 @@ import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.*;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -17,7 +18,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class CouponService {
@@ -59,7 +62,8 @@ public class CouponService {
 
 
         // Check if dateExpired is greater than dateValid
-        if (request.getDateExpired().before(request.getDateValid())) {
+        if (request.getDateExpired().compareTo(request.getDateValid()) <= 0) {
+            log.info("lmao");
             throw new AppException("Date expired must be greater than date valid", HttpStatus.BAD_REQUEST);
         }
         coupon.setDateExpired(request.getDateExpired());
@@ -77,34 +81,36 @@ public class CouponService {
         coupon.setUseCount(0); // Example
 
 
-        Discount discount = new Discount();
-        discount.setType(request.getDiscount().getType());
-        discount.setValueType(request.getDiscount().getValueType());
-        discount.setValueFixed(request.getDiscount().getValueFixed());
+        List<Discount> discounts = request.getDiscounts().stream().map(discountItem -> {
+            Discount discount = new Discount();
+            discount.setType(discountItem.getType());
+            discount.setValueType(discountItem.getValueType());
+            discount.setValueFixed(discountItem.getValueFixed());
 
-        switch (request.getDiscount().getType()) {
-            case "category":
-                Category category = categoryRepository.findById(request.getDiscount().getCategoryId())
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
-                discount.setCategory(category);
-                break;
-            case "product":
-                Product product = productRepository.findById(request.getDiscount().getProductId())
-                        .orElseThrow(() -> new IllegalArgumentException("Invalid product ID"));
-                discount.setProduct(product);
-                break;
-            case "total":
-            case "ship":
-                // No additional fields to set
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid discount type");
-        }
+            switch (discountItem.getType()) {
+                case "category":
+                    Category category = categoryRepository.findById(discountItem.getCategoryId())
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
+                    discount.setCategory(category);
+                    break;
+                case "product":
+                    Product product = productRepository.findById(discountItem.getProductId())
+                            .orElseThrow(() -> new IllegalArgumentException("Invalid product ID"));
+                    discount.setProduct(product);
+                    break;
+                case "total":
+                case "ship":
+                    // No additional fields to set
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid discount type");
+            }
 
-        discount.setCoupon(coupon);
+            discount.setCoupon(coupon);
+            return discount;
+        }).collect(Collectors.toList());
 
-
-        coupon.setDiscount(discount);
+        coupon.setDiscounts(discounts);
 
         try {
             return couponMapper.toResponse(couponRepository.save(coupon));
@@ -147,7 +153,7 @@ public class CouponService {
             throw new AppException("You have access the user's limit uses", HttpStatus.BAD_REQUEST);
         }
 
-        String discountType = coupon.getDiscount().getType();
+        String discountType = coupon.getDiscounts().getFirst().getType();
         double totalCost = 0;
 
         double totalDiscountAmount = 0.0;
@@ -155,13 +161,13 @@ public class CouponService {
 
         for (CartItemResponse item : cartItemList) {
             if (!discountType.equals("total")) {
-                totalDiscountAmount += applyProductDiscount(coupon.getDiscount(), item.getProduct());
+                totalDiscountAmount += applyProductDiscount(coupon.getDiscounts(), item.getProduct());
             }
             totalCost += item.getProduct().getPrice() * item.getQuantity();
         }
 
         if (discountType.equals("total")) {
-            Discount discount = coupon.getDiscount();
+            Discount discount = coupon.getDiscounts().getFirst();
             // apply for percent discount
             if ("percent".equalsIgnoreCase(discount.getValueType())) {
                 totalDiscountAmount = totalCost * (discount.getValueFixed() / 100.0);
@@ -176,29 +182,32 @@ public class CouponService {
     }
 
 
-    private double applyProductDiscount(Discount discount, ProductResponse product) {
+    private double applyProductDiscount(List<Discount> discounts, ProductResponse product) {
         double discountAmount = 0.0;
         boolean canApply;
 
-        // check product for discount
-        if (product.getId().equals(discount.getProduct().getId())) {
-            canApply = true;
+        for (Discount discount : discounts) {
+            // check product for discount
+            if (product.getId().equals(discount.getProduct().getId())) {
+                canApply = true;
+            }
+
+            // check product for discount
+            else canApply = product.getCategory().getId().equals(discount.getCategory().getId());
+
+            // apply discount
+            if (canApply) {
+                // apply for percent discount
+                if ("percent".equalsIgnoreCase(discount.getValueType())) {
+                    discountAmount += product.getPrice() * (discount.getValueFixed() / 100.0);
+                }
+                // apply for specific value discount
+                else if ("fixed".equalsIgnoreCase(discount.getValueType())) {
+                    discountAmount += discount.getValueFixed();
+                }
+            }
         }
 
-        // check product for discount
-        else canApply = product.getCategory().getId().equals(discount.getCategory().getId());
-
-        // apply discount
-        if (canApply) {
-            // apply for percent discount
-            if ("percent".equalsIgnoreCase(discount.getValueType())) {
-                discountAmount += product.getPrice() * (discount.getValueFixed() / 100.0);
-            }
-            // apply for specific value discount
-            else if ("fixed".equalsIgnoreCase(discount.getValueType())) {
-                discountAmount += discount.getValueFixed();
-            }
-        }
 
         return discountAmount;
     }
