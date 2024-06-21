@@ -26,4 +26,44 @@ public interface UserRepo extends JpaRepository<User, Long> {
     List<User> findUsersByRole(@Param("roleName") String roleName);
 
     boolean existsByUsername(String username);
+
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = 'CUSTOMER' " +
+            "AND (:status IS NULL OR u.status = :status) ORDER BY u.createdAt ASC")
+    List<User> findAscCustomersOrderByCreatedAt(@Param("status") String status);
+
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = 'CUSTOMER' " +
+            "AND (:status IS NULL OR u.status = :status) ORDER BY u.createdAt DESC")
+    List<User> findDescCustomersOrderByCreatedAt(@Param("status") String status);
+
+    @Query("SELECT u FROM User u JOIN u.roles r LEFT JOIN u.orders o WHERE r.name = 'CUSTOMER' " +
+            "AND (:status IS NULL OR u.status = :status) GROUP BY u.id ORDER BY COUNT(o) ASC")
+    List<User> findAscCustomersOrderByOrderNumber(@Param("status") String status);
+
+    @Query("SELECT u FROM User u JOIN u.roles r LEFT JOIN u.orders o WHERE r.name = 'CUSTOMER' " +
+            "AND (:status IS NULL OR u.status = :status) GROUP BY u.id ORDER BY COUNT(o) DESC")
+    List<User> findDescCustomersOrderByOrderNumber(@Param("status") String status);
+
+    @Query("SELECT u, SUM(od.price * od.quantity) AS totalSpent " +
+            "FROM User u " +
+            "JOIN u.roles r " +
+            "LEFT JOIN u.orders o " +
+            "LEFT JOIN o.orderDetails od " +
+            "WHERE r.name = 'CUSTOMER' AND (:status IS NULL OR u.status = :status) " +
+            "GROUP BY u.id " +
+            "ORDER BY totalSpent ASC")
+    List<User> findAscCustomersOrderByOrderTotal(@Param("status") String status);
+
+    @Query("SELECT u, SUM(od.price * od.quantity) AS totalSpent " +
+            "FROM User u " +
+            "JOIN u.roles r " +
+            "LEFT JOIN u.orders o " +
+            "LEFT JOIN o.orderDetails od " +
+            "WHERE r.name = 'CUSTOMER' AND (:status IS NULL OR u.status = :status) " +
+            "GROUP BY u.id " +
+            "ORDER BY totalSpent DESC")
+    List<User> findDescCustomersOrderByOrderTotal(@Param("status") String status);
+
+    @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = 'CUSTOMER' " +
+            "AND (:status IS NULL OR u.status = :status)")
+    List<User> findCustomerByStatus(String status);
 }
