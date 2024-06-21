@@ -85,4 +85,10 @@ public class OrderController {
         orderService.updateOrderStatus(orderId, status);
         return ApiResponse.<Void>builder().message("Success").build();
     }
+
+    @PatchMapping("/{orderId}/confirm")
+    public ApiResponse<Void> updateOrderByUser(@PathVariable Long orderId) {
+        orderService.updateOrderStatus(orderId, "Order Confirmed");
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
 }
