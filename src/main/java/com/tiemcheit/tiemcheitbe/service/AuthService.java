@@ -41,6 +41,7 @@ public class AuthService {
     private final ActiveRefreshTokenRepo activeRefreshTokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepo roleRepo;
+    private final VerificationCodeRepo verificationCodeRepo;
     private final UserMapper userMapper;
     private final VerificationService verificationService;
     private final OAuth2Client oAuth2Client;
@@ -334,8 +335,20 @@ public class AuthService {
         userRepo.save(user);
     }
 
-    public void resetPassword(String email, String newPassword) {
+    public void resetPassword(String email, String newPassword, String code) {
         User user = userRepo.findByEmail(email).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        boolean codeFound = user.getVerificationCodes().stream()
+                .anyMatch(vc -> vc.getCode().equals(code) && !vc.isExpired());
+
+        log.info("Code found: {}", codeFound);
+
+        if (!codeFound) {
+            throw new AppException("Verification code not found or expired", HttpStatus.BAD_REQUEST);
+        }
+        
+        user.getVerificationCodes().clear();
+        verificationCodeRepo.deleteByUserId(user.getId());
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepo.save(user);

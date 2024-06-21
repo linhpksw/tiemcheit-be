@@ -62,13 +62,6 @@ public class ProductController {
                 .build();
     }
 
-    @PutMapping("/{id}")
-    public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
-        return ApiResponse.<ProductResponse>builder()
-                .data(productService.update(productRequest, id))
-                .message("Success")
-                .build();
-    }
 
     @GetMapping("filter")
     public ApiResponse<List<ProductResponse>> searchProducts(
@@ -106,10 +99,10 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest productRequest) {
+    public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.update(productRequest, id))
-                .message(SUCCESS_MSG)
+                .message("Success")
                 .build();
     }
 
