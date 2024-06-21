@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import lombok.Data;
 
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Data
@@ -25,8 +24,8 @@ public class Coupon {
     private Date dateUpdated;
     private Date dateValid;
     private String description;
-    @OneToMany(mappedBy = "coupon", cascade = CascadeType.ALL)
-    private List<Discount> discounts;
+    @OneToOne(mappedBy = "coupon", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private Discount discount;
     private int limitAccountUses;
     private int limitUses;
     private int useCount;

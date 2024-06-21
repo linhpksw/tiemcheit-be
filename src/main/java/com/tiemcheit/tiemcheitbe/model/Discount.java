@@ -11,8 +11,8 @@ public class Discount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(cascade = CascadeType.ALL)
-    @JoinColumn(name = "coupon_id", foreignKey = @ForeignKey(name = "cp_dis_fk"))
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coupon_id", unique = true, nullable = false)
     private Coupon coupon;
 
     private String type; // category, product, total, ship

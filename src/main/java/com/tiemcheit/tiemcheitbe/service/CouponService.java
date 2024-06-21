@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,9 +47,28 @@ public class CouponService {
         Coupon coupon = new Coupon();
         coupon.setCode(request.getCode());
         coupon.setName(request.getName());
-        coupon.setDateExpired(request.getDateExpired());
+
+        // check the valid date and expired date
+        Date today = new Date();
+
+        // Check if dateValid is greater than today's date
+        if (request.getDateValid().before(today)) {
+            throw new AppException("Date valid must be greater than today", HttpStatus.BAD_REQUEST);
+        }
         coupon.setDateValid(request.getDateValid());
+
+
+        // Check if dateExpired is greater than dateValid
+        if (request.getDateExpired().before(request.getDateValid())) {
+            throw new AppException("Date expired must be greater than date valid", HttpStatus.BAD_REQUEST);
+        }
+        coupon.setDateExpired(request.getDateExpired());
+
         coupon.setDescription(request.getDescription());
+
+        if (request.getLimitUses() < request.getLimitAccountUses()) {
+            throw new AppException("Limit uses must be greater than limit account uses", HttpStatus.BAD_REQUEST);
+        }
         coupon.setLimitAccountUses(request.getLimitAccountUses());
         coupon.setLimitUses(request.getLimitUses());
         coupon.setStatus("inactive"); // Set other required fields
@@ -58,36 +76,35 @@ public class CouponService {
         coupon.setDateUpdated(new Date()); // Example
         coupon.setUseCount(0); // Example
 
-        List<Discount> discounts = request.getDiscounts().stream().map(discountItem -> {
-            Discount discount = new Discount();
-            discount.setType(discountItem.getType());
-            discount.setValueType(discountItem.getValueType());
-            discount.setValueFixed(discountItem.getValueFixed());
 
-            switch (discountItem.getType()) {
-                case "category":
-                    Category category = categoryRepository.findById(discountItem.getCategoryId())
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
-                    discount.setCategory(category);
-                    break;
-                case "product":
-                    Product product = productRepository.findById(discountItem.getProductId())
-                            .orElseThrow(() -> new IllegalArgumentException("Invalid product ID"));
-                    discount.setProduct(product);
-                    break;
-                case "total":
-                case "ship":
-                    // No additional fields to set
-                    break;
-                default:
-                    throw new IllegalArgumentException("Invalid discount type");
-            }
+        Discount discount = new Discount();
+        discount.setType(request.getDiscount().getType());
+        discount.setValueType(request.getDiscount().getValueType());
+        discount.setValueFixed(request.getDiscount().getValueFixed());
 
-            discount.setCoupon(coupon);
-            return discount;
-        }).collect(Collectors.toList());
+        switch (request.getDiscount().getType()) {
+            case "category":
+                Category category = categoryRepository.findById(request.getDiscount().getCategoryId())
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid category ID"));
+                discount.setCategory(category);
+                break;
+            case "product":
+                Product product = productRepository.findById(request.getDiscount().getProductId())
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid product ID"));
+                discount.setProduct(product);
+                break;
+            case "total":
+            case "ship":
+                // No additional fields to set
+                break;
+            default:
+                throw new IllegalArgumentException("Invalid discount type");
+        }
 
-        coupon.setDiscounts(discounts);
+        discount.setCoupon(coupon);
+
+
+        coupon.setDiscount(discount);
 
         try {
             return couponMapper.toResponse(couponRepository.save(coupon));
@@ -106,7 +123,8 @@ public class CouponService {
     }
 
     @Transactional
-    public void disableCoupons(Coupon coupon) {
+    public void disableCoupons(Long id) {
+        Coupon coupon = couponRepository.findById(id).get();
         coupon.setStatus("disabled");
         couponRepository.save(coupon);
     }
@@ -129,7 +147,7 @@ public class CouponService {
             throw new AppException("You have access the user's limit uses", HttpStatus.BAD_REQUEST);
         }
 
-        String discountType = coupon.getDiscounts().getFirst().getType();
+        String discountType = coupon.getDiscount().getType();
         double totalCost = 0;
 
         double totalDiscountAmount = 0.0;
@@ -137,13 +155,13 @@ public class CouponService {
 
         for (CartItemResponse item : cartItemList) {
             if (!discountType.equals("total")) {
-                totalDiscountAmount += applyProductDiscount(coupon.getDiscounts(), item.getProduct());
+                totalDiscountAmount += applyProductDiscount(coupon.getDiscount(), item.getProduct());
             }
             totalCost += item.getProduct().getPrice() * item.getQuantity();
         }
 
         if (discountType.equals("total")) {
-            Discount discount = coupon.getDiscounts().getFirst();
+            Discount discount = coupon.getDiscount();
             // apply for percent discount
             if ("percent".equalsIgnoreCase(discount.getValueType())) {
                 totalDiscountAmount = totalCost * (discount.getValueFixed() / 100.0);
@@ -158,46 +176,38 @@ public class CouponService {
     }
 
 
-    private double applyProductDiscount(List<Discount> discounts, ProductResponse product) {
+    private double applyProductDiscount(Discount discount, ProductResponse product) {
         double discountAmount = 0.0;
         boolean canApply;
 
-        for (Discount discount : discounts) {
-            // check product for discount
-            if (product.getId().equals(discount.getProduct().getId())) {
-                canApply = true;
+        // check product for discount
+        if (product.getId().equals(discount.getProduct().getId())) {
+            canApply = true;
+        }
+
+        // check product for discount
+        else canApply = product.getCategory().getId().equals(discount.getCategory().getId());
+
+        // apply discount
+        if (canApply) {
+            // apply for percent discount
+            if ("percent".equalsIgnoreCase(discount.getValueType())) {
+                discountAmount += product.getPrice() * (discount.getValueFixed() / 100.0);
             }
-
-            // check product for discount
-            else canApply = product.getCategory().getId().equals(discount.getCategory().getId());
-
-            // apply discount
-            if (canApply) {
-                // apply for percent discount
-                if ("percent".equalsIgnoreCase(discount.getValueType())) {
-                    discountAmount += product.getPrice() * (discount.getValueFixed() / 100.0);
-                }
-                // apply for specific value discount
-                else if ("fixed".equalsIgnoreCase(discount.getValueType())) {
-                    discountAmount += discount.getValueFixed();
-                }
+            // apply for specific value discount
+            else if ("fixed".equalsIgnoreCase(discount.getValueType())) {
+                discountAmount += discount.getValueFixed();
             }
         }
 
         return discountAmount;
     }
 
-    public boolean canUseCoupon(Long userId, Long couponId) {
-        Coupon coupon = couponRepository.findById(couponId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid coupon ID"));
-
-        // Check if the coupon has reached the total usage limit
-        if (coupon.getUseCount() >= coupon.getLimitUses()) {
-            return false;
+    @Transactional
+    public void deleteCoupon(Long couponId) {
+        if (!couponRepository.existsById(couponId)) {
+            throw new AppException("Coupon with ID " + couponId + " does not exist", HttpStatus.BAD_REQUEST);
         }
-
-        // Check if the user has reached the account usage limit for this coupon
-        List<Order> orders = orderRepo.findByUserIdAndCouponId(userId, couponId);
-        return orders.size() < coupon.getLimitAccountUses();
+        couponRepository.deleteById(couponId);
     }
 }

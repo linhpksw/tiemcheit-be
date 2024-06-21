@@ -38,4 +38,18 @@ public class CouponController {
         couponService.activateCoupons(couponIds);
         return ApiResponse.<Void>builder().message("Success").build();
     }
+
+    @PutMapping("/disable")
+    public ApiResponse<Void> disableCoupons(@RequestBody Long couponId) {
+        couponService.disableCoupons(couponId);
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
+    @DeleteMapping("/{couponId}")
+    public ApiResponse<Void> deleteCoupon(@PathVariable Long couponId) {
+
+        couponService.deleteCoupon(couponId);
+        return ApiResponse.<Void>builder().message("Delete success").build();
+
+    }
 }
