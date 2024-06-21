@@ -230,6 +230,10 @@ public class AuthService {
             throw new AppException("This account has been deleted", HttpStatus.FORBIDDEN);
         }
 
+        if ("INACTIVE".equals(user.getStatus())) {
+            throw new AppException("This account has been banned", HttpStatus.FORBIDDEN);
+        }
+
         if (!user.getIsActivated()) {
             throw new AppException(STR."This account has not been activated. Please enter verification code sent to the email \{user.getEmail()}", HttpStatus.FORBIDDEN);
         }
@@ -346,7 +350,7 @@ public class AuthService {
         if (!codeFound) {
             throw new AppException("Verification code not found or expired", HttpStatus.BAD_REQUEST);
         }
-        
+
         user.getVerificationCodes().clear();
         verificationCodeRepo.deleteByUserId(user.getId());
 
