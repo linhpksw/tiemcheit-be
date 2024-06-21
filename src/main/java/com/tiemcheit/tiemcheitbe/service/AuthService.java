@@ -112,6 +112,10 @@ public class AuthService {
             throw new AppException("This account has been deleted.", HttpStatus.FORBIDDEN);
         }
 
+        if ("INACTIVE".equals(user.getStatus())) {
+            throw new AppException("This account has been banned", HttpStatus.FORBIDDEN);
+        }
+
         return getAuthResponse(user);
     }
 
