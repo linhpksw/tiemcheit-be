@@ -53,7 +53,10 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).get(0).getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -66,7 +69,10 @@ public class ProductService {
         return products.stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -81,7 +87,10 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -110,9 +119,12 @@ public class ProductService {
          * */
         Product product = productRepo.findById(productId).orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
         if (product.getStatus().equals("inactive")) {
-            throw new AppException("Product is inactive", HttpStatus.BAD_REQUEST);
+            User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername())
+                    .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+            if (!userHasRole(user, "ADMIN")) {
+                throw new AppException("Product is inactive", HttpStatus.BAD_REQUEST);
+            }
         }
-
         //map product to ProductDetailResponse
         ProductDetailResponse productDetailResponse = ProductMapper.INSTANCE.toProductDetailResponse(product);
 
@@ -149,7 +161,10 @@ public class ProductService {
         return productRepo.findAll(PageRequest.of(page, size))
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 });
     }
@@ -161,13 +176,10 @@ public class ProductService {
 
         return productPage.map(product -> {
             ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-            List<ProductImage> images = productImageRepo.findAllByProductId(product.getId());
-
-            if (!images.isEmpty()) {
-                productResponse.setImage(images.get(0).getImage());
-            } else {
-                productResponse.setImage(null);
-            }
+            productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                    .findFirst()
+                    .map(ProductImage::getImage)
+                    .orElse(null));
 
             return productResponse;
         });
@@ -189,7 +201,10 @@ public class ProductService {
         return distinctProducts.stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
 
                     return productResponse;
                 })
@@ -203,7 +218,10 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).get(0).getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -215,7 +233,10 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -231,7 +252,6 @@ public class ProductService {
         }
 
         List<String> imageList = productRequest.getImageList();
-
         product.setCategory(productRequest.getCategory());
         //save product to product table
         Product savedProduct = productRepo.save(product);
@@ -337,5 +357,9 @@ public class ProductService {
 
         // Lưu danh sách các thành phần sản phẩm mới
         productIngredientRepo.saveAll(productIngredients);
+    }
+
+    private boolean userHasRole(User user, String role) {
+        return user.getRoles().stream().anyMatch(r -> r.getName().equals(role));
     }
 }
