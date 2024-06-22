@@ -28,7 +28,7 @@ public class RoleService {
 
     public RoleResponse createRole(RoleRequest roleRequest) {
         if (roleRepo.existsByName(roleRequest.getName())) {
-            throw new AppException(STR."Role \{roleRequest.getName()} already exists", HttpStatus.BAD_REQUEST);
+            throw new AppException("Role " + roleRequest.getName() + " already exists", HttpStatus.BAD_REQUEST);
         }
 
         var role = roleMapper.toRole(roleRequest);
@@ -48,7 +48,7 @@ public class RoleService {
     @Transactional
     public void deleteRole(String role) {
         var roleToDelete = roleRepo.findByName(role)
-                .orElseThrow(() -> new AppException(STR."Role \{role} not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Role " + role + " not found", HttpStatus.NOT_FOUND));
 
         roleToDelete.getPermissions().clear();
         roleToDelete.getUsers().forEach(user -> user.getRoles().remove(roleToDelete));
@@ -59,13 +59,13 @@ public class RoleService {
 
     public RoleResponse updateRole(RoleUpdateRequest request, String roleName) {
         var roleToUpdate = roleRepo.findByName(roleName)
-                .orElseThrow(() -> new AppException(STR."Role \{roleName} not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Role " + roleName + " not found", HttpStatus.NOT_FOUND));
 
         Set<Permission> foundPermissions = new HashSet<>();
 
         for (String permName : request.getPermissions()) {
             Permission perm = permissionRepo.findByName(permName)
-                    .orElseThrow(() -> new AppException(STR."Permission \{permName} not found", HttpStatus.NOT_FOUND));
+                    .orElseThrow(() -> new AppException("Permission " + permName + " not found", HttpStatus.NOT_FOUND));
             foundPermissions.add(perm);
         }
 
@@ -78,6 +78,6 @@ public class RoleService {
     public RoleResponse getRole(String role) {
         return roleRepo.findByName(role)
                 .map(roleMapper::toRoleResponse)
-                .orElseThrow(() -> new AppException(STR."Role \{role} not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Role " + role + " not found", HttpStatus.NOT_FOUND));
     }
 }

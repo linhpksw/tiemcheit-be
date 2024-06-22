@@ -1,0 +1,10 @@
+version: '1.0'
+services:
+  spring-boot-app:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:mysql://103.179.173.132:3306/tiemcheitdb
+      - SPRING_DATASOURCE_USERNAME=remote_user
+      - SPRING_DATASOURCE_PASSWORD=Bmcmc20@

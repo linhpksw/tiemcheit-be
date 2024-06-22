@@ -206,7 +206,7 @@ public class AuthService {
             expiryTime = new Date(issueTime.toInstant().plus(refreshTokenExpiration, ChronoUnit.SECONDS).toEpochMilli());
 
             if (activeRefreshTokenRepo.findByJti(jti).isEmpty()) {
-                throw new AppException(STR."Refresh token \{token} not found in repository.", HttpStatus.UNAUTHORIZED);
+                throw new AppException("Refresh token " + token + " not found in repository.", HttpStatus.UNAUTHORIZED);
             }
         }
 
@@ -239,7 +239,7 @@ public class AuthService {
         }
 
         if (!user.getIsActivated()) {
-            throw new AppException(STR."This account has not been activated. Please enter verification code sent to the email \{user.getEmail()}", HttpStatus.FORBIDDEN);
+            throw new AppException("This account has not been activated. Please enter verification code sent to the email " + user.getEmail(), HttpStatus.FORBIDDEN);
         }
 
         if (user.getPassword() == null) {
@@ -285,7 +285,7 @@ public class AuthService {
 
         if (!CollectionUtils.isEmpty(user.getRoles()))
             user.getRoles().forEach(role -> {
-                stringJoiner.add(STR."ROLE_\{role.getName()}");
+                stringJoiner.add("ROLE_" + role.getName());
                 if (!CollectionUtils.isEmpty(role.getPermissions()))
                     role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
             });
