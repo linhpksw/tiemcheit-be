@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - dev  # Set to whatever branch you want to trigger the deployment.
-      - master
 
 jobs:
   build_and_push:
