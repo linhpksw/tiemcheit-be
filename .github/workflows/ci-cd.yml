@@ -61,5 +61,9 @@ jobs:
             # Pull the latest image
             docker pull linhpksw/tiemcheit-be-spring-boot-app:latest
             
-            # Run the new container
-            docker run --name tiemcheitapp -d -p 8080:8080 linhpksw/tiemcheit-be-spring-boot-app:latest
+            # Run the new container with environment variables
+            docker run --name tiemcheitapp -d -p 8080:8080 \
+              -e SPRING_DATASOURCE_URL=${{ secrets.DB_URL }} \
+              -e SPRING_DATASOURCE_USERNAME=${{ secrets.DB_USERNAME }} \
+              -e SPRING_DATASOURCE_PASSWORD=${{ secrets.DB_PASSWORD }} \
+              linhpksw/tiemcheit-be-spring-boot-app:latest
