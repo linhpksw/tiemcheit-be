@@ -11,8 +11,8 @@ public class Discount {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "coupon_id", unique = true, nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "coupon_id", nullable = false)
     private Coupon coupon;
 
     private String type; // category, product, total, ship
@@ -27,6 +27,7 @@ public class Discount {
 
     private String valueType; // percent, fixed
     private Double valueFixed;
+
 
 }
 

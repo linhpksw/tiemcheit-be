@@ -15,6 +15,7 @@ public interface CouponRepo extends JpaRepository<Coupon, Long> {
 
     List<Coupon> findAllById(Iterable<Long> ids);
 
+    @Query("SELECT c FROM Coupon c WHERE c.code = :code")
     Coupon findByCode(String code);
 
     @Override
