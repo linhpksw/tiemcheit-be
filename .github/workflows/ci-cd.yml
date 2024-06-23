@@ -49,7 +49,17 @@ jobs:
           username: ${{ secrets.SERVER_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           script: |
+            # Stop all containers (prevents errors if any are still running)
+            docker stop $(docker ps -aq)
+            
+            # Remove all containers (frees up resources)
+            docker rm -f $(docker ps -aq)
+            
+            # Remove all unused Docker images (cleans up old images)
+            docker image prune -a -f
+            
+            # Pull the latest image
             docker pull linhpksw/tiemcheit-be-spring-boot-app:latest
-            docker stop tiemcheitapp || true
-            docker rm tiemcheitapp || true
+            
+            # Run the new container
             docker run --name tiemcheitapp -d -p 8080:8080 linhpksw/tiemcheit-be-spring-boot-app:latest
