@@ -2,10 +2,7 @@ package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
-import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.UserReviewResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.*;
 import com.tiemcheit.tiemcheitbe.service.ProductService;
 import com.tiemcheit.tiemcheitbe.service.ReviewService;
 import lombok.AllArgsConstructor;
@@ -59,14 +56,6 @@ public class ProductController {
         return ApiResponse.<ProductDetailResponse>builder()
                 .data(productService.getProductDetailById(id))
                 .message(SUCCESS_MSG)
-                .build();
-    }
-
-    @PutMapping("/{id}")
-    public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
-        return ApiResponse.<ProductResponse>builder()
-                .data(productService.update(productRequest, id))
-                .message("Success")
                 .build();
     }
 
@@ -127,5 +116,19 @@ public class ProductController {
 //                .message(SUCCESS_MSG)
 //                .build();
 //    }
+    @GetMapping("/user/{username}")
+    public ApiResponse<List<PurchasedProductResponse>> getProductPurchasedByUsername(@PathVariable String username) {
+        return ApiResponse.<List<PurchasedProductResponse>>builder()
+                .data(productService.getPurchasedProducts(username))
+                .message("success")
+                .build();
+    }
+    @GetMapping("/status/unavailable")
+    public ApiResponse<List<ProductResponse>> getUnavailableProducts() {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getUnavailableProducts())
+                .message("success")
+                .build();
+    }
 
 }

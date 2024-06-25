@@ -26,4 +26,9 @@ public interface ProductRepo extends JpaRepository<Product, Long> {
     List<Product> findAllByActiveAndDisabledStatus();
 
     List<Product> findAllByStatus(String status);
+    @Query("SELECT p FROM Product p JOIN ProductIngredient pi ON p.id = pi.product.id " +
+            "JOIN Ingredient i ON pi.ingredient.id = i.id " +
+            "WHERE i.status = 'disabled' " +
+            "OR pi.unit > i.quantity")
+    List<Product> findUnavailableProducts();
 }

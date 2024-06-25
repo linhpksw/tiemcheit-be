@@ -65,6 +65,11 @@ public class IngredientService {
         return IngredientMapper.INSTANCE.toIngredientResponse(ingredientRepo.save(ingredient));
 
     }
+    public void delete(long id) {
+        var ingredient = ingredientRepo.findById(id)
+                .orElseThrow(() -> new AppException("Ingredient not exists", HttpStatus.BAD_REQUEST));
+        ingredientRepo.delete(ingredient);
+    }
     public IngredientResponse restock(long id, IngredientRestockRequest request){
         var ingredient = ingredientRepo.findById(id)
                 .orElseThrow(() -> new AppException("Ingredient already exists", HttpStatus.BAD_REQUEST));

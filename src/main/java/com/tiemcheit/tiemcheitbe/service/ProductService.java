@@ -1,10 +1,7 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
-import com.tiemcheit.tiemcheitbe.dto.response.IngredientResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.OptionResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.*;
 import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
@@ -41,6 +38,9 @@ public class ProductService {
 
     private final OptionMapper optionMapper;
     private final ProductIngredientMapper productIngredientMapper;
+    private final OrderDetailRepo orderDetailRepo;
+    private final OrderRepo orderRepo;
+    private final UserRepo userRepo;
 
     //=============================================FOR CLIENTS=======================================================
     //get all products by active and disabled status
@@ -153,6 +153,39 @@ public class ProductService {
 
         return productDetailResponse;
     }
+    public List<PurchasedProductResponse> getPurchasedProducts(String username) {
+        // Find the user by username
+        var user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        // Find all orders of the user
+        List<Order> ordersOfUser = orderRepo.findAllByUser(user);
+
+        // Flatten the order details from all the orders
+        List<OrderDetail> orderDetailsOfUser = ordersOfUser.stream()
+                .flatMap(order -> orderDetailRepo.findAllByOrderId(order.getId()).stream())
+                .collect(Collectors.toList());
+
+        // Map order details and products to PurchasedProductResponse
+        List<PurchasedProductResponse> purchasedProducts = orderDetailsOfUser.stream()
+                .map(orderDetail -> {
+                    var product = productRepo.findById(orderDetail.getProduct().getId())
+                            .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+
+                    // Build and return the PurchasedProductResponse
+                    return PurchasedProductResponse.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .price(product.getPrice())
+                            .image(productImageRepo.findAllByProductId(product.getId()).get(0).getImage())
+                            .category(product.getCategory())
+                            .orderDetailId(orderDetail.getId())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return purchasedProducts;
+    }
 
     //=============================================FOR ADMINS=======================================================
     @PreAuthorize("hasRole('ADMIN')")
@@ -178,7 +211,16 @@ public class ProductService {
                 })
                 .toList();
     }
-
+    public List<ProductResponse> getUnavailableProducts() {
+        return productRepo.findUnavailableProducts()
+                .stream()
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    return productResponse;
+                })
+                .toList();
+    }
     //create a new product
     @PreAuthorize("hasRole('ADMIN')")
     public ProductResponse create(ProductRequest productRequest) {
@@ -289,4 +331,5 @@ public class ProductService {
         // Lưu danh sách các thành phần sản phẩm mới
         productIngredientRepo.saveAll(productIngredients);
     }
+
 }

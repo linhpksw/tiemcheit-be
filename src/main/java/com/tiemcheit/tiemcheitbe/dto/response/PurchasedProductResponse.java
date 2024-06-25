@@ -1,7 +1,6 @@
 package com.tiemcheit.tiemcheitbe.dto.response;
 
-import com.tiemcheit.tiemcheitbe.model.Store;
-import jakarta.persistence.*;
+import com.tiemcheit.tiemcheitbe.model.Category;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,11 +10,12 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IngredientResponse {
+public class PurchasedProductResponse {
     private Long id;
     private String name;
+    private Double price;
     private String image;
-    private double price;
-    private int quantity;
-    private String status;
+    private Category category;
+
+    private Long orderDetailId;
 }
