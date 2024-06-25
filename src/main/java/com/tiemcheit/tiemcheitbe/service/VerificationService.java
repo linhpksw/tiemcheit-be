@@ -1,6 +1,6 @@
 package com.tiemcheit.tiemcheitbe.service;
 
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.model.User;
 import com.tiemcheit.tiemcheitbe.model.VerificationCode;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
@@ -54,7 +54,7 @@ public class VerificationService {
             user.getVerificationCodes().clear();
             verificationCodeRepo.deleteByUserId(user.getId());
         }
-        
+
         userRepo.save(user);
     }
 

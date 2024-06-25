@@ -3,7 +3,7 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.request.IngredientRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.IngredientRestockRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.IngredientResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.repository.IngredientRepo;
 import com.tiemcheit.tiemcheitbe.repository.StoreRepo;

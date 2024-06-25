@@ -5,7 +5,7 @@ import com.tiemcheit.tiemcheitbe.dto.response.IngredientResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OptionResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductIngredientMapper;
@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -110,6 +109,7 @@ public class ProductService {
                 })
                 .toList();
     }
+
     //get product of an ingredients
     public List<ProductResponse> getProductsOfIngredient(Long ingredientId) {
         List<ProductIngredient> productIngredients = productIngredientRepo.findAllByIngredientId(ingredientId);

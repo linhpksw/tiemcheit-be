@@ -4,7 +4,7 @@ import com.tiemcheit.tiemcheitbe.dto.request.CouponRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CouponResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.CouponMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.*;

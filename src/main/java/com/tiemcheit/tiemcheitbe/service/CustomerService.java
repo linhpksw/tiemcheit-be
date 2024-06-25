@@ -2,7 +2,7 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.CustomerRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.UserProfileResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.RoleMapper;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
 import com.tiemcheit.tiemcheitbe.model.Role;

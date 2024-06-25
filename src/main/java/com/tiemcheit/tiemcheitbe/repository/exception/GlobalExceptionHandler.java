@@ -1,4 +1,4 @@
-package com.tiemcheit.tiemcheitbe.exception;
+package com.tiemcheit.tiemcheitbe.repository.exception;
 
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import lombok.extern.slf4j.Slf4j;

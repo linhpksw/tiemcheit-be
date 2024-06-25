@@ -2,7 +2,7 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.PermissionRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.PermissionResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.PermissionMapper;
 import com.tiemcheit.tiemcheitbe.model.Permission;
 import com.tiemcheit.tiemcheitbe.repository.PermissionRepo;

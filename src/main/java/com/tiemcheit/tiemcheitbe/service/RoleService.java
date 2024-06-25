@@ -3,7 +3,7 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.request.RoleRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.RoleUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.RoleResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.RoleMapper;
 import com.tiemcheit.tiemcheitbe.model.Permission;
 import com.tiemcheit.tiemcheitbe.repository.PermissionRepo;
