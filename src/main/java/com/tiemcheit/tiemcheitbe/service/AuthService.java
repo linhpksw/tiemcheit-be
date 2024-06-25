@@ -10,10 +10,13 @@ import com.tiemcheit.tiemcheitbe.dto.response.AuthResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ExchangeTokenResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.GoogleUserResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
-import com.tiemcheit.tiemcheitbe.model.*;
+import com.tiemcheit.tiemcheitbe.model.ActiveRefreshToken;
+import com.tiemcheit.tiemcheitbe.model.Role;
+import com.tiemcheit.tiemcheitbe.model.User;
+import com.tiemcheit.tiemcheitbe.model.VerificationCode;
 import com.tiemcheit.tiemcheitbe.repository.*;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -30,7 +33,6 @@ import java.text.ParseException;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -41,6 +43,7 @@ public class AuthService {
     private final ActiveRefreshTokenRepo activeRefreshTokenRepo;
     private final PasswordEncoder passwordEncoder;
     private final RoleRepo roleRepo;
+    private final VerificationCodeRepo verificationCodeRepo;
     private final UserMapper userMapper;
     private final VerificationService verificationService;
     private final OAuth2Client oAuth2Client;
@@ -111,6 +114,10 @@ public class AuthService {
             throw new AppException("This account has been deleted.", HttpStatus.FORBIDDEN);
         }
 
+        if ("INACTIVE".equals(user.getStatus())) {
+            throw new AppException("This account has been banned", HttpStatus.FORBIDDEN);
+        }
+
         return getAuthResponse(user);
     }
 
@@ -150,19 +157,6 @@ public class AuthService {
         roleRepo.findByName("CUSTOMER").ifPresent(roles::add);
         user.setRoles(roles);
 
-        if (request.getAddresses() != null) {
-            User finalUser = user;
-            Set<UserAddress> addresses = request.getAddresses().stream()
-                    .map(addr -> UserAddress.builder()
-                            .address(addr.getAddress())
-                            .isDefault(addr.getIsDefault())
-                            .user(finalUser)
-                            .build())
-                    .collect(Collectors.toSet());
-
-            user.setAddresses(addresses);
-        }
-
         List<VerificationCode> verificationCodes = new ArrayList<>();
         verificationCodes.add(verificationService.generateVerificationCode(user));
         user.setVerificationCodes(verificationCodes);
@@ -201,7 +195,7 @@ public class AuthService {
             expiryTime = new Date(issueTime.toInstant().plus(refreshTokenExpiration, ChronoUnit.SECONDS).toEpochMilli());
 
             if (activeRefreshTokenRepo.findByJti(jti).isEmpty()) {
-                throw new AppException(STR."Refresh token \{token} not found in repository.", HttpStatus.UNAUTHORIZED);
+                throw new AppException("Refresh token " + token + " not found in repository.", HttpStatus.UNAUTHORIZED);
             }
         }
 
@@ -229,8 +223,12 @@ public class AuthService {
             throw new AppException("This account has been deleted", HttpStatus.FORBIDDEN);
         }
 
+        if ("INACTIVE".equals(user.getStatus())) {
+            throw new AppException("This account has been banned", HttpStatus.FORBIDDEN);
+        }
+
         if (!user.getIsActivated()) {
-            throw new AppException(STR."This account has not been activated. Please enter verification code sent to the email \{user.getEmail()}", HttpStatus.FORBIDDEN);
+            throw new AppException("This account has not been activated. Please enter verification code sent to the email " + user.getEmail(), HttpStatus.FORBIDDEN);
         }
 
         if (user.getPassword() == null) {
@@ -276,7 +274,7 @@ public class AuthService {
 
         if (!CollectionUtils.isEmpty(user.getRoles()))
             user.getRoles().forEach(role -> {
-                stringJoiner.add(STR."ROLE_\{role.getName()}");
+                stringJoiner.add("ROLE_" + role.getName());
                 if (!CollectionUtils.isEmpty(role.getPermissions()))
                     role.getPermissions().forEach(permission -> stringJoiner.add(permission.getName()));
             });
@@ -334,8 +332,20 @@ public class AuthService {
         userRepo.save(user);
     }
 
-    public void resetPassword(String email, String newPassword) {
+    public void resetPassword(String email, String newPassword, String code) {
         User user = userRepo.findByEmail(email).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        boolean codeFound = user.getVerificationCodes().stream()
+                .anyMatch(vc -> vc.getCode().equals(code) && !vc.isExpired());
+
+        log.info("Code found: {}", codeFound);
+
+        if (!codeFound) {
+            throw new AppException("Verification code not found or expired", HttpStatus.BAD_REQUEST);
+        }
+
+        user.getVerificationCodes().clear();
+        verificationCodeRepo.deleteByUserId(user.getId());
 
         user.setPassword(passwordEncoder.encode(newPassword));
         userRepo.save(user);

@@ -46,5 +46,9 @@ public class Order {
     @JoinColumn(name = "user_id", foreignKey = @ForeignKey(name = "order_user_fk"))
     private User user;
 
+    @ManyToOne
+    private Coupon coupon;
 
+    @Column(name = "discount_price")
+    private Double discountPrice;
 }

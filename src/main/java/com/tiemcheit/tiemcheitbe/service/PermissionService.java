@@ -2,7 +2,7 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.PermissionRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.PermissionResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.PermissionMapper;
 import com.tiemcheit.tiemcheitbe.model.Permission;
 import com.tiemcheit.tiemcheitbe.repository.PermissionRepo;
@@ -23,7 +23,7 @@ public class PermissionService {
 
     public PermissionResponse createPermission(PermissionRequest request) {
         if (permissionRepo.existsByName(request.getName())) {
-            throw new AppException(STR."Permission \{request.getName()} already exists", HttpStatus.BAD_REQUEST);
+            throw new AppException("Permission " + request.getName() + " already exists", HttpStatus.BAD_REQUEST);
         }
 
         Permission permission = permissionMapper.toPermission(request);
@@ -40,13 +40,13 @@ public class PermissionService {
 
     public PermissionResponse getPermission(String permission) {
         var permissionEntity = permissionRepo.findByName(permission)
-                .orElseThrow(() -> new AppException(STR."Permission \{permission} not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Permission " + permission + " not found", HttpStatus.NOT_FOUND));
         return permissionMapper.toPermissionResponse(permissionEntity);
     }
 
     public void deletePermission(String permission) {
         if (!permissionRepo.existsByName(permission)) {
-            throw new AppException(STR."Permission \{permission} not exists", HttpStatus.BAD_REQUEST);
+            throw new AppException("Permission " + permission + " not exists", HttpStatus.BAD_REQUEST);
         }
 
         permissionRepo.deleteByName(permission);
@@ -54,12 +54,12 @@ public class PermissionService {
 
     public PermissionResponse updatePermission(PermissionRequest request, String permissionName) {
         var permissionToUpdate = permissionRepo.findByName(permissionName)
-                .orElseThrow(() -> new AppException(STR."Permission \{permissionName} not found", HttpStatus.NOT_FOUND));
+                .orElseThrow(() -> new AppException("Permission " + permissionName + " not found", HttpStatus.NOT_FOUND));
 
         permissionRepo.findByName(request.getName())
                 .ifPresent(permission -> {
                     if (!permission.getName().equals(permissionName)) {
-                        throw new AppException(STR."Permission \{request.getName()} already exists", HttpStatus.BAD_REQUEST);
+                        throw new AppException("Permission " + request.getName() + " already exists", HttpStatus.BAD_REQUEST);
                     }
                 });
 

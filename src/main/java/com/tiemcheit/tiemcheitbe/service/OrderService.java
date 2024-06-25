@@ -3,12 +3,9 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.request.OrderRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OrderResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.OrderMapper;
-import com.tiemcheit.tiemcheitbe.model.Order;
-import com.tiemcheit.tiemcheitbe.model.OrderDetail;
-import com.tiemcheit.tiemcheitbe.model.Product;
-import com.tiemcheit.tiemcheitbe.model.User;
+import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.OrderRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
@@ -32,6 +29,7 @@ public class OrderService {
     private final UserRepo userRepo;
     private final OrderMapper orderMapper;
     private final CartService cartService;
+    private final CouponService couponService;
 
     public List<OrderResponse> getUserOrders() {
         User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
@@ -60,7 +58,6 @@ public class OrderService {
             // test
             throw new AppException("Access denied", HttpStatus.FORBIDDEN);
         }
-
     }
 
     public List<OrderResponse> getFilterOrders(Date startDate, Date endDate, String status) {
@@ -72,7 +69,7 @@ public class OrderService {
         return orderMapper.toResponses(orderRepo.findAllByOptionalFilters(startDate, endDate, status));
     }
 
-    public Long placeOrder(OrderRequest request) {
+    public Long placeOrder(OrderRequest request, String code) {
         // first get the item from user's cart
         List<CartItemResponse> cartItemList = cartService.allCartItems();
 
@@ -86,6 +83,14 @@ public class OrderService {
         order.setPaymentMethod(request.getPaymentMethod()); // Replace with actual data
         order.setMessage(request.getMessage());
         order.setOrderStatus("Order Received"); // Replace with actual data
+        // set coupon to order if having code
+        if (code != null) {
+            Coupon coupon = couponService.getCouponByCode(code);
+            order.setCoupon(coupon);
+            if (coupon != null)
+                coupon.setUseCount(coupon.getUseCount() + 1);
+        }
+        order.setDiscountPrice(request.getDiscountPrice());
 
         // Retrieve the user
 

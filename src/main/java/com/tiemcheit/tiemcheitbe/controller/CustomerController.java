@@ -39,4 +39,17 @@ public class CustomerController {
                 .message("Success")
                 .data(data).build();
     }
+
+    @GetMapping("/filter")
+    public ApiResponse<List<UserProfileResponse>> filteredCustomers(
+            @RequestParam(required = false) String status,
+            @RequestParam(required = false) String sortOption,
+            @RequestParam(required = false) String order) {
+        var data = customerService.getCustomersByStatus(status, sortOption, order);
+        return ApiResponse.<List<UserProfileResponse>>builder()
+                .message("Success")
+                .data(data)
+                .build();
+    }
+
 }

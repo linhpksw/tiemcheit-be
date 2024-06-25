@@ -20,5 +20,4 @@ public class UserUpdateRequest {
     private String status;
     private Boolean isActivated;
     private Set<RoleRequest> roles;
-    private Set<AddressRequest> addresses;
 }

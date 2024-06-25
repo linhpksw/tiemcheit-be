@@ -6,6 +6,7 @@ import com.tiemcheit.tiemcheitbe.dto.response.*;
 import com.tiemcheit.tiemcheitbe.service.ProductService;
 import com.tiemcheit.tiemcheitbe.service.ReviewService;
 import lombok.AllArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -59,16 +60,37 @@ public class ProductController {
                 .build();
     }
 
+
     @GetMapping("filter")
-    public ApiResponse<List<ProductResponse>> searchProducts(
+    public ApiResponse<List<ProductResponse>> filter(
             @RequestParam Map<String, String> params,
             @RequestParam(required = false, defaultValue = "id") String sortBy,
             @RequestParam(required = false, defaultValue = "asc") String direction) {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getProductByConditionsAndSort(params, sortBy, direction))
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
+
+    @GetMapping("pagination/{page}/{size}")
+    public ApiResponse<Page<ProductResponse>> getProductsWithPagination(@PathVariable int page, @PathVariable int size) {
+        return ApiResponse.<Page<ProductResponse>>builder()
+                .data(productService.getProductsWithPagination(page, size))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
+    @GetMapping("pagination/{page}/{size}/filter")
+    public ApiResponse<Page<ProductResponse>> getProductsWithPaginationAndFilter(@PathVariable int page, @PathVariable int size,
+                                                                                 @RequestParam Map<String, String> params,
+                                                                                 @RequestParam(required = false, defaultValue = "id") String sortBy,
+                                                                                 @RequestParam(required = false, defaultValue = "asc") String direction) {
+        return ApiResponse.<Page<ProductResponse>>builder()
+                .data(productService.getProductsWithPaginationAndSort(page, size, params, sortBy, direction))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
 
     @GetMapping("/{id}/reviews")
     public ApiResponse<List<UserReviewResponse>> getReviewsByProductId(@PathVariable("id") long productId) {
@@ -86,6 +108,15 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/ordered")
+    public ApiResponse<List<ProductResponse>> getHistoryOrderedProducts() {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getHistoryOrderProduct())
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
+
     @PostMapping("")
     public ApiResponse<ProductResponse> addProduct(@RequestBody ProductRequest productRequest) {
         return ApiResponse.<ProductResponse>builder()
@@ -95,10 +126,10 @@ public class ProductController {
     }
 
     @PutMapping("/{id}")
-    public ApiResponse<ProductResponse> updateProduct(@PathVariable Long id, @RequestBody ProductRequest productRequest) {
+    public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
         return ApiResponse.<ProductResponse>builder()
                 .data(productService.update(productRequest, id))
-                .message(SUCCESS_MSG)
+                .message("Success")
                 .build();
     }
 
@@ -128,6 +159,14 @@ public class ProductController {
         return ApiResponse.<List<ProductResponse>>builder()
                 .data(productService.getUnavailableProducts())
                 .message("success")
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Boolean> deleteProduct(@PathVariable Long id) {
+        return ApiResponse.<Boolean>builder()
+                .data(productService.delete(id))
+                .message(SUCCESS_MSG)
                 .build();
     }
 

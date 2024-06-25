@@ -86,7 +86,7 @@ public class AuthController {
 
     @PostMapping("/reset-password")
     ApiResponse<Void> resetPassword(@RequestBody ResetPasswordRequest request) {
-        authService.resetPassword(request.getEmail(), request.getNewPassword());
+        authService.resetPassword(request.getEmail(), request.getNewPassword(), request.getCode());
         return ApiResponse.<Void>builder().message("Success").build();
     }
 

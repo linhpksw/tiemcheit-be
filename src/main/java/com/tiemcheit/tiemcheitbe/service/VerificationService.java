@@ -1,6 +1,6 @@
 package com.tiemcheit.tiemcheitbe.service;
 
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.model.User;
 import com.tiemcheit.tiemcheitbe.model.VerificationCode;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
@@ -42,8 +42,6 @@ public class VerificationService {
         User user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
 
-        log.info("User: {}", user);
-
         boolean codeFound = user.getVerificationCodes().stream()
                 .anyMatch(vc -> vc.getCode().equals(code) && !vc.isExpired());
 
@@ -53,10 +51,10 @@ public class VerificationService {
 
         if (type.equals("verify")) {
             user.setIsActivated(true);
+            user.getVerificationCodes().clear();
+            verificationCodeRepo.deleteByUserId(user.getId());
         }
 
-        verificationCodeRepo.deleteByUserId(user.getId());
-        user.getVerificationCodes().clear();
         userRepo.save(user);
     }
 
@@ -70,7 +68,7 @@ public class VerificationService {
         if (type.equals("verify") && user.getIsActivated()) {
             throw new AppException("User is already activated", HttpStatus.BAD_REQUEST);
         }
-        
+
         verificationCodeRepo.deleteByUserId(user.getId());
         user.getVerificationCodes().clear();
 

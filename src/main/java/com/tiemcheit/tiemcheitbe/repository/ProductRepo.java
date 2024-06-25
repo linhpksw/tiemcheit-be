@@ -5,13 +5,17 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface ProductRepo extends JpaRepository<Product, Long> {
+public interface ProductRepo extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
+
+//    @Query("SELECT p FROM Product p WHERE p.id = :productId")
+//    Product findProductById(@Param("productId") Long productId);
 
     @Query("SELECT p FROM Product p WHERE p.status = 'active' OR p.status = 'disabled'")
     List<Product> findAllByCategoryId(Long category_id);

@@ -41,14 +41,14 @@ public class OrderController {
                 .build();
     }
 
-@GetMapping("/user/{uid}")
+    @GetMapping("/user/{uid}")
     public ApiResponse<List<OrderResponse>> getOrderByUser(@PathVariable Long uid) {
         return ApiResponse.<List<OrderResponse>>builder()
                 .data(orderService.getOrdersByUser(uid))
                 .message("Success")
                 .build();
     }
-    
+
     @GetMapping("/filter")
     public ApiResponse<List<OrderResponse>> getOrdersByDateRangeAndStatus(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
@@ -62,9 +62,9 @@ public class OrderController {
 
     @GetMapping("/admin/filter")
     public ApiResponse<List<OrderResponse>> getFilterOrdersByAdmin(
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
-            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
-            @RequestParam String status) {
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date startDate,
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Date endDate,
+            @RequestParam(required = false) String status) {
         return ApiResponse.<List<OrderResponse>>builder()
                 .data(orderService.getFilterOrdersByAdmin(startDate, endDate, status))
                 .message("Success")
@@ -72,9 +72,9 @@ public class OrderController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<Long> addOrder(@RequestBody OrderRequest request) {
+    public ApiResponse<Long> addOrder(@RequestBody OrderRequest request, @RequestParam(required = false) String code) {
         return ApiResponse.<Long>builder()
-                .data(orderService.placeOrder(request))
+                .data(orderService.placeOrder(request, code))
                 .message("Success")
                 .build();
     }
@@ -83,6 +83,12 @@ public class OrderController {
     public ApiResponse<Void> updateOrderByUser(@PathVariable Long orderId,
                                                @RequestParam String status) {
         orderService.updateOrderStatus(orderId, status);
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
+    @PatchMapping("/{orderId}/confirm")
+    public ApiResponse<Void> updateOrderByUser(@PathVariable Long orderId) {
+        orderService.updateOrderStatus(orderId, "Order Confirmed");
         return ApiResponse.<Void>builder().message("Success").build();
     }
 }

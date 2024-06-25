@@ -10,8 +10,10 @@ import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.*;
 import com.tiemcheit.tiemcheitbe.service.specification.ProductSpecification;
+import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -22,7 +24,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -34,6 +35,7 @@ public class ProductService {
     private final ProductImageRepo productImageRepo;
     private final OptionRepo optionRepo;
     private final IngredientRepo ingredientRepo;
+    private final UserRepo userRepo;
 
 
     private final OptionMapper optionMapper;
@@ -49,7 +51,10 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).get(0).getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -62,7 +67,10 @@ public class ProductService {
         return products.stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -77,7 +85,10 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -96,6 +107,7 @@ public class ProductService {
                 })
                 .toList();
     }
+
     //get product of an ingredients
     public List<ProductResponse> getProductsOfIngredient(Long ingredientId) {
         List<ProductIngredient> productIngredients = productIngredientRepo.findAllByIngredientId(ingredientId);
@@ -119,9 +131,12 @@ public class ProductService {
          * */
         Product product = productRepo.findById(productId).orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
         if (product.getStatus().equals("inactive")) {
-            throw new AppException("Product is inactive", HttpStatus.BAD_REQUEST);
+            User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername())
+                    .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+            if (!userHasRole(user, "ADMIN")) {
+                throw new AppException("Product is inactive", HttpStatus.BAD_REQUEST);
+            }
         }
-
         //map product to ProductDetailResponse
         ProductDetailResponse productDetailResponse = ProductMapper.INSTANCE.toProductDetailResponse(product);
 
@@ -187,6 +202,60 @@ public class ProductService {
         return purchasedProducts;
     }
 
+    public Page<ProductResponse> getProductsWithPagination(int page, int size) {
+        return productRepo.findAll(PageRequest.of(page, size))
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
+                    return productResponse;
+                });
+    }
+
+    public Page<ProductResponse> getProductsWithPaginationAndSort(int page, int size, Map<String, String> conditions, String sortField, String sortDirection) {
+        Specification<Product> specification = ProductSpecification.getSpecification(conditions);
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField);
+        Page<Product> productPage = productRepo.findAll(specification, PageRequest.of(page, size, sort));
+
+        return productPage.map(product -> {
+            ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+            productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                    .findFirst()
+                    .map(ProductImage::getImage)
+                    .orElse(null));
+
+            return productResponse;
+        });
+    }
+
+    public List<ProductResponse> getHistoryOrderProduct() {
+        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        List<Order> orders = orderRepo.findAllByUserOrderByIdDesc(user);
+
+        List<Product> distinctProducts = orders.stream()
+                .flatMap(order -> orderDetailRepo.findAllByOrderId(order.getId()).stream())
+                .map(orderDetail -> productRepo.findById(orderDetail.getProduct().getId())
+                        .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND)))
+                .distinct()
+                .toList();
+
+        return distinctProducts.stream()
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
+
+                    return productResponse;
+                })
+                .toList();
+    }
+
     //=============================================FOR ADMINS=======================================================
     @PreAuthorize("hasRole('ADMIN')")
     public List<ProductResponse> getAllProductsByStatus(String status) {
@@ -194,7 +263,10 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).get(0).getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -206,7 +278,10 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
                     return productResponse;
                 })
                 .toList();
@@ -231,7 +306,6 @@ public class ProductService {
         }
 
         List<String> imageList = productRequest.getImageList();
-
         product.setCategory(productRequest.getCategory());
         //save product to product table
         Product savedProduct = productRepo.save(product);
@@ -284,6 +358,13 @@ public class ProductService {
         return productResponse;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    public Boolean delete(Long id) {
+        Product product = productRepo.findById(id)
+                .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+        productRepo.delete(product);
+        return true;
+    }
 
     private void updateProductImages(ProductRequest productRequest, Product product) {
         productImageRepo.deleteAllByProductId(product.getId());
@@ -332,4 +413,7 @@ public class ProductService {
         productIngredientRepo.saveAll(productIngredients);
     }
 
+    private boolean userHasRole(User user, String role) {
+        return user.getRoles().stream().anyMatch(r -> r.getName().equals(role));
+    }
 }
