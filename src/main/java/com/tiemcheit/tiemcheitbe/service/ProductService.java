@@ -2,7 +2,7 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.*;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductIngredientMapper;
@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -42,7 +43,6 @@ public class ProductService {
     private final ProductIngredientMapper productIngredientMapper;
     private final OrderDetailRepo orderDetailRepo;
     private final OrderRepo orderRepo;
-    private final UserRepo userRepo;
 
     //=============================================FOR CLIENTS=======================================================
     //get all products by active and disabled status
