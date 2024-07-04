@@ -41,7 +41,7 @@ public class CartController {
     public ApiResponse<Double> applyDiscount(@PathVariable String code) {
 
         return ApiResponse.<Double>builder()
-                .data(couponService.applyCouponToCart(code))
+                .data(couponService.applyCouponToCart(code, "lmao"))
                 .message("Success")
                 .build();
     }
