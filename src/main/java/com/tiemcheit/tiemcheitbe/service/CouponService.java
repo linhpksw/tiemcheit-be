@@ -4,14 +4,15 @@ import com.tiemcheit.tiemcheitbe.dto.request.CouponRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CouponResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
+import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.CouponMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.*;
-import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -205,6 +206,33 @@ public class CouponService {
             throw new AppException("Coupon with ID " + couponId + " does not exist", HttpStatus.BAD_REQUEST);
         }
         couponRepository.deleteById(couponId);
+    }
+
+    // Method to update the coupon status
+    public void updateCouponStatus() {
+        List<Coupon> coupons = couponRepository.findAll();
+        Date now = new Date();
+
+        for (Coupon coupon : coupons) {
+            boolean canUpdate = false;
+            if (!coupon.getStatus().equals("disable") && coupon.getDateExpired().compareTo(now) <= 0) {
+                coupon.setStatus("disabled");
+                canUpdate = true;
+            } else if (!coupon.getStatus().equals("active") && coupon.getDateValid().compareTo(now) >= 0) {
+                coupon.setStatus("active");
+                canUpdate = true;
+            } else if (!coupon.getStatus().equals("inactive")) {
+                coupon.setStatus("inactive");
+                canUpdate = true;
+            }
+            if (canUpdate) couponRepository.save(coupon);
+        }
+    }
+
+    // Scheduled task to run the updateCouponStatus method every day at midnight
+    @Scheduled(cron = "0 * * * * ?")
+    public void scheduleCouponStatusUpdate() {
+        updateCouponStatus();
     }
 
     public void validateCouponRequest(CouponRequest request) {
