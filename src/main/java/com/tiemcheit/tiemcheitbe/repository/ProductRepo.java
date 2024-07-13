@@ -20,7 +20,7 @@ public interface ProductRepo extends JpaRepository<Product, Long>, JpaSpecificat
     @Query("SELECT p FROM Product p WHERE p.status = 'active' OR p.status = 'disabled'")
     List<Product> findAllByCategoryId(Long category_id);
 
-    @Query("SELECT p FROM Product p WHERE p.status = 'active' OR p.status = 'disabled'")
+    //    @Query("SELECT p FROM Product p WHERE p.status = 'active' OR p.status = 'disabled'")
     List<Product> findAll(Specification<Product> specification, Sort sort);
 
     @Query("SELECT  p FROM Product p WHERE p.status = 'active' ORDER BY p.sold DESC")
@@ -31,4 +31,5 @@ public interface ProductRepo extends JpaRepository<Product, Long>, JpaSpecificat
 
     List<Product> findAllByStatus(String status);
 
+    List<Product> findAllByCategoryIdAndStatus(Long category_id, String status);
 }
