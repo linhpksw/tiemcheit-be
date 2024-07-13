@@ -5,15 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.Set;
+
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IngredientRequest {
-    private String name;
-    private Long quantity;
-    private double price;
-    private String status;
-    private String image;
-    private Long id;
+public class OptionRequest {
+    public Long id;
+    public String name;
+    private Set<OptionValueRequest> optionValues;
 }

@@ -16,6 +16,9 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o ORDER BY o.orderDate DESC")
     List<Order> findAllByUserOrderDateDesc();
 
+    @Query("SELECT o FROM Order o WHERE o.orderStatus = :status")
+    List<Order> findAllByOrderStatus(String status);
+
     List<Order> findAllByUser(User user);
 
     List<Order> findAllByUserOrderByIdDesc(User user);
@@ -33,5 +36,6 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
 
     @Query("SELECT SUM(od.price * od.quantity) FROM Order o JOIN o.orderDetails od WHERE o.user.id = :userId")
     Double getTotalAmountSpentByUser(@Param("userId") Long userId);
+
     List<Order> findByUserIdAndCouponId(Long userId, Long couponId);
 }

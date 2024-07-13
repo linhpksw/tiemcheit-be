@@ -17,5 +17,5 @@ public class Category {
     @Column(nullable = false, length = 50)
     private String name;
 
-
+    private String status;
 }

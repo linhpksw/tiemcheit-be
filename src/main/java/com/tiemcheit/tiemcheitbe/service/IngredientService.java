@@ -3,10 +3,9 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.request.IngredientRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.IngredientRestockRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.IngredientResponse;
-import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.repository.IngredientRepo;
-import com.tiemcheit.tiemcheitbe.repository.StoreRepo;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
@@ -18,7 +17,6 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class IngredientService {
     private final IngredientRepo ingredientRepo;
-    private final StoreRepo storeRepo;
 
     public List<IngredientResponse> getAllIngredients() {
         return ingredientRepo.findAll()
@@ -34,7 +32,6 @@ public class IngredientService {
         var ingredient = IngredientMapper.INSTANCE.toIngredient(request);
 
         //comment when store service and mapper is available
-        ingredient.setStore(storeRepo.getReferenceById(1L));
         ingredient = ingredientRepo.save(ingredient);
         return IngredientMapper.INSTANCE.toIngredientResponse(ingredient);
     }
@@ -73,10 +70,4 @@ public class IngredientService {
         return ingredientRepo.findById(id).map(IngredientMapper.INSTANCE::toIngredientResponse).orElse(null);
     }
 
-    public List<IngredientResponse> getIngredientsByStoreId(Long store_id) {
-        return ingredientRepo.findAllByStoreId(store_id)
-                .stream()
-                .map(IngredientMapper.INSTANCE::toIngredientResponse)
-                .collect(Collectors.toList());
-    }
 }
