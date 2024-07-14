@@ -10,9 +10,11 @@ import com.tiemcheit.tiemcheitbe.dto.response.RoleResponse;
 import com.tiemcheit.tiemcheitbe.service.IngredientService;
 import com.tiemcheit.tiemcheitbe.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequiredArgsConstructor
@@ -69,4 +71,18 @@ public class IngredientController {
                 .message("Success")
                 .build();
     }
+    @GetMapping("pagination/{page}/{size}/filter")
+    public ApiResponse<Page<IngredientResponse>> getIngredientsWithPaginationAndFilter(
+            @PathVariable int page,
+            @PathVariable int size,
+            @RequestParam Map<String, String> params,
+            @RequestParam(required = false, defaultValue = "id") String sortBy,
+            @RequestParam(required = false, defaultValue = "asc") String direction) {
+        return ApiResponse.<Page<IngredientResponse>>builder()
+                .data(ingredientService.getIngredientsWithPaginationAndSort(page, size, params, sortBy, direction))
+                .message("Success")
+                .build();
+    }
+
+
 }
