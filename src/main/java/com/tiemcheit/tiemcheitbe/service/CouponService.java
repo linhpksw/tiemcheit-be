@@ -35,6 +35,7 @@ public class CouponService {
     private final OrderRepo orderRepo;
     private final CartService cartService;
     private final UserRepo userRepo;
+    private final EmailService emailService;
 
     @Transactional
     public List<CouponResponse> getAllCoupon() {
@@ -218,7 +219,8 @@ public class CouponService {
             if (!coupon.getStatus().equals("disable") && coupon.getDateExpired().compareTo(now) <= 0) {
                 coupon.setStatus("disabled");
                 canUpdate = true;
-            } else if (!coupon.getStatus().equals("active") && coupon.getDateValid().compareTo(now) >= 0) {
+            } else if (!coupon.getStatus().equals("active") && coupon.getDateValid().compareTo(now) <= 0
+                    && coupon.getDateExpired().compareTo(now) >= 0) {
                 coupon.setStatus("active");
                 canUpdate = true;
             } else if (!coupon.getStatus().equals("inactive")) {
@@ -276,5 +278,9 @@ public class CouponService {
                 trimmedValue.length() >= 4 &&
                 trimmedValue.length() <= 64 &&
                 code.equals(trimmedValue);
+    }
+
+    public void sendCouponCode(User user, Coupon coupon) {
+        emailService.sendCouponCode(user, coupon);
     }
 }
