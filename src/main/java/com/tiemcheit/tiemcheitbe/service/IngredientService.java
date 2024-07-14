@@ -4,13 +4,20 @@ import com.tiemcheit.tiemcheitbe.dto.request.IngredientRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.IngredientRestockRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.IngredientResponse;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
+import com.tiemcheit.tiemcheitbe.model.Ingredient;
 import com.tiemcheit.tiemcheitbe.repository.IngredientRepo;
 import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
+import com.tiemcheit.tiemcheitbe.service.specification.IngredientSpecification;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -69,5 +76,16 @@ public class IngredientService {
     public IngredientResponse getIngredientById(Long id) {
         return ingredientRepo.findById(id).map(IngredientMapper.INSTANCE::toIngredientResponse).orElse(null);
     }
+    public Page<IngredientResponse> getIngredientsWithPaginationAndSort(
+            int page,
+            int size,
+            Map<String, String> conditions,
+            String sortField,
+            String sortDirection) {
+        Specification<Ingredient> specification = IngredientSpecification.getSpecification(conditions);
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField.trim());
+        Page<Ingredient> ingredientPage = ingredientRepo.findAll(specification, PageRequest.of(page, size, sort));
 
+        return ingredientPage.map(IngredientMapper.INSTANCE::toIngredientResponse);
+    }
 }
