@@ -2,10 +2,7 @@ package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
-import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.UserReviewResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.*;
 import com.tiemcheit.tiemcheitbe.service.ProductService;
 import com.tiemcheit.tiemcheitbe.service.ReviewService;
 import lombok.AllArgsConstructor;
@@ -164,6 +161,13 @@ public class ProductController {
         return ApiResponse.<Boolean>builder()
                 .data(productService.delete(id))
                 .message(SUCCESS_MSG)
+                .build();
+    }
+    @GetMapping("/user/{username}")
+    public ApiResponse<List<PurchasedProductResponse>> getProductPurchasedByUsername(@PathVariable String username) {
+        return ApiResponse.<List<PurchasedProductResponse>>builder()
+                .data(productService.getPurchasedProducts(username))
+                .message("success")
                 .build();
     }
 
