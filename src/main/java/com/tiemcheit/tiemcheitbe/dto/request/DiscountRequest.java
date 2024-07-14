@@ -4,6 +4,7 @@ import lombok.Data;
 
 @Data
 public class DiscountRequest {
+    private Long id;
     private String type; // category, product, total, ship
     private Long categoryId;
     private Long productId;

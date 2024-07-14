@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.CouponRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.DiscountRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CouponResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
@@ -18,6 +19,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -36,6 +38,7 @@ public class CouponService {
     private final CartService cartService;
     private final UserRepo userRepo;
     private final EmailService emailService;
+    private final DiscountRepo discountRepo;
 
     @Transactional
     public List<CouponResponse> getAllCoupon() {
@@ -45,6 +48,15 @@ public class CouponService {
     @Transactional
     public Coupon getCouponByCode(String code) {
         return couponRepository.findByCode(code);
+    }
+
+    @Transactional
+    public CouponResponse getCouponById(Long id) {
+        if (couponRepository.findById(id).isPresent()) {
+            return couponMapper.toResponse(couponRepository.findById(id).get());
+        } else {
+            return null;
+        }
     }
 
     @Transactional
@@ -282,5 +294,44 @@ public class CouponService {
 
     public void sendCouponCode(User user, Coupon coupon) {
         emailService.sendCouponCode(user, coupon);
+    }
+
+    public void updateCoupon(Long id, CouponRequest request) {
+        Optional<Coupon> optionalCoupon = couponRepository.findById(id);
+
+        if (optionalCoupon.isPresent()) {
+            Coupon coupon = optionalCoupon.get();
+            coupon.setName(request.getName());
+            coupon.setCode(request.getCode());
+            coupon.setDateExpired(request.getDateExpired());
+            coupon.setDateValid(request.getDateValid());
+            coupon.setDescription(request.getDescription());
+            List<DiscountRequest> discountUpdateRequests = request.getDiscounts();
+            for (DiscountRequest discountUpdateRequest : discountUpdateRequests) {
+                Discount discount = discountRepo.findByCouponId(id).getFirst();
+
+                discount.setType(discountUpdateRequest.getType());
+                // Set category and product if applicable
+                if (discountUpdateRequest.getCategoryId() != null) {
+                    Category category = categoryRepository.findById(discountUpdateRequest.getCategoryId()).orElse(null);
+                    discount.setCategory(category);
+                }
+                if (discountUpdateRequest.getProductId() != null) {
+                    Product product = productRepository.findById(discountUpdateRequest.getProductId()).orElse(null);
+                    discount.setProduct(product);
+                }
+                discount.setValueType(discountUpdateRequest.getValueType());
+                discount.setValueFixed(discountUpdateRequest.getValueFixed());
+
+                discountRepo.save(discount);
+            }
+
+            coupon.setLimitAccountUses(request.getLimitAccountUses());
+            coupon.setLimitUses(request.getLimitUses());
+            coupon.setDateUpdated(new Date());
+            couponRepository.save(coupon);
+        } else {
+            throw new AppException("Coupon not found with id " + id, HttpStatus.BAD_REQUEST);
+        }
     }
 }
