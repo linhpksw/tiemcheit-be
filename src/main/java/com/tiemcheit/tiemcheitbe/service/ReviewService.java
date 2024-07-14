@@ -2,7 +2,6 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.UserReviewResponse;
-import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
 import com.tiemcheit.tiemcheitbe.mapper.UserReviewMapper;
 import com.tiemcheit.tiemcheitbe.model.OrderDetail;
@@ -11,6 +10,7 @@ import com.tiemcheit.tiemcheitbe.model.UserReview;
 import com.tiemcheit.tiemcheitbe.repository.OrderDetailRepo;
 import com.tiemcheit.tiemcheitbe.repository.ReviewRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -65,4 +65,8 @@ public class ReviewService {
     }
 
 
+    //    @PreAuthorize("hasRole('ADMIN')")
+    public Integer getAllReviews() {
+        return reviewRepo.findAll().size();
+    }
 }

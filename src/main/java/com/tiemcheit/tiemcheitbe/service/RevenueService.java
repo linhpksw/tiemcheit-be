@@ -1,6 +1,5 @@
 package com.tiemcheit.tiemcheitbe.service;
 
-import com.tiemcheit.tiemcheitbe.mapper.OrderMapper;
 import com.tiemcheit.tiemcheitbe.model.Order;
 import com.tiemcheit.tiemcheitbe.model.OrderDetail;
 import com.tiemcheit.tiemcheitbe.repository.OrderRepo;
@@ -15,7 +14,6 @@ import java.util.List;
 public class RevenueService {
 
     private final OrderRepo orderRepo;
-    private final OrderMapper orderMapper;
 
     @PreAuthorize("hasRole('ADMIN')")
     public Double getRevenue() {
@@ -24,4 +22,6 @@ public class RevenueService {
         List<List<OrderDetail>> orderDetailsList = orderList.stream().map(Order::getOrderDetails).toList();
         return orderDetailsList.stream().mapToDouble(orderDetails -> orderDetails.stream().mapToDouble(orderDetail -> orderDetail.getProduct().getPrice() * orderDetail.getQuantity()).sum()).sum();
     }
+
+
 }

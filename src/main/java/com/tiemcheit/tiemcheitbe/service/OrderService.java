@@ -3,12 +3,12 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.request.OrderRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OrderResponse;
-import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.OrderMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.OrderRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -135,5 +135,18 @@ public class OrderService {
 
     private boolean userHasRole(User user, String role) {
         return user.getRoles().stream().anyMatch(r -> r.getName().equals(role));
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public Integer getSuccessOrdersAmount() {
+        String status = "DELIVERED";
+        List<Order> orderList = orderRepo.findAllByOrderStatus(status);
+        return orderList.size();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public Integer getOrdersAmountByStatus(String status) {
+        List<Order> orderList = orderRepo.findAllByOrderStatus(status.toUpperCase());
+        return orderList.size();
     }
 }
