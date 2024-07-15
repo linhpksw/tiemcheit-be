@@ -24,6 +24,14 @@ public class CouponController {
                 .build();
     }
 
+    @GetMapping("/{id}")
+    public ApiResponse<CouponResponse> getCouponById(@PathVariable Long id) {
+        return ApiResponse.<CouponResponse>builder()
+                .data(couponService.getCouponById(id))
+                .message("Success")
+                .build();
+    }
+
     @PostMapping
     public ApiResponse<CouponResponse> createCoupon(@RequestBody CouponRequest coupon) {
 
@@ -51,5 +59,22 @@ public class CouponController {
         couponService.deleteCoupon(couponId);
         return ApiResponse.<Void>builder().message("Delete success").build();
 
+    }
+
+    @PostMapping("/user")
+    public ApiResponse<Void> sendCoupon(@RequestBody List<String> emails, @RequestParam String code) {
+        couponService.sendCouponCode(emails, code);
+
+        return ApiResponse.<Void>builder()
+                .message("Success")
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<Void> updateCoupon(@PathVariable Long id, @RequestBody CouponRequest updateRequest) {
+        couponService.updateCoupon(id, updateRequest);
+        return ApiResponse.<Void>builder()
+                .message("Success")
+                .build();
     }
 }

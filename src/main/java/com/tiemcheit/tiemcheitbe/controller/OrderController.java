@@ -86,6 +86,12 @@ public class OrderController {
         return ApiResponse.<Void>builder().message("Success").build();
     }
 
+    @PatchMapping("/status")
+    public ApiResponse<Void> updateOrderByUser(@RequestBody List<Long> orders, @RequestParam String status) {
+        orderService.updateOrdersStatus(status, orders);
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
     @PatchMapping("/{orderId}/confirm")
     public ApiResponse<Void> updateOrderByUser(@PathVariable Long orderId) {
         orderService.updateOrderStatus(orderId, "Order Confirmed");
@@ -106,5 +112,11 @@ public class OrderController {
                 .data(orderService.countDeliveredOrdersByMonth(status, year))
                 .message("Success")
                 .build();
+    }
+    
+    @PatchMapping("/{orderId}/cancel")
+    public ApiResponse<Void> cancelOrder(@PathVariable Long orderId, @RequestParam String reason) {
+        orderService.cancelOrder(orderId, reason);
+        return ApiResponse.<Void>builder().message("Success").build();
     }
 }

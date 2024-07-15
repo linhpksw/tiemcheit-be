@@ -7,6 +7,7 @@ import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.service.CartService;
 import com.tiemcheit.tiemcheitbe.service.CouponService;
+import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,7 +42,7 @@ public class CartController {
     public ApiResponse<Double> applyDiscount(@PathVariable String code) {
 
         return ApiResponse.<Double>builder()
-                .data(couponService.applyCouponToCart(code))
+                .data(couponService.applyCouponToCart(code, SecurityUtils.getCurrentUsername()))
                 .message("Success")
                 .build();
     }

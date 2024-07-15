@@ -134,6 +134,23 @@ public class OrderService {
         orderRepo.save(order);
     }
 
+    @Transactional
+    public int updateOrdersStatus(String status, List<Long> orders) {
+        return orderRepo.updateOrderStatusByIds(status, orders);
+    }
+
+    @Transactional
+    public void cancelOrder(Long orderId, String reason) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        // Update the status
+        order.setCancelReason(reason);
+        order.setOrderStatus("Order Canceled");
+        // Save the updated order
+        orderRepo.save(order);
+    }
+
     private boolean userHasRole(User user, String role) {
         return user.getRoles().stream().anyMatch(r -> r.getName().equals(role));
     }
