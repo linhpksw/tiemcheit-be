@@ -21,6 +21,6 @@ public class ProductDetailResponse {
     private Integer quantity;
     private Category category;
     private List<OptionResponse> optionList;
-    private List<IngredientResponse> ingredientList;
+    private List<ProductIngredientResponse> ingredientList;
     private String status;
 }
