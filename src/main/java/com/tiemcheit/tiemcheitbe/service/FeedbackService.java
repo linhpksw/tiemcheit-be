@@ -10,6 +10,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -26,6 +27,7 @@ public class FeedbackService {
         for (Feedback f : feedbacks) {
             feedbackResponses.add(feedbackMapper.toFeedbackResponse(f));
         }
+        Collections.reverse(feedbackResponses);
 
         return feedbackResponses;
     }
@@ -42,5 +44,17 @@ public class FeedbackService {
         feedbackToUpdate.setRead(feedbackRequest.isRead());
         Feedback updatedFeedback = feedbackRepo.save(feedbackToUpdate);
         return feedbackMapper.toFeedbackResponse(updatedFeedback);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public List<FeedbackResponse> updateFeedbacks(List<FeedbackRequest> feedbackRequest) {
+        List<FeedbackResponse> responses = new ArrayList<>();
+        for (FeedbackRequest req : feedbackRequest) {
+            Feedback feedbackToUpdate = feedbackRepo.getReferenceById(req.getId());
+            feedbackToUpdate.setRead(req.isRead());
+            Feedback updatedFeedback = feedbackRepo.save(feedbackToUpdate);
+            responses.add(feedbackMapper.toFeedbackResponse(updatedFeedback));
+        }
+        return responses;
     }
 }

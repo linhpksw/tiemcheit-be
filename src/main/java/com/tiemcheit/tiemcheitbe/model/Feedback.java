@@ -2,6 +2,9 @@ package com.tiemcheit.tiemcheitbe.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.CreationTimestamp;
+
+import java.util.Date;
 
 @Getter
 @Setter
@@ -17,16 +20,17 @@ public class Feedback {
     private Long id;
 
     @Column(nullable = false)
-    private String firstName;
-
-    @Column(nullable = false)
-    private String lastName;
+    private String name;
 
     @Column(nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String message;
+
+    @CreationTimestamp
+    @Column(updatable = false)
+    private Date sentAt;
 
     private boolean isRead;
 }

@@ -32,10 +32,18 @@ public class FeedbackController {
                 .data(data).build();
     }
 
-    @PatchMapping("")
+    @PatchMapping("single")
     public ApiResponse<FeedbackResponse> updateFeedback(@RequestBody FeedbackRequest feedbackRequest) {
         var data = feedbackService.updateFeedback(feedbackRequest);
         return ApiResponse.<FeedbackResponse>builder()
+                .message("Success")
+                .data(data).build();
+    }
+
+    @PatchMapping("multi")
+    public ApiResponse<List<FeedbackResponse>> updateFeedbacks(@RequestBody List<FeedbackRequest> feedbackRequests) {
+        var data = feedbackService.updateFeedbacks(feedbackRequests);
+        return ApiResponse.<List<FeedbackResponse>>builder()
                 .message("Success")
                 .data(data).build();
     }
