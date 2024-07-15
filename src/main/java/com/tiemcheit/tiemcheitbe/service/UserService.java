@@ -33,7 +33,6 @@ import java.util.Set;
 @Service
 @RequiredArgsConstructor
 @Slf4j
-
 public class UserService {
     private final UserRepo userRepo;
     private final RoleRepo roleRepo;
@@ -68,10 +67,18 @@ public class UserService {
         }
 
         if (request.getPhone() != null) {
+            if (userRepo.existsByPhone(request.getPhone())) {
+                throw new AppException("User already exists with this phone", HttpStatus.BAD_REQUEST);
+            }
+
             user.setPhone(request.getPhone());
         }
 
         if (request.getEmail() != null) {
+            if (userRepo.existsByEmail(request.getEmail())) {
+                throw new AppException("User already exists with this email", HttpStatus.BAD_REQUEST);
+            }
+
             user.setEmail(request.getEmail());
         }
 
@@ -176,7 +183,7 @@ public class UserService {
     @PreAuthorize("#username == authentication.name || hasRole('ROLE_ADMIN')")
     public void deleteUserAddress(String username, Long addressId) {
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
-        
+
         userAddressRepo.findById(addressId)
                 .orElseThrow(() -> new AppException("Address not found.", HttpStatus.NOT_FOUND));
 
