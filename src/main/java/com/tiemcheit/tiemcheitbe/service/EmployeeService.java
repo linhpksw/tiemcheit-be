@@ -39,7 +39,6 @@ public class EmployeeService {
 //                employees.add(u);
 //            }
 //        }
-
         List<User> employees = userRepo.findEmployees(status, startDate, endDate, field, order);
         List<UserProfileResponse> responses = new ArrayList<>();
         for (User e : employees) {
@@ -55,54 +54,4 @@ public class EmployeeService {
     public UserProfileResponse updateEmployee(EmployeeRequest employeeRequest) {
         return userService.updateUserProfile(employeeRequest.getUsername(), employeeRequest.getUpdateData());
     }
-
-//    @PreAuthorize("hasRole('ROLE_ADMIN')")
-//    public List<UserProfileResponse> getEmployeesByStatus(String status, String sortOption, String order) {
-//        if (status == null && sortOption == null && order == null) {
-//            return allEmployees();
-//        }
-//
-//        List<User> customers = new ArrayList<>();
-//        String uppercaseStatus = status != null ? status.toUpperCase() : null;
-//        if (sortOption != null) {
-//            switch (sortOption.toLowerCase()) {
-//                case "created_at":
-//                    if (order.equalsIgnoreCase("asc")) {
-//                        customers = userRepo.findAscCustomersOrderByCreatedAt(uppercaseStatus);
-//                    } else {
-//                        customers = userRepo.findDescCustomersOrderByCreatedAt(uppercaseStatus);
-//                    }
-//                    break;
-//                case "order_number":
-//                    if (order.equalsIgnoreCase("asc")) {
-//                        customers = userRepo.findAscCustomersOrderByOrderNumber(uppercaseStatus);
-//                    } else {
-//                        customers = userRepo.findDescCustomersOrderByOrderNumber(uppercaseStatus);
-//                    }
-//                    break;
-//                case "order_total":
-//                    if (order.equalsIgnoreCase("asc")) {
-//                        customers = userRepo.findAscCustomersOrderByOrderTotal(uppercaseStatus);
-//                    } else {
-//                        customers = userRepo.findDescCustomersOrderByOrderTotal(uppercaseStatus);
-//                    }
-//                    break;
-//            }
-//        } else {
-//            customers = userRepo.findCustomerByStatus(status);
-//        }
-//        List<UserProfileResponse> responseCustomers = new ArrayList<>();
-//        for (User c : customers) {
-//            responseCustomers.add(userMapper.toUserProfileResponse(c));
-//        }
-//
-//        Role role = roleRepo.findByName("CUSTOMER").orElseThrow(() -> new AppException("Role not found.", HttpStatus.NOT_FOUND));
-//        for (UserProfileResponse u : responseCustomers) {
-//            if (u.getRoles().contains(roleMapper.toRoleResponse(role))) {
-//                u.setOrderNumber(orderRepo.countByUser_Id(u.getId()));
-//                u.setOrderTotal(orderRepo.getTotalAmountSpentByUser(u.getId()));
-//            }
-//        }
-//        return responseCustomers;
-//    }
 }

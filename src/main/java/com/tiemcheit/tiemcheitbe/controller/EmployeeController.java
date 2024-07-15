@@ -7,6 +7,10 @@ import com.tiemcheit.tiemcheitbe.service.EmployeeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 
 @RestController
@@ -20,8 +24,18 @@ public class EmployeeController {
     public ApiResponse<List<UserProfileResponse>> allCustomers(
             @RequestParam("status") String status, @RequestParam("startDate") String startDate,
             @RequestParam("endDate") String endDate, @RequestParam("field") String field,
-            @RequestParam("order") String order) {
-        var data = employeeService.allEmployees(status, startDate, endDate, field, order);
+            @RequestParam("order") String order) throws ParseException {
+        Date formattedStartDate = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
+        Date formattedEndDate = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(formattedEndDate);
+        calendar.set(Calendar.HOUR_OF_DAY, 23);
+        calendar.set(Calendar.MINUTE, 59);
+        calendar.set(Calendar.SECOND, 59);
+        calendar.set(Calendar.MILLISECOND, 999);
+        Date exactEndDate = calendar.getTime();
+        
+        var data = employeeService.allEmployees(status, formattedStartDate, exactEndDate, field, order);
         return ApiResponse.<List<UserProfileResponse>>builder()
                 .message("Success")
                 .data(data).build();
