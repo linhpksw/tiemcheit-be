@@ -99,4 +99,12 @@ public class OrderController {
                 .message("Success")
                 .build();
     }
+
+    @GetMapping("/count/{status}/{year}")
+    public ApiResponse<Long[]> countDeliveredOrdersByMonth(@PathVariable String status, @PathVariable int year) {
+        return ApiResponse.<Long[]>builder()
+                .data(orderService.countDeliveredOrdersByMonth(status, year))
+                .message("Success")
+                .build();
+    }
 }

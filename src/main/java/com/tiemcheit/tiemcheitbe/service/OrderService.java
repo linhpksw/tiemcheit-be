@@ -16,6 +16,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -149,4 +150,19 @@ public class OrderService {
         List<Order> orderList = orderRepo.findAllByOrderStatus(status.toUpperCase());
         return orderList.size();
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public Long[] countDeliveredOrdersByMonth(String status, int year) {
+        List<Object[]> results = orderRepo.countOrdersByStatusAndMonth(status.toUpperCase(), year);
+        Long[] countByMonth = new Long[12];
+        Arrays.fill(countByMonth, 0L);
+        for (Object[] result : results) {
+            Integer month = (Integer) result[0] - 1; // Month is 1-based in SQL, adjust to 0-based for array
+            Long count = (Long) result[1];
+            countByMonth[month] = count;
+        }
+        return countByMonth;
+    }
+
+
 }
