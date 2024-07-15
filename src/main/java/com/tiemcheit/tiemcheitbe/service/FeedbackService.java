@@ -11,6 +11,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -22,6 +23,19 @@ public class FeedbackService {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     public List<FeedbackResponse> allFeedbacks() {
         List<Feedback> feedbacks = feedbackRepo.findAll();
+        List<FeedbackResponse> feedbackResponses = new ArrayList<>();
+
+        for (Feedback f : feedbacks) {
+            feedbackResponses.add(feedbackMapper.toFeedbackResponse(f));
+        }
+        Collections.reverse(feedbackResponses);
+
+        return feedbackResponses;
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    public List<FeedbackResponse> allFeedbacksInTimeRange(Date startDate, Date endDate) {
+        List<Feedback> feedbacks = feedbackRepo.findAllByDateRange(startDate, endDate);
         List<FeedbackResponse> feedbackResponses = new ArrayList<>();
 
         for (Feedback f : feedbacks) {
