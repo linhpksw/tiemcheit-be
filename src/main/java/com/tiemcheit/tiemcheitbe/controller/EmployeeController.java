@@ -17,8 +17,11 @@ public class EmployeeController {
     public final EmployeeService employeeService;
 
     @GetMapping("")
-    public ApiResponse<List<UserProfileResponse>> allCustomers() {
-        var data = employeeService.allEmployees();
+    public ApiResponse<List<UserProfileResponse>> allCustomers(
+            @RequestParam("status") String status, @RequestParam("startDate") String startDate,
+            @RequestParam("endDate") String endDate, @RequestParam("field") String field,
+            @RequestParam("order") String order) {
+        var data = employeeService.allEmployees(status, startDate, endDate, field, order);
         return ApiResponse.<List<UserProfileResponse>>builder()
                 .message("Success")
                 .data(data).build();
