@@ -38,4 +38,16 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     Double getTotalAmountSpentByUser(@Param("userId") Long userId);
 
     List<Order> findByUserIdAndCouponId(Long userId, Long couponId);
+
+    @Query("SELECT MONTH(o.orderDate) AS month, COUNT(o) AS count FROM Order o WHERE o.orderStatus = :status AND YEAR(o.orderDate) = :year GROUP BY MONTH(o.orderDate)")
+    List<Object[]> countOrdersByStatusAndMonth(@Param("status") String status, @Param("year") int year);
+
+    @Query(value = "SELECT MONTH(o.order_date) AS month, SUM(od.price) AS total_price " +
+            "FROM orders o " +
+            "JOIN order_details od ON o.id = od.order_id " +
+            "WHERE o.order_status = 'DELIVERED' AND YEAR(o.order_date) = :year " +
+            "GROUP BY MONTH(o.order_date)",
+            nativeQuery = true)
+    List<Object[]> sumOrderRevenueByMonth(@Param("year") int year);
+
 }

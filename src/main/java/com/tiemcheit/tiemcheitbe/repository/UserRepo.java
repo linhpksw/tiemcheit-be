@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 
@@ -66,4 +67,23 @@ public interface UserRepo extends JpaRepository<User, Long> {
     @Query("SELECT u FROM User u JOIN u.roles r WHERE r.name = 'CUSTOMER' " +
             "AND (:status IS NULL OR u.status = :status)")
     List<User> findCustomerByStatus(String status);
+
+    @Query("SELECT e FROM User e " +
+            "JOIN e.roles r " +
+            "WHERE r.name = 'EMPLOYEE' " +
+            "AND (:status = 'none' OR e.status = :status) " +
+            "AND (:startDate IS NULL OR e.createdAt >= :startDate) " +
+            "AND (:endDate IS NULL OR e.createdAt <= :endDate) " +
+            "ORDER BY " +
+            "CASE WHEN :field = 'name' AND :order = 'asc' THEN e.fullname END ASC, " +
+            "CASE WHEN :field = 'name' AND :order = 'desc' THEN e.fullname END DESC, " +
+            "CASE WHEN :field = 'date' AND :order = 'asc' THEN e.createdAt END ASC, " +
+            "CASE WHEN :field = 'date' AND :order = 'desc' THEN e.createdAt END DESC")
+    List<User> findEmployees(
+            @Param("status") String status,
+            @Param("startDate") Date startDate,
+            @Param("endDate") Date endDate,
+            @Param("field") String field,
+            @Param("order") String order
+    );
 }

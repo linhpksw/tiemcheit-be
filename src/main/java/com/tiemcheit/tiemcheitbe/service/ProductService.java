@@ -104,11 +104,15 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    List<ProductImage> images = productImageRepo.findAllByProductId(product.getId());
+                    if (!images.isEmpty()) {
+                        productResponse.setImage(images.get(0).getImage());
+                    }
                     return productResponse;
                 })
                 .toList();
     }
+
 
     //get product of an ingredients
     public List<ProductResponse> getProductsOfIngredient(Long ingredientId) {
@@ -395,5 +399,9 @@ public class ProductService {
 
     private boolean userHasRole(User user, String role) {
         return user.getRoles().stream().anyMatch(r -> r.getName().equals(role));
+    }
+
+    public Integer getProductAmountByStatus(String status) {
+        return productRepo.findAllByStatus(status).size();
     }
 }
