@@ -3,12 +3,12 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.request.OrderRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OrderResponse;
-import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.OrderMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.OrderRepo;
 import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -129,6 +129,23 @@ public class OrderService {
         // Update the status
         order.setOrderStatus(status);
 
+        // Save the updated order
+        orderRepo.save(order);
+    }
+
+    @Transactional
+    public int updateOrdersStatus(String status, List<Long> orders) {
+        return orderRepo.updateOrderStatusByIds(status, orders);
+    }
+
+    @Transactional
+    public void cancelOrder(Long orderId, String reason) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        // Update the status
+        order.setCancelReason(reason);
+        order.setOrderStatus("Order Canceled");
         // Save the updated order
         orderRepo.save(order);
     }

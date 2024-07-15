@@ -3,9 +3,11 @@ package com.tiemcheit.tiemcheitbe.repository;
 import com.tiemcheit.tiemcheitbe.model.Order;
 import com.tiemcheit.tiemcheitbe.model.User;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -38,4 +40,9 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     Double getTotalAmountSpentByUser(@Param("userId") Long userId);
 
     List<Order> findByUserIdAndCouponId(Long userId, Long couponId);
+
+    @Modifying
+    @Transactional
+    @Query("UPDATE Order o SET o.orderStatus = :status WHERE o.id IN :ids")
+    int updateOrderStatusByIds(@Param("status") String status, @Param("ids") List<Long> ids);
 }
