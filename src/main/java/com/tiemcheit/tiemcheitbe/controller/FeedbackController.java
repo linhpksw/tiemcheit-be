@@ -27,7 +27,9 @@ public class FeedbackController {
 //                .message("Success")
 //                .data(data).build();
 //    }
-    public ApiResponse<List<FeedbackResponse>> allFeedbacks(@RequestParam String startDate, @RequestParam String endDate) throws ParseException {
+    public ApiResponse<List<FeedbackResponse>> allFeedbacks(
+            @RequestParam String startDate,
+            @RequestParam String endDate) throws ParseException {
         Date formattedStartDate = new SimpleDateFormat("yyyy-MM-dd").parse(startDate);
         Date formattedEndDate = new SimpleDateFormat("yyyy-MM-dd").parse(endDate);
         Calendar calendar = Calendar.getInstance();
