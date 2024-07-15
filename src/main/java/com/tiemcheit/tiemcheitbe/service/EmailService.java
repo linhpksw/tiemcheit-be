@@ -8,6 +8,8 @@ import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import java.text.SimpleDateFormat;
+
 @Service
 @RequiredArgsConstructor
 public class EmailService {
@@ -92,13 +94,14 @@ public class EmailService {
                     "<body>\n" +
                     "    <div class=\"container\">\n" +
                     "        <h1>Chúc mừng!</h1>\n" +
-                    "        <p>Kính gửi " + user.getUsername() + ",</p>\n" +
+                    "        <p>Xin chào " + user.getUsername() + ",</p>\n" +
                     "        <p>Chúng tôi rất vui khi được chia sẻ mã giảm giá cho bạn với sự đóng góp lớn của bạn cho cửa hàng của chúng tôi:</p>\n" +
                     "        <div class=\"coupon-code\">" + coupon.getCode() + "</div>\n" +
                     "        <p class=\"details\">\n" +
-                    "            <strong>Mô tả:</strong> [DESCRIPTION]<br>\n" +
-                    "            <strong>Ngày hợp lệ:</strong>" + coupon.getDateValid() + "<br>\n" +
-                    "            <strong>Ngày hết hạn:</strong>" + coupon.getDateExpired() + "<br>\n" +
+                    "            <strong>Mô tả:</strong>" + coupon.getDescription() + "<br>\n" +
+                    "            <strong>Ngày hợp lệ: </strong>" + new SimpleDateFormat("HH:mm dd:MM:yyyy").format(coupon.getDateValid()) + "<br>\n" +
+                    "            <strong>Ngày hết hạn: </strong>" + new SimpleDateFormat("HH:mm dd:MM:yyyy").format(coupon.getDateValid()) + "<br>\n" +
+                    "            <strong>Giới hạn sử dụng: </strong>" + coupon.getLimitAccountUses() + "<br>\n" +
                     "        </p>\n" +
                     "        <p>Hãy chắc chắn để sử dụng nó trước khi nó hết hạn!</p>\n" +
                     "        <p>Trân trọng,<br>Tiệm chè IT</p>\n" +

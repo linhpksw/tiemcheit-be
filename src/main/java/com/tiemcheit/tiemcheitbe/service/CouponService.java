@@ -5,10 +5,10 @@ import com.tiemcheit.tiemcheitbe.dto.request.DiscountRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CouponResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
-import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.CouponMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.*;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -292,8 +292,12 @@ public class CouponService {
                 code.equals(trimmedValue);
     }
 
-    public void sendCouponCode(User user, Coupon coupon) {
-        emailService.sendCouponCode(user, coupon);
+    public void sendCouponCode(List<String> emails, String code) {
+        for (String email : emails) {
+            User user = userRepo.findByEmail(email).get();
+            Coupon coupon = couponRepository.findByCode(code);
+            emailService.sendCouponCode(user, coupon);
+        }
     }
 
     public void updateCoupon(Long id, CouponRequest request) {

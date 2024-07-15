@@ -1,11 +1,8 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.CouponRequest;
-import com.tiemcheit.tiemcheitbe.dto.request.SendCouponRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CouponResponse;
-import com.tiemcheit.tiemcheitbe.model.Coupon;
-import com.tiemcheit.tiemcheitbe.model.User;
 import com.tiemcheit.tiemcheitbe.service.CouponService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -65,11 +62,8 @@ public class CouponController {
     }
 
     @PostMapping("/user")
-    public ApiResponse<Void> sendCoupon(@RequestBody SendCouponRequest request) {
-        User user = request.getUser();
-        Coupon coupon = request.getCoupon();
-
-        couponService.sendCouponCode(user, coupon);
+    public ApiResponse<Void> sendCoupon(@RequestBody List<String> emails, @RequestParam String code) {
+        couponService.sendCouponCode(emails, code);
 
         return ApiResponse.<Void>builder()
                 .message("Success")
