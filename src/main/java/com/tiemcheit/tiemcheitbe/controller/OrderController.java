@@ -91,4 +91,20 @@ public class OrderController {
         orderService.updateOrderStatus(orderId, "Order Confirmed");
         return ApiResponse.<Void>builder().message("Success").build();
     }
+
+    @GetMapping("/status/{status}")
+    public ApiResponse<Integer> getDeliveredOrders(@PathVariable String status) {
+        return ApiResponse.<Integer>builder()
+                .data(orderService.getOrdersAmountByStatus(status))
+                .message("Success")
+                .build();
+    }
+
+    @GetMapping("/count/{status}/{year}")
+    public ApiResponse<Long[]> countDeliveredOrdersByMonth(@PathVariable String status, @PathVariable int year) {
+        return ApiResponse.<Long[]>builder()
+                .data(orderService.countDeliveredOrdersByMonth(status, year))
+                .message("Success")
+                .build();
+    }
 }
