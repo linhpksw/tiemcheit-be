@@ -2,7 +2,7 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.WishlistItemRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.WishlistItemResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.WishlistItemMapper;
 import com.tiemcheit.tiemcheitbe.model.WishlistItem;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;

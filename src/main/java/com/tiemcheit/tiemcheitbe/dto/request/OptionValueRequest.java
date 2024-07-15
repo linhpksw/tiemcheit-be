@@ -9,11 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class IngredientRequest {
-    private String name;
-    private Long quantity;
-    private double price;
-    private String status;
-    private String image;
-    private Long id;
+public class OptionValueRequest {
+    public Long id;
+    public String name;
 }

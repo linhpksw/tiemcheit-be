@@ -3,7 +3,7 @@ package com.tiemcheit.tiemcheitbe.service;
 import com.tiemcheit.tiemcheitbe.dto.request.OrderRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OrderResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.OrderMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.OrderRepo;

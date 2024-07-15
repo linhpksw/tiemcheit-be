@@ -16,6 +16,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import java.util.Arrays;
+
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
@@ -23,9 +25,9 @@ import org.springframework.web.filter.CorsFilter;
 public class SecurityConfig {
     private final String[] PUBLIC_ENDPOINTS = {
             "/auth/login", "/auth/register", "/auth/refresh", "/auth/logout", "/auth/authenticate", "/auth/introspect", "/auth/oauth2",
-            "/auth/reset-password", "/auth/verification", "/auth/resend-verification", "/auth/send-forgot-code", "/auth/change-password",
+            "/auth/reset-password", "/auth/verification", "/auth/resend-verification", "/auth/send-forgot-code", "/auth/change-password", "/logs/**",
             "cart/**", "/filter/**",
-            "/products/**", "/option/**", "/category/**", "/order/**", "/ingredients/**"
+            "/products/**", "/options/**", "/categories/**", "/orders/**", "/ingredients/**"
     };
 
     private final CustomJwtDecoder customJwtDecoder;
@@ -68,7 +70,7 @@ public class SecurityConfig {
     @Bean
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
-        corsConfiguration.addAllowedOrigin("http://localhost:3000");
+        corsConfiguration.setAllowedOrigins(Arrays.asList("http://localhost:3000", "https://tiemcheit.com", "https://www.tiemcheit.com"));
         corsConfiguration.addAllowedMethod("*");
         corsConfiguration.addAllowedHeader("*");
 

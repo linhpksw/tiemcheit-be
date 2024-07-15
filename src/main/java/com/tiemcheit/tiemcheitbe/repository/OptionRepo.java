@@ -2,7 +2,9 @@ package com.tiemcheit.tiemcheitbe.repository;
 
 import com.tiemcheit.tiemcheitbe.model.Option;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public interface OptionRepo extends JpaRepository<Option, Long>{
+@Repository
+public interface OptionRepo extends JpaRepository<Option, Long> {
 
 }

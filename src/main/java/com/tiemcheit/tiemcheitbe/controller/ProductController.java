@@ -31,6 +31,14 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/category/{id}/status/{status}/amount")
+    public ApiResponse<Integer> getAllProductAmountByCategoryIdAndStatus(@PathVariable Long id, @PathVariable String status) {
+        return ApiResponse.<Integer>builder()
+                .data(productService.getAllProductAmountByCategoryIdAndStatus(id, status))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
     @GetMapping("/status/active-disabled")
     public ApiResponse<List<ProductResponse>> getAllProductsByActiveAndDisabledStatus() {
         return ApiResponse.<List<ProductResponse>>builder()
@@ -64,7 +72,7 @@ public class ProductController {
     }
 
 
-    @GetMapping("filter")
+    @GetMapping("/filter")
     public ApiResponse<List<ProductResponse>> filter(
             @RequestParam Map<String, String> params,
             @RequestParam(required = false, defaultValue = "id") String sortBy,

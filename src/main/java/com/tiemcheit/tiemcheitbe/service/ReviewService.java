@@ -2,7 +2,7 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.UserReviewResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
 import com.tiemcheit.tiemcheitbe.mapper.UserReviewMapper;
 import com.tiemcheit.tiemcheitbe.model.OrderDetail;

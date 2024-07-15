@@ -1,7 +1,10 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
+import com.tiemcheit.tiemcheitbe.dto.request.UserAddAddressRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.UserUpdateAddressRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.UserUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserAddAddressResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserProfileResponse;
 import com.tiemcheit.tiemcheitbe.service.UserService;
@@ -75,5 +78,22 @@ public class UserController {
         return ApiResponse.<UserProfileResponse>builder()
                 .data(userService.updateUserProfile(username, request))
                 .build();
+    }
+
+    @PatchMapping("/{username}/addresses/{addressId}")
+    ApiResponse<Void> updateUserAddress(@PathVariable String username, @PathVariable Long addressId, @RequestBody @Valid UserUpdateAddressRequest request) {
+        userService.updateUserAddress(username, addressId, request);
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
+    @PostMapping("/{username}/addresses")
+    ApiResponse<UserAddAddressResponse> addUserAddress(@PathVariable String username, @RequestBody @Valid UserAddAddressRequest request) {
+        return ApiResponse.<UserAddAddressResponse>builder().data(userService.addUserAddress(username, request)).message("Success").build();
+    }
+
+    @DeleteMapping("/{username}/addresses/{addressId}")
+    ApiResponse<Void> deleteUserAddress(@PathVariable String username, @PathVariable Long addressId) {
+        userService.deleteUserAddress(username, addressId);
+        return ApiResponse.<Void>builder().message("Success").build();
     }
 }

@@ -5,13 +5,13 @@ import com.tiemcheit.tiemcheitbe.dto.response.IngredientResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OptionResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductIngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
 import com.tiemcheit.tiemcheitbe.repository.*;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.service.specification.ProductSpecification;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import jakarta.transaction.Transactional;
@@ -27,7 +27,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -110,6 +109,7 @@ public class ProductService {
                 })
                 .toList();
     }
+
     //get product of an ingredients
     public List<ProductResponse> getProductsOfIngredient(Long ingredientId) {
         List<ProductIngredient> productIngredients = productIngredientRepo.findAllByIngredientId(ingredientId);
@@ -185,7 +185,7 @@ public class ProductService {
 
     public Page<ProductResponse> getProductsWithPaginationAndSort(int page, int size, Map<String, String> conditions, String sortField, String sortDirection) {
         Specification<Product> specification = ProductSpecification.getSpecification(conditions);
-        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField);
+        Sort sort = Sort.by(Sort.Direction.fromString(sortDirection), sortField.trim());
         Page<Product> productPage = productRepo.findAll(specification, PageRequest.of(page, size, sort));
 
         return productPage.map(product -> {
@@ -239,6 +239,26 @@ public class ProductService {
                     return productResponse;
                 })
                 .toList();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<ProductResponse> getAllProductsByCategoryIdAndStatus(Long categoryId, String status) {
+        return productRepo.findAllByCategoryIdAndStatus(categoryId, status)
+                .stream()
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
+                    return productResponse;
+                })
+                .toList();
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    public Integer getAllProductAmountByCategoryIdAndStatus(Long categoryId, String status) {
+        return productRepo.findAllByCategoryIdAndStatus(categoryId, status).size();
     }
 
     @PreAuthorize("hasRole('ADMIN')")

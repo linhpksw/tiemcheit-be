@@ -2,6 +2,7 @@ package com.tiemcheit.tiemcheitbe.model;
 
 import jakarta.persistence.*;
 import lombok.*;
+
 @Getter
 @Setter
 @Builder
@@ -18,8 +19,4 @@ public class Ingredient {
     private String image;
     private double price;
     private String status = "AVAILABLE";
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id", nullable = false)
-    private Store store;
 }

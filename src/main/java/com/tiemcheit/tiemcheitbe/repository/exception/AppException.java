@@ -1,4 +1,4 @@
-package com.tiemcheit.tiemcheitbe.exception;
+package com.tiemcheit.tiemcheitbe.repository.exception;
 
 
 import lombok.Getter;

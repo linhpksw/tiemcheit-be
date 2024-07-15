@@ -1,13 +1,11 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
+import com.tiemcheit.tiemcheitbe.dto.request.CategoryRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.CategoryResponse;
 import com.tiemcheit.tiemcheitbe.service.CategoryService;
 import lombok.AllArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -15,13 +13,22 @@ import java.util.List;
 @RequestMapping("/categories")
 @AllArgsConstructor
 public class CategoryController {
+    private static final String SUCCESS_MSG = "Success";
     private final CategoryService categoryService;
 
     @GetMapping("")
     public ApiResponse<List<CategoryResponse>> getAllCategories() {
         return ApiResponse.<List<CategoryResponse>>builder()
                 .data(categoryService.getAllCategories())
-                .message("Success")
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
+    @GetMapping("/status/active-disabled")
+    public ApiResponse<List<CategoryResponse>> getAllCategoriesByActiveAndDisabledStatus() {
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .data(categoryService.getAllCategoriesByActiveAndDisabledStatus())
+                .message(SUCCESS_MSG)
                 .build();
     }
 
@@ -29,7 +36,41 @@ public class CategoryController {
     public ApiResponse<CategoryResponse> getCategoryById(@PathVariable Long id) {
         return ApiResponse.<CategoryResponse>builder()
                 .data(categoryService.getCategoryById(id))
-                .message("Success")
+                .message(SUCCESS_MSG)
                 .build();
     }
+
+    @GetMapping("/status/{status}")
+    public ApiResponse<List<CategoryResponse>> getAllCategoriesByStatus(@PathVariable String status) {
+        return ApiResponse.<List<CategoryResponse>>builder()
+                .data(categoryService.getAllCategoriesByStatus(status))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
+    @PostMapping("")
+    public ApiResponse<CategoryResponse> createCategory(@RequestBody CategoryRequest category) {
+        return ApiResponse.<CategoryResponse>builder()
+                .data(categoryService.create(category))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
+    @PutMapping("/{id}")
+    public ApiResponse<CategoryResponse> updateCategory(@PathVariable Long id, @RequestBody CategoryRequest category) {
+        return ApiResponse.<CategoryResponse>builder()
+                .data(categoryService.update(id, category))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
+    @DeleteMapping("/{id}")
+    public ApiResponse<Boolean> deleteCategory(@PathVariable Long id) {
+        return ApiResponse.<Boolean>builder()
+                .data(categoryService.delete(id))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
+
 }

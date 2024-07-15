@@ -1,9 +1,13 @@
 package com.tiemcheit.tiemcheitbe.dto.response;
 
-import lombok.Data;
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
 
-@Data
-public class AddressResponse {
+@Getter
+@Setter
+@Builder
+public class UserAddAddressResponse {
     private Long id;
     private String address;
     private Boolean isDefault;

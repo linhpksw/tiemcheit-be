@@ -4,7 +4,7 @@ import com.tiemcheit.tiemcheitbe.dto.request.CartItemDeleteRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
-import com.tiemcheit.tiemcheitbe.exception.AppException;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.CartItemMapper;
 import com.tiemcheit.tiemcheitbe.model.CartItem;
 import com.tiemcheit.tiemcheitbe.model.Product;
