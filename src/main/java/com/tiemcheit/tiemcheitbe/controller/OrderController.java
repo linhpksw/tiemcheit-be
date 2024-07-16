@@ -1,6 +1,5 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
-import com.tiemcheit.tiemcheitbe.dto.request.OrderRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OrderResponse;
 import com.tiemcheit.tiemcheitbe.service.OrderService;
@@ -71,13 +70,13 @@ public class OrderController {
                 .build();
     }
 
-    @PostMapping("/add")
-    public ApiResponse<Long> addOrder(@RequestBody OrderRequest request, @RequestParam(required = false) String code) {
-        return ApiResponse.<Long>builder()
-                .data(orderService.placeOrder(request, code))
-                .message("Success")
-                .build();
-    }
+//    @PostMapping("/add")
+//    public ApiResponse<Long> addOrder(@RequestBody OrderRequest request, @RequestParam(required = false) String code) {
+//        return ApiResponse.<Long>builder()
+//                .data(orderService.placeOrder(request, code))
+//                .message("Success")
+//                .build();
+//    }
 
     @PatchMapping("/{orderId}/status")
     public ApiResponse<Void> updateOrderByUser(@PathVariable Long orderId,
@@ -113,7 +112,7 @@ public class OrderController {
                 .message("Success")
                 .build();
     }
-    
+
     @PatchMapping("/{orderId}/cancel")
     public ApiResponse<Void> cancelOrder(@PathVariable Long orderId, @RequestParam String reason) {
         orderService.cancelOrder(orderId, reason);
