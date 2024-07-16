@@ -19,4 +19,5 @@ public class ProductRequest {
     private List<Long> optionId;
     private List<ProductIngredientRequest> productIngredients;
     private String status;
+    private String prevStatus;
 }

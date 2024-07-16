@@ -4,8 +4,11 @@ import com.tiemcheit.tiemcheitbe.dto.request.CategoryRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CategoryResponse;
 import com.tiemcheit.tiemcheitbe.mapper.CategoryMapper;
 import com.tiemcheit.tiemcheitbe.model.Category;
+import com.tiemcheit.tiemcheitbe.model.Product;
 import com.tiemcheit.tiemcheitbe.repository.CategoryRepo;
+import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
 import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -18,6 +21,7 @@ import java.util.List;
 public class CategoryService {
 
     private final CategoryRepo categoryRepo;
+    private final ProductRepo productRepo;
 
     public List<CategoryResponse> getAllCategoriesByActiveAndDisabledStatus() {
         return categoryRepo.findAllByActiveAndDisabledStatus()
@@ -84,5 +88,55 @@ public class CategoryService {
         return true;
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public CategoryResponse updateCategoryStatus(Long categoryId, String newStatus, String flag) {
+        Category category = categoryRepo.findById(categoryId)
+                .orElseThrow(() -> new AppException("Category not found", HttpStatus.NOT_FOUND));
 
+        category.setStatus(newStatus);
+        categoryRepo.save(category);
+
+        // Cập nhật status của các sản phẩm trong danh mục
+        if ("disabled".equals(newStatus)) {
+            this.updateProductStatusByCategory(categoryId, "disabled");
+        } else if ("active".equals(newStatus)) {
+            if ("restore".equals(flag)) {
+                this.restoreProductStatusByCategory(categoryId);
+            } else if ("all".equals(flag)) {
+                this.updateProductStatusByCategory(categoryId, "active");
+            }
+        }
+        return CategoryMapper.INSTANCE.toCategoryResponse(category);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void updateProductStatusByCategory(Long categoryId, String newStatus) {
+        Category category = categoryRepo.findById(categoryId)
+                .orElseThrow(() -> new AppException("Category not found", HttpStatus.NOT_FOUND));
+
+        List<Product> products = productRepo.findAllByCategoryId(category.getId());
+        for (Product product : products) {
+            if (product.getStatus().equals("inactive")) {
+                continue;
+            }
+            product.setPrevStatus(product.getStatus());
+            product.setStatus(newStatus);
+            productRepo.save(product);
+        }
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @Transactional
+    public void restoreProductStatusByCategory(Long categoryId) {
+        List<Product> products = productRepo.findAllByCategoryId(categoryId);
+        for (Product product : products) {
+            if (product.getStatus().equals("inactive")) {
+                continue;
+            }
+            product.setStatus(product.getPrevStatus());
+            productRepo.save(product);
+        }
+    }
 }

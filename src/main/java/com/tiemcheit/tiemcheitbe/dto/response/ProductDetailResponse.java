@@ -23,4 +23,5 @@ public class ProductDetailResponse {
     private List<OptionResponse> optionList;
     private List<ProductIngredientResponse> ingredientList;
     private String status;
+    private String prevStatus;
 }
