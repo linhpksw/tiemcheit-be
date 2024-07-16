@@ -72,5 +72,13 @@ public class CategoryController {
                 .build();
     }
 
+    @PutMapping("/{id}/status/{status}/{type}") // type is restore or all
+    public ApiResponse<CategoryResponse> updateCategoryStatus(@PathVariable Long id, @PathVariable String status, @PathVariable String type) {
+        return ApiResponse.<CategoryResponse>builder()
+                .data(categoryService.updateCategoryStatus(id, status, type))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
 
 }

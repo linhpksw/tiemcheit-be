@@ -40,6 +40,7 @@ public class Product {
     private Integer sold = 0;
 
     private String status;
+    private String prevStatus;
 
     @OneToMany(mappedBy = "product")
     private List<CartItem> cartItems;

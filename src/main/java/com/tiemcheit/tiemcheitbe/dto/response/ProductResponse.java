@@ -21,4 +21,5 @@ public class ProductResponse {
     private Integer quantity;
     private Category category;
     private String status;
+    private String prevStatus;
 }
