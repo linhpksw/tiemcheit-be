@@ -70,7 +70,7 @@ public class OrderService {
         return orderMapper.toResponses(orderRepo.findAllByOptionalFilters(startDate, endDate, status));
     }
 
-    public Long placeOrder(OrderRequest request, String code) {
+    public Long placeOrder(OrderRequest request, String code, String username) {
         // first get the item from user's cart
         List<CartItemResponse> cartItemList = cartService.allCartItems();
 
@@ -95,7 +95,7 @@ public class OrderService {
 
         // Retrieve the user
 
-        User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
+        User user = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         order.setUser(user);
 
         // Add order items
