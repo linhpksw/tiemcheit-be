@@ -1,10 +1,7 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
-import com.tiemcheit.tiemcheitbe.dto.response.OptionResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductIngredientResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.*;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductIngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
@@ -26,6 +23,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -225,6 +223,39 @@ public class ProductService {
                 })
                 .toList();
     }
+    public List<PurchasedProductResponse> getPurchasedProducts(String username) {
+        // Find the user by username
+        var user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        // Find all orders of the user
+        List<Order> ordersOfUser = orderRepo.findAllByUser(user);
+
+        // Flatten the order details from all the orders
+        List<OrderDetail> orderDetailsOfUser = ordersOfUser.stream()
+                .flatMap(order -> orderDetailRepo.findAllByOrderId(order.getId()).stream())
+                .collect(Collectors.toList());
+
+        // Map order details and products to PurchasedProductResponse
+        List<PurchasedProductResponse> purchasedProducts = orderDetailsOfUser.stream()
+                .map(orderDetail -> {
+                    var product = productRepo.findById(orderDetail.getProduct().getId())
+                            .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+
+                    // Build and return the PurchasedProductResponse
+                    return PurchasedProductResponse.builder()
+                            .id(product.getId())
+                            .name(product.getName())
+                            .price(product.getPrice())
+                            .image(productImageRepo.findAllByProductId(product.getId()).get(0).getImage())
+                            .category(product.getCategory())
+                            .orderDetailId(orderDetail.getId())
+                            .build();
+                })
+                .collect(Collectors.toList());
+
+        return purchasedProducts;
+    }
 
     //=============================================FOR ADMINS=======================================================
     @PreAuthorize("hasRole('ADMIN')")
@@ -277,8 +308,34 @@ public class ProductService {
                 .toList();
     }
 
+//    @PreAuthorize("hasRole('ADMIN')")
+    public Page<ProductResponse> getIngredientAlertProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productIngredientRepo.findDistinctProductsByUnitInCupGreaterThanIngredientQuantity(pageable)
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
+                    return productResponse;
+                });
+
+    }
+//    public Page<ProductResponse> getProductsWithPagination(int page, int size) {
+//        return productRepo.findAll(PageRequest.of(page, size))
+//                .map(product -> {
+//                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+//                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+//                            .findFirst()
+//                            .map(ProductImage::getImage)
+//                            .orElse(null));
+//                    return productResponse;
+//                });
+//    }
+
     //create a new product
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ProductResponse create(ProductRequest productRequest) {
         //save product to product table
         Product product = ProductMapper.INSTANCE.toProduct(productRequest);
