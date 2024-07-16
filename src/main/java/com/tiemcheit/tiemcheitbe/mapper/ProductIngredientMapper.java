@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.mapper;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductIngredientRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.ProductIngredientResponse;
 import com.tiemcheit.tiemcheitbe.model.ProductIngredient;
 import org.mapstruct.Mapper;
 
@@ -8,4 +9,7 @@ import org.mapstruct.Mapper;
 public interface ProductIngredientMapper {
     //to ProductIngredient
     ProductIngredient toProductIngredient(ProductIngredientRequest request);
+
+    //to ProductIngredientResponse
+    ProductIngredientResponse toProductIngredientResponse(ProductIngredient productIngredient);
 }

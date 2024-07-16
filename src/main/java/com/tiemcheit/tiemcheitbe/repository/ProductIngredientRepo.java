@@ -13,7 +13,9 @@ import java.util.List;
 
 @Repository
 public interface ProductIngredientRepo extends JpaRepository<ProductIngredient, ProductIngredientId> {
+    @Query("SELECT pi FROM ProductIngredient pi WHERE pi.product.id = :product_id")
     List<ProductIngredient> findAllByProductId(Long product_id);
+
     List<ProductIngredient> findAllByIngredientId(Long ingredient_id);
     @Query("SELECT DISTINCT pi.product FROM ProductIngredient pi WHERE pi.unit > pi.ingredient.quantity")
     Page<Product> findDistinctProductsByUnitInCupGreaterThanIngredientQuantity(Pageable pageable);

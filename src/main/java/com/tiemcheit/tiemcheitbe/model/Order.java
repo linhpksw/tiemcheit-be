@@ -51,4 +51,5 @@ public class Order {
 
     @Column(name = "discount_price")
     private Double discountPrice;
+    private String cancelReason;
 }

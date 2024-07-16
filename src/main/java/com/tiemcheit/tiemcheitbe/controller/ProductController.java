@@ -177,4 +177,12 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("status/{status}/amount")
+    public ApiResponse<Integer> getAllProductAmountByStatus(@PathVariable String status) {
+        return ApiResponse.<Integer>builder()
+                .data(productService.getProductAmountByStatus(status))
+                .message(SUCCESS_MSG)
+                .build();
+    }
+
 }

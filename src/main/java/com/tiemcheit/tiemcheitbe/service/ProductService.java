@@ -1,8 +1,10 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
-import com.tiemcheit.tiemcheitbe.dto.response.*;
-import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
+import com.tiemcheit.tiemcheitbe.dto.response.OptionResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.ProductIngredientResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductIngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
@@ -102,11 +104,15 @@ public class ProductService {
                 .stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
-                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).getFirst().getImage());
+                    List<ProductImage> images = productImageRepo.findAllByProductId(product.getId());
+                    if (!images.isEmpty()) {
+                        productResponse.setImage(images.get(0).getImage());
+                    }
                     return productResponse;
                 })
                 .toList();
     }
+
 
     //get product of an ingredients
     public List<ProductResponse> getProductsOfIngredient(Long ingredientId) {
@@ -148,11 +154,9 @@ public class ProductService {
                 .toList();
 
         //get ingredient list of product
-        List<IngredientResponse> ingredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+        List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
                 .stream()
-                .map(ProductIngredient::getIngredient)
-                .toList().stream()
-                .map(IngredientMapper.INSTANCE::toIngredientResponse)
+                .map(productIngredientMapper::toProductIngredientResponse)
                 .toList();
 
         //get image list of product
@@ -163,7 +167,7 @@ public class ProductService {
 
         //set option list, ingredient list, image list to productDetailResponse
         productDetailResponse.setOptionList(optionList);
-        productDetailResponse.setIngredientList(ingredientResponseList);
+        productDetailResponse.setIngredientList(productIngredientResponseList);
         productDetailResponse.setImageList(imageList);
 
         return productDetailResponse;
@@ -361,6 +365,7 @@ public class ProductService {
     public ProductResponse update(ProductRequest productRequest, Long id) {
         Product product = productRepo.findById(id)
                 .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+
         if (!productRequest.getName().isEmpty()) {
             product.setName(productRequest.getName());
         }
@@ -378,15 +383,16 @@ public class ProductService {
         }
 
         Product updatedProduct = productRepo.save(product);
-        if (productRequest.getImageList() != null) {
+
+        if (productRequest.getImageList() != null && !productRequest.getImageList().isEmpty()) {
             updateProductImages(productRequest, updatedProduct);
         }
 
-        if (productRequest.getOptionId() != null) {
+        if (productRequest.getOptionId() != null && !productRequest.getOptionId().isEmpty()) {
             updateProductOptions(productRequest, updatedProduct);
         }
 
-        if (productRequest.getProductIngredients() != null) {
+        if (productRequest.getProductIngredients() != null && !productRequest.getProductIngredients().isEmpty()) {
             updateProductIngredients(productRequest, updatedProduct);
         }
 
@@ -394,6 +400,7 @@ public class ProductService {
         productResponse.setImage(productImageRepo.findAllByProductId(updatedProduct.getId()).getFirst().getImage());
         return productResponse;
     }
+
 
     @PreAuthorize("hasRole('ADMIN')")
     public Boolean delete(Long id) {
@@ -452,5 +459,9 @@ public class ProductService {
 
     private boolean userHasRole(User user, String role) {
         return user.getRoles().stream().anyMatch(r -> r.getName().equals(role));
+    }
+
+    public Integer getProductAmountByStatus(String status) {
+        return productRepo.findAllByStatus(status).size();
     }
 }
