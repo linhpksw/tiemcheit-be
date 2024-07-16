@@ -45,7 +45,7 @@ public class PaymentService {
     }
 
     public PaymentResponse getPayment(String username) {
-        Payment payment = paymentRepo.findTopByUsernameOrderByOrderDateDesc(username)
+        Payment payment = paymentRepo.findTop1ByUsernameOrderByOrderDateDesc(username)
                 .orElseThrow(() -> new AppException("No payments found for user.", HttpStatus.NOT_FOUND));
 
         return paymentMapper.toPaymentResponse(payment);
