@@ -11,8 +11,8 @@ import java.util.List;
 public interface CategoryRepo extends JpaRepository<Category, Long> {
     List<Category> findAllByStatus(String status);
 
-    @Query("SELECT c from Category c WHERE c.status = 'active' OR c.status = 'disabled'")
-    List<Category> findAllByActiveAndDisabledStatus();
+    @Query("SELECT c from Category c WHERE c.status = 'active'")
+    List<Category> findAllByActiveStatus();
 
     List<Category> findByName(String name);
 }

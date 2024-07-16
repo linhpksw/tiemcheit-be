@@ -24,10 +24,10 @@ public class CategoryController {
                 .build();
     }
 
-    @GetMapping("/status/active-disabled")
-    public ApiResponse<List<CategoryResponse>> getAllCategoriesByActiveAndDisabledStatus() {
+    @GetMapping("/status/active/client")
+    public ApiResponse<List<CategoryResponse>> getAllCategoriesByActiveStatus() {
         return ApiResponse.<List<CategoryResponse>>builder()
-                .data(categoryService.getAllCategoriesByActiveAndDisabledStatus())
+                .data(categoryService.getAllCategoriesByActiveStatus())
                 .message(SUCCESS_MSG)
                 .build();
     }
