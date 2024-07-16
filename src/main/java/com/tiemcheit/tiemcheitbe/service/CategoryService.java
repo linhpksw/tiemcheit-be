@@ -23,8 +23,8 @@ public class CategoryService {
     private final CategoryRepo categoryRepo;
     private final ProductRepo productRepo;
 
-    public List<CategoryResponse> getAllCategoriesByActiveAndDisabledStatus() {
-        return categoryRepo.findAllByActiveAndDisabledStatus()
+    public List<CategoryResponse> getAllCategoriesByActiveStatus() {
+        return categoryRepo.findAllByActiveStatus()
                 .stream()
                 .map(CategoryMapper.INSTANCE::toCategoryResponse)
                 .toList();
