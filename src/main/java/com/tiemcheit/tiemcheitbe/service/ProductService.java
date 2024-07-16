@@ -1,10 +1,7 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
-import com.tiemcheit.tiemcheitbe.dto.response.OptionResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductDetailResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductIngredientResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.ProductResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.*;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductIngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
