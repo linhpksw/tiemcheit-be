@@ -307,8 +307,34 @@ public class ProductService {
                 .toList();
     }
 
+//    @PreAuthorize("hasRole('ADMIN')")
+    public Page<ProductResponse> getIngredientAlertProducts(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return productIngredientRepo.findDistinctProductsByUnitInCupGreaterThanIngredientQuantity(pageable)
+                .map(product -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
+                    return productResponse;
+                });
+
+    }
+//    public Page<ProductResponse> getProductsWithPagination(int page, int size) {
+//        return productRepo.findAll(PageRequest.of(page, size))
+//                .map(product -> {
+//                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
+//                    productResponse.setImage(productImageRepo.findAllByProductId(product.getId()).stream()
+//                            .findFirst()
+//                            .map(ProductImage::getImage)
+//                            .orElse(null));
+//                    return productResponse;
+//                });
+//    }
+
     //create a new product
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public ProductResponse create(ProductRequest productRequest) {
         //save product to product table
         Product product = ProductMapper.INSTANCE.toProduct(productRequest);

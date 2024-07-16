@@ -124,7 +124,6 @@ public class ProductController {
                 .build();
     }
 
-
     @PostMapping("")
     public ApiResponse<ProductResponse> addProduct(@RequestBody ProductRequest productRequest) {
         return ApiResponse.<ProductResponse>builder()
@@ -132,6 +131,13 @@ public class ProductController {
                 .message(SUCCESS_MSG)
                 .build();
     }
+//    @PostMapping("/")
+//    public ApiResponse<ProductResponse> addCustomProduct(@RequestBody ProductRequest productRequest) {
+//        return ApiResponse.<ProductResponse>builder()
+//                .data(productService.create(productRequest))
+//                .message(SUCCESS_MSG)
+//                .build();
+//    }
 
     @PutMapping("/{id}")
     public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {
@@ -148,13 +154,13 @@ public class ProductController {
                 .message("Success")
                 .build();
     }
-//    @GetMapping("outOfStock")
-//    public ApiResponse<List<ProductResponse>> getOutOfStockProducts() {
-//        return ApiResponse.<ProductResponse>builder()
-//                .data("")
-//                .message(SUCCESS_MSG)
-//                .build();
-//    }
+    @GetMapping("alert/{page}/{size}")
+    public ApiResponse<Page<ProductResponse>> getOutOfStockProducts(@PathVariable int page, @PathVariable int size) {
+        return ApiResponse.<Page<ProductResponse>>builder()
+                .data(productService.getIngredientAlertProducts(page, size))
+                .message(SUCCESS_MSG)
+                .build();
+    }
 
     @DeleteMapping("/{id}")
     public ApiResponse<Boolean> deleteProduct(@PathVariable Long id) {
