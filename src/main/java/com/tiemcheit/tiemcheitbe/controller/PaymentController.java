@@ -31,7 +31,7 @@ public class PaymentController {
     @PostMapping("/casso")
     public ApiResponse<Void> handleWebhook(@RequestBody CassoTransaction transaction) {
         paymentService.handleWebhook(transaction);
-        
+
         return ApiResponse.<Void>builder().message("Success").build();
     }
 

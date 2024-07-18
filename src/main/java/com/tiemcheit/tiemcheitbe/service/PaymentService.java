@@ -80,8 +80,7 @@ public class PaymentService {
     }
 
     private Payment verifyPayment(String username, Long amount) {
-        return paymentRepo.findTopByUsernameAndTotalPriceOrderByOrderDateDesc(username, amount)
-                .orElse(null);
+        return paymentRepo.findMatchingPayment(username, amount).orElse(null);
     }
 
 }
