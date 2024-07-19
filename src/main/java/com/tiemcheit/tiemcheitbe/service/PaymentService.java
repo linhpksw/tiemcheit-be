@@ -57,7 +57,7 @@ public class PaymentService {
     @Transactional
     public void handleWebhook(CassoTransaction transaction) {
         String description = transaction.getDescription();
-        Pattern pattern = Pattern.compile("DEN:\\S+ (\\S+)");
+        Pattern pattern = Pattern.compile("DEN:\\S+ (\\w+)");
         Matcher matcher = pattern.matcher(description);
 
         if (matcher.find()) {
