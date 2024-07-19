@@ -56,33 +56,57 @@ public class PaymentService {
 
     @Transactional
     public void handleWebhook(CassoTransaction transaction) {
+        if (transaction == null) {
+            log.error("Transaction is null");
+            return;
+        }
+
         String description = transaction.getDescription();
+
+        if (description == null) {
+            log.error("Transaction description is null");
+            return;
+        }
+
+        log.info("Transaction description: {}", description);
         Pattern pattern = Pattern.compile("DEN:\\S+ (\\w+)");
         Matcher matcher = pattern.matcher(description);
 
         if (matcher.find()) {
             String username = matcher.group(1);
+            log.info("Extracted username: {}", username);
+
+            if (username == null || username.isEmpty()) {
+                log.error("Extracted username is null or empty");
+                return;
+            }
+
+
             Long amount = transaction.getAmount();
+            log.info("Transaction amount: {}", amount);
 
             Payment verifiedPayment = verifyPayment(username, amount);
 
-            if (verifiedPayment != null) {
-                OrderRequest orderRequest = OrderRequest.builder()
-                        .orderDate(new Date())
-                        .shippingAddress(verifiedPayment.getShippingAddress())
-                        .shippingMethod(verifiedPayment.getShippingMethod())
-                        .paymentMethod(verifiedPayment.getPaymentMethod())
-                        .discountPrice(verifiedPayment.getDiscountPrice())
-                        .message(verifiedPayment.getMessage())
-                        .build();
-
-                orderService.placeOrder(orderRequest, null, username);
-
-                // Delete all payments for the username after placing the order
-                paymentRepo.deleteByUsername(username);
+            if (verifiedPayment == null) {
+                log.error("No matching payment found for username: {} and amount: {}", username, amount);
+                return;
             }
+            OrderRequest orderRequest = OrderRequest.builder()
+                    .orderDate(new Date())
+                    .shippingAddress(verifiedPayment.getShippingAddress())
+                    .shippingMethod(verifiedPayment.getShippingMethod())
+                    .paymentMethod(verifiedPayment.getPaymentMethod())
+                    .discountPrice(verifiedPayment.getDiscountPrice())
+                    .message(verifiedPayment.getMessage())
+                    .build();
+
+            orderService.placeOrder(orderRequest, null, username);
+
+            // Delete all payments for the username after placing the order
+            paymentRepo.deleteByUsername(username);
+
         } else {
-            System.out.println("Username not found");
+            log.error("Username not found in description: {}", description);
         }
     }
 
