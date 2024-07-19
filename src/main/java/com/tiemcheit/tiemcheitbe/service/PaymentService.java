@@ -16,6 +16,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -52,22 +54,32 @@ public class PaymentService {
     }
 
     public void handleWebhook(CassoTransaction transaction) {
-        String username = transaction.getDescription();
-        Long amount = transaction.getAmount();
+        String description = transaction.getDescription();
 
-        Payment verifiedPayment = verifyPayment(username, amount);
+        Pattern pattern = Pattern.compile(":\\d+;\\s*([^\\s]+)");
+        Matcher matcher = pattern.matcher(description);
 
-        if (verifiedPayment != null) {
-            OrderRequest orderRequest = OrderRequest.builder()
-                    .orderDate(new Date())
-                    .shippingAddress(verifiedPayment.getShippingAddress())
-                    .shippingMethod(verifiedPayment.getShippingMethod())
-                    .paymentMethod(verifiedPayment.getPaymentMethod())
-                    .discountPrice(verifiedPayment.getDiscountPrice())
-                    .message(verifiedPayment.getMessage())
-                    .build();
+        if (matcher.find()) {
+            String username = matcher.group(1);
 
-            orderService.placeOrder(orderRequest, null, username);
+            Long amount = transaction.getAmount();
+
+            Payment verifiedPayment = verifyPayment(username, amount);
+
+            if (verifiedPayment != null) {
+                OrderRequest orderRequest = OrderRequest.builder()
+                        .orderDate(new Date())
+                        .shippingAddress(verifiedPayment.getShippingAddress())
+                        .shippingMethod(verifiedPayment.getShippingMethod())
+                        .paymentMethod(verifiedPayment.getPaymentMethod())
+                        .discountPrice(verifiedPayment.getDiscountPrice())
+                        .message(verifiedPayment.getMessage())
+                        .build();
+
+                orderService.placeOrder(orderRequest, null, username);
+            }
+        } else {
+            System.out.println("Username not found");
         }
     }
 
