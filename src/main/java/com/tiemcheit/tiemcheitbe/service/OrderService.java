@@ -71,10 +71,8 @@ public class OrderService {
     }
 
     public void placeOrder(OrderRequest request, String code, String username) {
-        // first get the item from user's cart
-        List<CartItemResponse> cartItemList = cartService.allCartItems();
+        List<CartItemResponse> cartItemList = cartService.allCartItemsFromUsername(username);
 
-        // Create a new order
         Order order = new Order();
         order.setOrderDate(new Date());
 
@@ -84,7 +82,7 @@ public class OrderService {
         order.setPaymentMethod(request.getPaymentMethod()); // Replace with actual data
         order.setMessage(request.getMessage());
         order.setOrderStatus("Order Received"); // Replace with actual data
-        
+
         // set coupon to order if having code
         if (code != null) {
             Coupon coupon = couponService.getCouponByCode(code);

@@ -55,11 +55,7 @@ public class PaymentService {
         String username = transaction.getDescription();
         Long amount = transaction.getAmount();
 
-        log.info("handleWebhook: username: {}, amount: {}", username, amount);
-        log.info("CassoTransaction: transaction: {}", transaction);
-
         Payment verifiedPayment = verifyPayment(username, amount);
-        log.info("verifiedPayment: {}", verifiedPayment);
 
         if (verifiedPayment != null) {
             OrderRequest orderRequest = OrderRequest.builder()
@@ -71,11 +67,7 @@ public class PaymentService {
                     .message(verifiedPayment.getMessage())
                     .build();
 
-            log.info("orderRequest: {}", orderRequest);
-
             orderService.placeOrder(orderRequest, null, username);
-
-            log.info("Order placed successfully.");
         }
     }
 

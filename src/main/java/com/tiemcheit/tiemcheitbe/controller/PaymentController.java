@@ -4,7 +4,6 @@ import com.tiemcheit.tiemcheitbe.dto.request.PaymentRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.PaymentResponse;
 import com.tiemcheit.tiemcheitbe.model.CassoTransaction;
-import com.tiemcheit.tiemcheitbe.service.OrderService;
 import com.tiemcheit.tiemcheitbe.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -14,8 +13,6 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/payments")
 public class PaymentController {
     private final PaymentService paymentService;
-    private final OrderService orderService;
-
 
     @PostMapping()
     public ApiResponse<Void> addPayment(@RequestBody PaymentRequest request) {
