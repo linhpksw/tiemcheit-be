@@ -1,9 +1,9 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
+import com.tiemcheit.tiemcheitbe.dto.request.CassoRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.PaymentRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.PaymentResponse;
-import com.tiemcheit.tiemcheitbe.model.CassoTransaction;
 import com.tiemcheit.tiemcheitbe.service.PaymentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -28,13 +28,13 @@ public class PaymentController {
     }
 
     @PostMapping("/casso")
-    public ApiResponse<Void> handleWebhook(@RequestBody CassoTransaction transaction) {
-        if (transaction == null) {
-            log.error("Received null transaction");
-            return ApiResponse.<Void>builder().message("Transaction is null").build();
+    public ApiResponse<Void> handleWebhook(@RequestBody CassoRequest request) {
+        if (request == null || request.getData() == null || request.getData().isEmpty()) {
+            log.error("Received null or empty transaction list");
+            return ApiResponse.<Void>builder().message("Transaction list is null or empty").build();
         }
 
-        paymentService.handleWebhook(transaction);
+        request.getData().forEach(paymentService::handleWebhook);
 
         return ApiResponse.<Void>builder().message("Success").build();
     }

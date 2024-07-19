@@ -81,10 +81,7 @@ public class PaymentService {
                 return;
             }
 
-
             Long amount = transaction.getAmount();
-            log.info("Transaction amount: {}", amount);
-
             Payment verifiedPayment = verifyPayment(username, amount);
 
             if (verifiedPayment == null) {
