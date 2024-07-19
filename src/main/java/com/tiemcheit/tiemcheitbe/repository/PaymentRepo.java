@@ -12,5 +12,5 @@ public interface PaymentRepo extends JpaRepository<Payment, Long> {
     @Query(value = "SELECT * FROM payments p WHERE p.username = :username AND p.total_price = :amount ORDER BY p.order_date DESC LIMIT 1", nativeQuery = true)
     Optional<Payment> findMatchingPayment(String username, Long amount);
 
-
+    void deleteByUsername(String username);
 }

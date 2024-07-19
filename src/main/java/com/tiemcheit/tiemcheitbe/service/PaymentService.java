@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.regex.Matcher;
@@ -53,15 +54,14 @@ public class PaymentService {
         return paymentMapper.toPaymentResponse(payment);
     }
 
+    @Transactional
     public void handleWebhook(CassoTransaction transaction) {
         String description = transaction.getDescription();
-
-        Pattern pattern = Pattern.compile(":\\d+;\\s*([^\\s]+)");
+        Pattern pattern = Pattern.compile("DEN:\\S+ (\\S+)");
         Matcher matcher = pattern.matcher(description);
 
         if (matcher.find()) {
             String username = matcher.group(1);
-
             Long amount = transaction.getAmount();
 
             Payment verifiedPayment = verifyPayment(username, amount);
@@ -77,6 +77,9 @@ public class PaymentService {
                         .build();
 
                 orderService.placeOrder(orderRequest, null, username);
+
+                // Delete all payments for the username after placing the order
+                paymentRepo.deleteByUsername(username);
             }
         } else {
             System.out.println("Username not found");
