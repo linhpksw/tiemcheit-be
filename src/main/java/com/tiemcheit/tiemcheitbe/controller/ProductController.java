@@ -131,13 +131,13 @@ public class ProductController {
                 .message(SUCCESS_MSG)
                 .build();
     }
-//    @PostMapping("/")
-//    public ApiResponse<ProductResponse> addCustomProduct(@RequestBody ProductRequest productRequest) {
-//        return ApiResponse.<ProductResponse>builder()
-//                .data(productService.create(productRequest))
-//                .message(SUCCESS_MSG)
-//                .build();
-//    }
+    @GetMapping("/orderDetail/{id}")
+    public ApiResponse<ProductResponse> addCustomProduct(@PathVariable Long id) {
+        return ApiResponse.<ProductResponse>builder()
+                .data(productService.getProductByOrderDetailId(id))
+                .message(SUCCESS_MSG)
+                .build();
+    }
 
     @PutMapping("/{id}")
     public ApiResponse<ProductResponse> updateProduct(@RequestBody ProductRequest productRequest, @PathVariable Long id) {

@@ -58,6 +58,18 @@ public class ProductService {
                 })
                 .toList();
     }
+    public ProductResponse getProductByOrderDetailId(Long id) {
+        var orderDetail = orderDetailRepo.findById(id).orElse(null);
+        if (orderDetail == null) {
+            return null;
+        }
+        var productResponse = ProductMapper.INSTANCE.toProductResponse(orderDetail.getProduct());
+        productResponse.setImage(productImageRepo.findAllByProductId(productResponse.getId()).stream()
+                .findFirst()
+                .map(ProductImage::getImage)
+                .orElse(null));
+        return productResponse;
+    }
 
     //get All ProductResponse by category id
     public List<ProductResponse> getAllProductsByCategoryId(Long categoryId) {
