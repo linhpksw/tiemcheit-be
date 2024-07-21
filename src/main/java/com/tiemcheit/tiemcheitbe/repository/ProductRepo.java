@@ -17,7 +17,7 @@ public interface ProductRepo extends JpaRepository<Product, Long>, JpaSpecificat
 //    @Query("SELECT p FROM Product p WHERE p.id = :productId")
 //    Product findProductById(@Param("productId") Long productId);
 
-    @Query("SELECT p FROM Product p WHERE p.status = 'active' OR p.status = 'disabled'")
+    @Query("SELECT p FROM Product p WHERE p.category.id = :category_id AND (p.status = 'active' OR p.status = 'disabled')")
     List<Product> findAllByCategoryId(Long category_id);
 
     //    @Query("SELECT p FROM Product p WHERE p.status = 'active' OR p.status = 'disabled'")
