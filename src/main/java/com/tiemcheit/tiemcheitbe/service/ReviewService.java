@@ -17,6 +17,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +55,9 @@ public class ReviewService {
         var orderDetail = orderDetailRepo.findById(orderDetailId).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND));
         var username = SecurityUtils.getCurrentUsername();
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
-
+        if(!Objects.equals(user.getId(), orderDetail.getOrder().getUser().getId())){
+            throw new AppException("The user cannot review this product", HttpStatus.UNAUTHORIZED);
+        }
         UserReview userReview = userReviewMapper.toUserReview(userReviewRequest);
         userReview.setOrderDetail(orderDetail);
         userReview.setUser(user);
