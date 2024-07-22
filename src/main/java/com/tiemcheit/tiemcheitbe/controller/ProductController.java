@@ -154,6 +154,7 @@ public class ProductController {
                 .message("Success")
                 .build();
     }
+
     @GetMapping("alert/{page}/{size}")
     public ApiResponse<Page<ProductResponse>> getOutOfStockProducts(@PathVariable int page, @PathVariable int size) {
         return ApiResponse.<Page<ProductResponse>>builder()
@@ -169,6 +170,7 @@ public class ProductController {
                 .message(SUCCESS_MSG)
                 .build();
     }
+
     @GetMapping("/user/{username}")
     public ApiResponse<List<PurchasedProductResponse>> getProductPurchasedByUsername(@PathVariable String username) {
         return ApiResponse.<List<PurchasedProductResponse>>builder()
@@ -185,4 +187,11 @@ public class ProductController {
                 .build();
     }
 
+    @GetMapping("/{id}/relative")
+    public ApiResponse<List<ProductResponse>> getRelativeProducts(@PathVariable Long id) {
+        return ApiResponse.<List<ProductResponse>>builder()
+                .data(productService.getAllRelativeProductOfProduct(id))
+                .message(SUCCESS_MSG)
+                .build();
+    }
 }
