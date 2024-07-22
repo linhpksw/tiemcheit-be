@@ -138,10 +138,16 @@ public class CouponService {
         if (coupon == null) {
             throw new AppException("Coupon not found", HttpStatus.BAD_REQUEST);
         }
+
+        if (!coupon.getStatus().equals("active")) {
+            throw new AppException("Coupon is not valid", HttpStatus.BAD_REQUEST);
+        }
+
         // Check if the coupon has reached the total usage limit
         if (coupon.getUseCount() >= coupon.getLimitUses()) {
             throw new AppException("Coupon is not valid anymore", HttpStatus.BAD_REQUEST);
         }
+
         // Check if the user has reached the account usage limit for this coupon
         User user = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         List<Order> orders = orderRepo.findByUserIdAndCouponId(user.getId(), coupon.getId());
