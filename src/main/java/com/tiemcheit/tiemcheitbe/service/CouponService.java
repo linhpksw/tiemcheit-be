@@ -235,7 +235,7 @@ public class CouponService {
                     && coupon.getDateExpired().compareTo(now) >= 0) {
                 coupon.setStatus("active");
                 canUpdate = true;
-            } else if (!coupon.getStatus().equals("inactive")) {
+            } else if (!coupon.getStatus().equals("inactive") && coupon.getDateValid().compareTo(now) >= 0) {
                 coupon.setStatus("inactive");
                 canUpdate = true;
             }
@@ -257,19 +257,19 @@ public class CouponService {
             throw new AppException("Tên không hợp lệ", HttpStatus.BAD_REQUEST);
         }
         if (request.getDateValid() == null || request.getDateValid().before(new Date())) {
-            throw new AppException("Date Valid is required and must be in the future", HttpStatus.BAD_REQUEST);
+            throw new AppException("Ngày hợp lệ phải lớn hơn ngày hiện tại", HttpStatus.BAD_REQUEST);
         }
         if (request.getDateExpired() == null || request.getDateExpired().before(request.getDateValid())) {
-            throw new AppException("Date Expired is required and must be after Date Valid", HttpStatus.BAD_REQUEST);
+            throw new AppException("Ngày hết hạn phải lớn hơn ngày hợp lệ", HttpStatus.BAD_REQUEST);
         }
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
             throw new AppException("Vui lòng nhập mô tả", HttpStatus.BAD_REQUEST);
         }
         if (request.getLimitAccountUses() < 1) {
-            throw new AppException("Limit Account Uses is required and must be greater than 0", HttpStatus.BAD_REQUEST);
+            throw new AppException("Giới hạn sử dụng của 1 tài khoản là bắt buộc và phải lớn hơn 0", HttpStatus.BAD_REQUEST);
         }
         if (request.getLimitUses() < 1) {
-            throw new AppException("Limit Uses is required and must be greater than 0", HttpStatus.BAD_REQUEST);
+            throw new AppException("Giới hạn sử dụng là bắt buộc và phải lớn hơn 0", HttpStatus.BAD_REQUEST);
         }
     }
 
