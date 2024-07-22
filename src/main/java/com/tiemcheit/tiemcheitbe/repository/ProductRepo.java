@@ -32,4 +32,7 @@ public interface ProductRepo extends JpaRepository<Product, Long>, JpaSpecificat
     List<Product> findAllByStatus(String status);
 
     List<Product> findAllByCategoryIdAndStatus(Long category_id, String status);
+
+    @Query("SELECT p FROM Product p WHERE p.id != :id AND p.category.id = :category_id AND (p.status = 'active' OR p.status = 'disabled')")
+    List<Product> findAllExceptIdByCategoryId(Long id, Long category_id);
 }

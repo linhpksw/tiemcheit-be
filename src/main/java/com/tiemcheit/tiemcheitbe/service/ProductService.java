@@ -223,6 +223,7 @@ public class ProductService {
                 })
                 .toList();
     }
+
     public List<PurchasedProductResponse> getPurchasedProducts(String username) {
         // Find the user by username
         var user = userRepo.findByUsername(username)
@@ -255,6 +256,16 @@ public class ProductService {
                 .collect(Collectors.toList());
 
         return purchasedProducts;
+    }
+
+    public List<ProductResponse> getAllRelativeProductOfProduct(Long productId) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+
+        List<Product> products = productRepo.findAllExceptIdByCategoryId(productId, product.getCategory().getId());
+        return products.stream()
+                .map(ProductMapper.INSTANCE::toProductResponse)
+                .toList();
     }
 
     //=============================================FOR ADMINS=======================================================
@@ -308,7 +319,7 @@ public class ProductService {
                 .toList();
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    //    @PreAuthorize("hasRole('ADMIN')")
     public Page<ProductResponse> getIngredientAlertProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return productIngredientRepo.findDistinctProductsByUnitInCupGreaterThanIngredientQuantity(pageable)
