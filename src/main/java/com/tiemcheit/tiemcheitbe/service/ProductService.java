@@ -260,7 +260,10 @@ public class ProductService {
                             .id(product.getId())
                             .name(product.getName())
                             .price(product.getPrice())
-                            .image(productImageRepo.findAllByProductId(product.getId()).get(0).getImage())
+                            .image(productImageRepo.findAllByProductId(product.getId()).stream()
+                                    .findFirst()
+                                    .map(ProductImage::getImage)
+                                    .orElse(null))
                             .category(product.getCategory())
                             .orderDetailId(orderDetail.getId())
                             .build();
