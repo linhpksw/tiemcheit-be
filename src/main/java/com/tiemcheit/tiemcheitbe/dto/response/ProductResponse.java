@@ -7,6 +7,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,8 +19,9 @@ public class ProductResponse {
     private Double price;
     private String image;
     private LocalDate createAt;
-    private Integer quantity;
+    //    private Integer quantity;
     private Category category;
+    private List<ProductIngredientResponse> ingredientList;
     private String status;
     private String prevStatus;
 }

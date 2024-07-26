@@ -58,6 +58,7 @@ public class ProductService {
                 })
                 .toList();
     }
+
     public ProductResponse getProductByOrderDetailId(Long id) {
         var orderDetail = orderDetailRepo.findById(id).orElse(null);
         if (orderDetail == null) {
@@ -75,6 +76,7 @@ public class ProductService {
     public List<ProductResponse> getAllProductsByCategoryId(Long categoryId) {
 
         List<Product> products = productRepo.findAllByCategoryId(categoryId);
+
         return products.stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
@@ -82,6 +84,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
@@ -190,6 +197,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 });
     }
@@ -205,7 +217,11 @@ public class ProductService {
                     .findFirst()
                     .map(ProductImage::getImage)
                     .orElse(null));
-
+            List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                    .stream()
+                    .map(productIngredientMapper::toProductIngredientResponse)
+                    .toList();
+            productResponse.setIngredientList(productIngredientResponseList);
             return productResponse;
         });
     }
@@ -230,7 +246,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
-
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
@@ -259,7 +279,7 @@ public class ProductService {
                     return PurchasedProductResponse.builder()
                             .id(product.getId())
                             .name(product.getName())
-                            .price(product.getPrice())
+//                            .price(product.getPrice())
                             .image(productImageRepo.findAllByProductId(product.getId()).stream()
                                     .findFirst()
                                     .map(ProductImage::getImage)
@@ -279,7 +299,19 @@ public class ProductService {
 
         List<Product> products = productRepo.findAllExceptIdByCategoryId(productId, product.getCategory().getId());
         return products.stream()
-                .map(ProductMapper.INSTANCE::toProductResponse)
+                .map(rawproduct -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(rawproduct);
+                    productResponse.setImage(productImageRepo.findAllByProductId(rawproduct.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(rawproduct.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
+                    return productResponse;
+                })
                 .toList();
     }
 
@@ -294,6 +326,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
@@ -309,6 +346,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
@@ -329,6 +371,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
@@ -344,6 +391,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 });
 
@@ -401,9 +453,9 @@ public class ProductService {
         if (productRequest.getPrice() != null) {
             product.setPrice(productRequest.getPrice());
         }
-        if (productRequest.getQuantity() != null) {
-            product.setQuantity(productRequest.getQuantity());
-        }
+//        if (productRequest.getQuantity() != null) {
+//            product.setQuantity(productRequest.getQuantity());
+//        }
 
         Product updatedProduct = productRepo.save(product);
 
