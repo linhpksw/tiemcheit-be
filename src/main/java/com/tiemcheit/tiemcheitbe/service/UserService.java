@@ -1,22 +1,15 @@
 package com.tiemcheit.tiemcheitbe.service;
 
-import com.tiemcheit.tiemcheitbe.dto.request.RoleRequest;
-import com.tiemcheit.tiemcheitbe.dto.request.UserAddAddressRequest;
-import com.tiemcheit.tiemcheitbe.dto.request.UserUpdateAddressRequest;
-import com.tiemcheit.tiemcheitbe.dto.request.UserUpdateRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.*;
 import com.tiemcheit.tiemcheitbe.dto.response.UserAddAddressResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserAvatarResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserProfileResponse;
 import com.tiemcheit.tiemcheitbe.mapper.UserAddressMapper;
+import com.tiemcheit.tiemcheitbe.mapper.UserAvatarMapper;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
-import com.tiemcheit.tiemcheitbe.model.Permission;
-import com.tiemcheit.tiemcheitbe.model.Role;
-import com.tiemcheit.tiemcheitbe.model.User;
-import com.tiemcheit.tiemcheitbe.model.UserAddress;
-import com.tiemcheit.tiemcheitbe.repository.PermissionRepo;
-import com.tiemcheit.tiemcheitbe.repository.RoleRepo;
-import com.tiemcheit.tiemcheitbe.repository.UserAddressRepo;
-import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import com.tiemcheit.tiemcheitbe.model.*;
+import com.tiemcheit.tiemcheitbe.repository.*;
 import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -35,12 +28,14 @@ import java.util.Set;
 @Slf4j
 public class UserService {
     private final UserRepo userRepo;
+    private final UserAvatarRepo userAvatarRepo;
     private final RoleRepo roleRepo;
     private final UserAddressRepo userAddressRepo;
     private final PermissionRepo permissionRepo;
     private final PasswordEncoder passwordEncoder;
     private final UserMapper userMapper;
     private final UserAddressMapper userAddressMapper;
+    private final UserAvatarMapper userAvatarMapper;
 
     @PreAuthorize("#username == authentication.name || hasRole('ROLE_ADMIN')")
     public UserInfoResponse getUserInfo(String username) {
@@ -66,19 +61,17 @@ public class UserService {
             user.setFullname(request.getFullname());
         }
 
-        if (request.getPhone() != null) {
-            if (userRepo.existsByPhone(request.getPhone())) {
+        if (request.getPhone() != null && !request.getPhone().equals(user.getPhone())) {
+            if (userRepo.existsByPhoneAndIdNot(request.getPhone(), user.getId())) {
                 throw new AppException("User already exists with this phone", HttpStatus.BAD_REQUEST);
             }
-
             user.setPhone(request.getPhone());
         }
 
-        if (request.getEmail() != null) {
-            if (userRepo.existsByEmail(request.getEmail())) {
+        if (request.getEmail() != null && !request.getEmail().equals(user.getEmail())) {
+            if (userRepo.existsByEmailAndIdNot(request.getEmail(), user.getId())) {
                 throw new AppException("User already exists with this email", HttpStatus.BAD_REQUEST);
             }
-
             user.setEmail(request.getEmail());
         }
 
@@ -191,4 +184,28 @@ public class UserService {
         userAddressRepo.deleteByIdAndUserId(addressId, user.getId());
     }
 
+    public UserAvatarResponse getUserAvatar(String username) {
+        UserAvatar userAvatar = userAvatarRepo.findByUser_Username(username);
+
+        return userAvatarMapper.toUserAvatarResponse(userAvatar);
+    }
+
+    public UserAvatarResponse addUserAvatar(String username, UserAvatarRequest request) {
+        User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
+
+        String image = request.getImage();
+
+        log.info("Image: {}", request.getImage());
+
+        UserAvatar userAvatar = userAvatarRepo.findByUser_Username(username);
+
+        if (userAvatar == null) {
+            userAvatar = userAvatarRepo.save(UserAvatar.builder().image(image).user(user).build());
+        } else {
+            userAvatar.setImage(image);
+            userAvatarRepo.save(userAvatar);
+        }
+
+        return userAvatarMapper.toUserAvatarResponse(userAvatar);
+    }
 }

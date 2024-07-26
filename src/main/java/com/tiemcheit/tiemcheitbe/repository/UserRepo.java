@@ -86,4 +86,8 @@ public interface UserRepo extends JpaRepository<User, Long> {
             @Param("field") String field,
             @Param("order") String order
     );
+
+    boolean existsByPhoneAndIdNot(String phone, Long id);
+
+    boolean existsByEmailAndIdNot(String email, Long id);
 }
