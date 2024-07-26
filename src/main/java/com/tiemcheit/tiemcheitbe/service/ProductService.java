@@ -268,8 +268,8 @@ public class ProductService {
                             .orderDetailId(orderDetail.getId())
                             .build();
                 })
+                .distinct()
                 .collect(Collectors.toList());
-
         return purchasedProducts;
     }
 
