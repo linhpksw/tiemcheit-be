@@ -18,7 +18,7 @@ public class ProductDetailResponse {
     private String description;
     private List<String> imageList;
     private Double price;
-    private Integer quantity;
+    //    private Integer quantity;
     private Category category;
     private List<OptionResponse> optionList;
     private List<ProductIngredientResponse> ingredientList;
