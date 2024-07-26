@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -111,4 +112,8 @@ public class PaymentService {
         return paymentRepo.findMatchingPayment(username, amount).orElse(null);
     }
 
+    public boolean checkPaymentExists(String username) {
+        Optional<Payment> payment = paymentRepo.findTop1ByUsernameOrderByOrderDateDesc(username);
+        return payment.isPresent();
+    }
 }
