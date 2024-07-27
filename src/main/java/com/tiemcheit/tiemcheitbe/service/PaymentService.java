@@ -107,6 +107,8 @@ public class PaymentService {
             // Delete all payments for the username after placing the order
             paymentRepo.deleteByUsername(username);
 
+            cassoTransactionRepo.deleteByUsername(username);
+
         } else {
             log.error("Username not found in description: {}", description);
         }
