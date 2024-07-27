@@ -282,12 +282,13 @@ public class CouponService {
 
     private boolean validateName(String name) {
         String trimmedValue = name.trim();
-        Pattern pattern = Pattern.compile("^[a-zA-Z0-9 ]+$");
-        return pattern.matcher(trimmedValue).matches() &&
+//        Pattern pattern = Pattern.compile("^[a-zA-Z0-9 ]+$");
+        return
+//                pattern.matcher(trimmedValue).matches() &&
                 !trimmedValue.contains("  ") &&
-                trimmedValue.length() >= 4 &&
-                trimmedValue.length() <= 64 &&
-                name.equals(trimmedValue);
+                        trimmedValue.length() >= 4 &&
+                        trimmedValue.length() <= 64 &&
+                        name.equals(trimmedValue);
     }
 
     private boolean validateCode(String code) {
