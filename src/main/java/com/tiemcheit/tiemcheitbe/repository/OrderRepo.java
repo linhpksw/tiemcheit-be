@@ -21,6 +21,9 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.orderStatus = :status")
     List<Order> findAllByOrderStatus(String status);
 
+    @Query("SELECT o FROM Order o WHERE o.orderStatus <> :status")
+    List<Order> findAllByOrderStatusExcept(String status);
+
     List<Order> findAllByUser(User user);
 
     List<Order> findAllByUserOrderByIdDesc(User user);
@@ -44,11 +47,13 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     @Query("SELECT MONTH(o.orderDate) AS month, COUNT(o) AS count FROM Order o WHERE o.orderStatus = :status AND YEAR(o.orderDate) = :year GROUP BY MONTH(o.orderDate)")
     List<Object[]> countOrdersByStatusAndMonth(@Param("status") String status, @Param("year") int year);
 
-    @Query(value = "SELECT MONTH(o.order_date) AS month, SUM(od.price) AS total_price " +
+    @Query(value = "SELECT MONTH(o.order_date) AS month, SUM(p.price * od.quantity) AS total_price " +
             "FROM orders o " +
             "JOIN order_details od ON o.id = od.order_id " +
-            "WHERE o.order_status = 'DELIVERED' AND YEAR(o.order_date) = :year " +
-            "GROUP BY MONTH(o.order_date)",
+            "JOIN products p ON od.product_id = p.id " +
+            "WHERE o.order_status <> 'Order Canceled' AND YEAR(o.order_date) = :year " +
+            "GROUP BY MONTH(o.order_date) " +
+            "ORDER BY MONTH(o.order_date)",
             nativeQuery = true)
     List<Object[]> sumOrderRevenueByMonth(@Param("year") int year);
 
