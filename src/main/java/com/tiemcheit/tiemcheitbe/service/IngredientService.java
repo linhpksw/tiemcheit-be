@@ -66,6 +66,9 @@ public class IngredientService {
     }
 
     public IngredientResponse restock(long id, IngredientRestockRequest request) {
+        if(request.getQuantity() <= 0) {
+            throw new AppException("Quantity must be greater than zero", HttpStatus.BAD_REQUEST);
+        }
         var ingredient = ingredientRepo.findById(id)
                 .orElseThrow(() -> new AppException("Ingredient already exists", HttpStatus.BAD_REQUEST));
         ingredient.setQuantity(ingredient.getQuantity() + request.getQuantity());
