@@ -42,6 +42,7 @@ public class PaymentService {
                             .shippingMethod(request.getShippingMethod())
                             .paymentMethod(request.getPaymentMethod())
                             .discountPrice(request.getDiscountPrice())
+                            .couponCode(request.getCouponCode())
                             .message(request.getMessage())
                             .totalPrice(request.getTotalPrice())
                             .build());
@@ -100,7 +101,7 @@ public class PaymentService {
                     .message(verifiedPayment.getMessage())
                     .build();
 
-            orderService.placeOrder(orderRequest, null, username);
+            orderService.placeOrder(orderRequest, verifiedPayment.getCouponCode(), username);
 
             // Delete all payments for the username after placing the order
             paymentRepo.deleteByUsername(username);
