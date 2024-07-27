@@ -40,13 +40,33 @@ public class OrderService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<OrderResponse> getAllOrders() {
-        return orderMapper.toResponses(orderRepo.findAllByUserOrderDateDesc());
+        var orderResponses = orderMapper.toResponses(orderRepo.findAllByUserOrderDateDesc());
+
+        orderResponses.forEach(orderResponse -> {
+            orderResponse.getOrderDetails().forEach(orderDetailResponse -> {
+                orderDetailResponse.getProduct().setImage(productImageRepo.findAllByProductId(orderDetailResponse.getProduct().getId()).stream()
+                        .findFirst()
+                        .map(ProductImage::getImage)
+                        .orElse(null));
+            });
+        });
+        return orderResponses;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
     public List<OrderResponse> getOrdersByUser(Long uid) {
         User user = userRepo.getReferenceById(uid);
-        return orderMapper.toResponses(orderRepo.findAllByUser(user));
+        var orderResponses = orderMapper.toResponses(orderRepo.findAllByUser(user));
+
+        orderResponses.forEach(orderResponse -> {
+            orderResponse.getOrderDetails().forEach(orderDetailResponse -> {
+                orderDetailResponse.getProduct().setImage(productImageRepo.findAllByProductId(orderDetailResponse.getProduct().getId()).stream()
+                        .findFirst()
+                        .map(ProductImage::getImage)
+                        .orElse(null));
+            });
+        });
+        return orderResponses;
     }
 
     // check the not found exception after
@@ -74,11 +94,32 @@ public class OrderService {
 
     public List<OrderResponse> getFilterOrders(Date startDate, Date endDate, String status) {
         User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
-        return orderMapper.toResponses(orderRepo.findAllByUserIdAndOptionalFilters(user.getId(), startDate, endDate, status));
+        var orderResponses = orderMapper.toResponses(orderRepo.findAllByUserIdAndOptionalFilters(user.getId(), startDate, endDate, status));
+
+        orderResponses.forEach(orderResponse -> {
+            orderResponse.getOrderDetails().forEach(orderDetailResponse -> {
+                orderDetailResponse.getProduct().setImage(productImageRepo.findAllByProductId(orderDetailResponse.getProduct().getId()).stream()
+                        .findFirst()
+                        .map(ProductImage::getImage)
+                        .orElse(null));
+            });
+        });
+
+        return orderResponses;
     }
 
     public List<OrderResponse> getFilterOrdersByAdmin(Date startDate, Date endDate, String status) {
-        return orderMapper.toResponses(orderRepo.findAllByOptionalFilters(startDate, endDate, status));
+        var orderResponses = orderMapper.toResponses(orderRepo.findAllByOptionalFilters(startDate, endDate, status));
+
+        orderResponses.forEach(orderResponse -> {
+            orderResponse.getOrderDetails().forEach(orderDetailResponse -> {
+                orderDetailResponse.getProduct().setImage(productImageRepo.findAllByProductId(orderDetailResponse.getProduct().getId()).stream()
+                        .findFirst()
+                        .map(ProductImage::getImage)
+                        .orElse(null));
+            });
+        });
+        return orderResponses;
     }
 
     @Transactional
