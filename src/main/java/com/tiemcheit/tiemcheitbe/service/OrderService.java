@@ -51,12 +51,12 @@ public class OrderService {
     // check the not found exception after
     public OrderResponse getOrderDetails(Long orderId) {
         User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
-        Order order = orderRepo.findById(orderId).orElseThrow(() -> new RuntimeException("Order not found"));
+        Order order = orderRepo.findById(orderId).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND));
 
         if (userHasRole(user, "ADMIN") || order.getUser().getId().equals(user.getId())) {
             return orderMapper.toReponse(order);
         } else {
-            // test
+
             throw new AppException("Access denied", HttpStatus.FORBIDDEN);
         }
     }
@@ -138,13 +138,33 @@ public class OrderService {
     }
 
     @Transactional
-    public void cancelOrder(Long orderId, String reason) {
+    public void cancelOrderRequest(Long orderId, String reason) {
         Order order = orderRepo.findById(orderId)
                 .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
 
         // Update the status
         order.setCancelReason(reason);
+        order.setOrderStatus("Cancel Pending");
+        // Save the updated order
+        orderRepo.save(order);
+    }
+
+    @Transactional
+    public void cancelOrder(Long orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
         order.setOrderStatus("Order Canceled");
+        // Save the updated order
+        orderRepo.save(order);
+    }
+
+    @Transactional
+    public void cancelOrderReject(Long orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        order.setOrderStatus("Order Received");
         // Save the updated order
         orderRepo.save(order);
     }
