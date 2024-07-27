@@ -28,7 +28,7 @@ public interface OrderRepo extends JpaRepository<Order, Long> {
     @Query("SELECT o FROM Order o WHERE o.user.id = :userId AND (:startDate IS NULL OR o.orderDate >= :startDate) AND (:endDate IS NULL OR o.orderDate <= :endDate) AND (:status IS NULL OR o.orderStatus = :status) ORDER BY o.orderDate DESC")
     List<Order> findAllByUserIdAndOptionalFilters(@Param("userId") Long userId, @Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("status") String status);
 
-    @Query("SELECT o FROM Order o WHERE (:startDate IS NULL OR o.orderDate >= :startDate) AND (:endDate IS NULL OR o.orderDate <= :endDate) AND (:status IS NULL OR o.orderStatus = :status) ORDER BY o.orderDate DESC")
+    @Query("SELECT o FROM Order o WHERE (:startDate IS NULL OR cast(o.orderDate as date) >= :startDate) AND (:endDate IS NULL OR cast(o.orderDate as date) <= :endDate) AND (:status IS NULL OR o.orderStatus = :status) ORDER BY o.orderDate DESC")
     List<Order> findAllByOptionalFilters(@Param("startDate") Date startDate, @Param("endDate") Date endDate, @Param("status") String status);
 
     // @Query("SELECT o FROM Order o WHERE o.orderDate BETWEEN :startDate AND :endDate AND o.orderStatus = :status")

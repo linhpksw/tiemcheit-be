@@ -59,6 +59,7 @@ public class ProductService {
                 })
                 .toList();
     }
+
     public ProductResponse getProductByOrderDetailId(Long id) {
         var orderDetail = orderDetailRepo.findById(id).orElse(null);
         if (orderDetail == null) {
@@ -76,6 +77,7 @@ public class ProductService {
     public List<ProductResponse> getAllProductsByCategoryId(Long categoryId) {
 
         List<Product> products = productRepo.findAllByCategoryId(categoryId);
+
         return products.stream()
                 .map(product -> {
                     ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(product);
@@ -83,6 +85,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
@@ -191,6 +198,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 });
     }
@@ -206,7 +218,11 @@ public class ProductService {
                     .findFirst()
                     .map(ProductImage::getImage)
                     .orElse(null));
-
+            List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                    .stream()
+                    .map(productIngredientMapper::toProductIngredientResponse)
+                    .toList();
+            productResponse.setIngredientList(productIngredientResponseList);
             return productResponse;
         });
     }
@@ -231,11 +247,16 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
-
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
     }
+
     public List<PurchasedProductResponse> getPurchasedProducts(String username) {
         // Find the user by username
         var user = userRepo.findByUsername(username)
@@ -259,7 +280,7 @@ public class ProductService {
                     return PurchasedProductResponse.builder()
                             .id(product.getId())
                             .name(product.getName())
-                            .price(product.getPrice())
+//                            .price(product.getPrice())
                             .image(productImageRepo.findAllByProductId(product.getId()).stream()
                                     .findFirst()
                                     .map(ProductImage::getImage)
@@ -293,6 +314,28 @@ public class ProductService {
 
     }
 
+    public List<ProductResponse> getAllRelativeProductOfProduct(Long productId) {
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new AppException("Product not found", HttpStatus.NOT_FOUND));
+
+        List<Product> products = productRepo.findAllExceptIdByCategoryId(productId, product.getCategory().getId());
+        return products.stream()
+                .map(rawproduct -> {
+                    ProductResponse productResponse = ProductMapper.INSTANCE.toProductResponse(rawproduct);
+                    productResponse.setImage(productImageRepo.findAllByProductId(rawproduct.getId()).stream()
+                            .findFirst()
+                            .map(ProductImage::getImage)
+                            .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(rawproduct.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
+                    return productResponse;
+                })
+                .toList();
+    }
+
     //=============================================FOR ADMINS=======================================================
     @PreAuthorize("hasRole('ADMIN')")
     public List<ProductResponse> getAllProductsByStatus(String status) {
@@ -304,6 +347,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
@@ -319,6 +367,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
@@ -339,12 +392,17 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 })
                 .toList();
     }
 
-//    @PreAuthorize("hasRole('ADMIN')")
+    //    @PreAuthorize("hasRole('ADMIN')")
     public Page<ProductResponse> getIngredientAlertProducts(int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return productIngredientRepo.findDistinctProductsByUnitInCupGreaterThanIngredientQuantity(pageable)
@@ -354,6 +412,11 @@ public class ProductService {
                             .findFirst()
                             .map(ProductImage::getImage)
                             .orElse(null));
+                    List<ProductIngredientResponse> productIngredientResponseList = productIngredientRepo.findAllByProductId(product.getId())
+                            .stream()
+                            .map(productIngredientMapper::toProductIngredientResponse)
+                            .toList();
+                    productResponse.setIngredientList(productIngredientResponseList);
                     return productResponse;
                 });
 
@@ -411,9 +474,9 @@ public class ProductService {
         if (productRequest.getPrice() != null) {
             product.setPrice(productRequest.getPrice());
         }
-        if (productRequest.getQuantity() != null) {
-            product.setQuantity(productRequest.getQuantity());
-        }
+//        if (productRequest.getQuantity() != null) {
+//            product.setQuantity(productRequest.getQuantity());
+//        }
 
         Product updatedProduct = productRepo.save(product);
 

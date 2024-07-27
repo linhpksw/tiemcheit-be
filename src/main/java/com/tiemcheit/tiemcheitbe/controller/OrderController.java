@@ -113,9 +113,21 @@ public class OrderController {
                 .build();
     }
 
+    @PatchMapping("/{orderId}/cancel-request")
+    public ApiResponse<Void> cancelOrderRequest(@PathVariable Long orderId, @RequestParam String reason) {
+        orderService.cancelOrderRequest(orderId, reason);
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
     @PatchMapping("/{orderId}/cancel")
-    public ApiResponse<Void> cancelOrder(@PathVariable Long orderId, @RequestParam String reason) {
-        orderService.cancelOrder(orderId, reason);
+    public ApiResponse<Void> cancelOrder(@PathVariable Long orderId) {
+        orderService.cancelOrder(orderId);
+        return ApiResponse.<Void>builder().message("Success").build();
+    }
+
+    @PatchMapping("/{orderId}/cancel-reject")
+    public ApiResponse<Void> cancelOrderReject(@PathVariable Long orderId) {
+        orderService.cancelOrderReject(orderId);
         return ApiResponse.<Void>builder().message("Success").build();
     }
 }

@@ -29,6 +29,8 @@ public class PaymentController {
 
     @PostMapping("/casso")
     public ApiResponse<Void> handleWebhook(@RequestBody CassoRequest request) {
+        log.info("Received webhook request: {}", request);
+
         if (request == null || request.getData() == null || request.getData().isEmpty()) {
             log.error("Received null or empty transaction list");
             return ApiResponse.<Void>builder().message("Transaction list is null or empty").build();
@@ -37,6 +39,12 @@ public class PaymentController {
         request.getData().forEach(paymentService::handleWebhook);
 
         return ApiResponse.<Void>builder().message("Success").build();
+    }
+
+    @GetMapping("/check/{username}")
+    public ApiResponse<Boolean> isPaid(@PathVariable String username) {
+        boolean exists = paymentService.checkPaymentExists(username);
+        return ApiResponse.<Boolean>builder().data(!exists).message("Success").build();
     }
 
 }

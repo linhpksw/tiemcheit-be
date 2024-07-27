@@ -1,12 +1,10 @@
 package com.tiemcheit.tiemcheitbe.controller;
 
 import com.tiemcheit.tiemcheitbe.dto.request.UserAddAddressRequest;
+import com.tiemcheit.tiemcheitbe.dto.request.UserAvatarRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.UserUpdateAddressRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.UserUpdateRequest;
-import com.tiemcheit.tiemcheitbe.dto.response.ApiResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.UserAddAddressResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
-import com.tiemcheit.tiemcheitbe.dto.response.UserProfileResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.*;
 import com.tiemcheit.tiemcheitbe.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -96,4 +94,19 @@ public class UserController {
         userService.deleteUserAddress(username, addressId);
         return ApiResponse.<Void>builder().message("Success").build();
     }
+
+    @GetMapping("/{username}/avatars")
+    ApiResponse<UserAvatarResponse> getAvatar(@PathVariable String username) {
+        return ApiResponse.<UserAvatarResponse>builder()
+                .data(userService.getUserAvatar(username))
+                .build();
+    }
+
+    @PostMapping("/{username}/avatars")
+    ApiResponse<UserAvatarResponse> addAvatar(@PathVariable String username, @RequestBody UserAvatarRequest request) {
+        return ApiResponse.<UserAvatarResponse>builder()
+                .data(userService.addUserAvatar(username, request))
+                .build();
+    }
+
 }

@@ -52,11 +52,9 @@ public class CouponService {
 
     @Transactional
     public CouponResponse getCouponById(Long id) {
-        if (couponRepository.findById(id).isPresent()) {
-            return couponMapper.toResponse(couponRepository.findById(id).get());
-        } else {
-            return null;
-        }
+        couponRepository.findById(id).orElseThrow(() -> new AppException("Không tìm thấy mã giảm giá", HttpStatus.BAD_REQUEST));
+        return couponMapper.toResponse(couponRepository.findById(id).get());
+
     }
 
     @Transactional
@@ -136,18 +134,24 @@ public class CouponService {
         List<CartItemResponse> cartItemList = cartService.allCartItems();
         Coupon coupon = couponRepository.findByCode(code);
         if (coupon == null) {
-            throw new AppException("Coupon not found", HttpStatus.BAD_REQUEST);
+            throw new AppException("Không tìm thấy mã giảm giá", HttpStatus.BAD_REQUEST);
         }
+
+        if (coupon.getStatus().equals("inactive")) {
+            throw new AppException("Mã giảm giá không hoạt động", HttpStatus.BAD_REQUEST);
+        }
+
         // Check if the coupon has reached the total usage limit
         if (coupon.getUseCount() >= coupon.getLimitUses()) {
-            throw new AppException("Coupon is not valid anymore", HttpStatus.BAD_REQUEST);
+            throw new AppException("Mã giảm giá không còn giá trị nữa", HttpStatus.BAD_REQUEST);
         }
+
         // Check if the user has reached the account usage limit for this coupon
         User user = userRepo.findByUsername(username).orElseThrow(() -> new RuntimeException("User not found"));
         List<Order> orders = orderRepo.findByUserIdAndCouponId(user.getId(), coupon.getId());
 
         if (orders.size() >= coupon.getLimitAccountUses()) {
-            throw new AppException("You have access the user's limit uses", HttpStatus.BAD_REQUEST);
+            throw new AppException("Bạn đã sử dụng hết lượt của mã giảm giá", HttpStatus.BAD_REQUEST);
         }
 
         String discountType = coupon.getDiscounts().getFirst().getType();
@@ -235,7 +239,7 @@ public class CouponService {
                     && coupon.getDateExpired().compareTo(now) >= 0) {
                 coupon.setStatus("active");
                 canUpdate = true;
-            } else if (!coupon.getStatus().equals("inactive")) {
+            } else if (!coupon.getStatus().equals("inactive") && coupon.getDateValid().compareTo(now) >= 0) {
                 coupon.setStatus("inactive");
                 canUpdate = true;
             }
@@ -257,19 +261,22 @@ public class CouponService {
             throw new AppException("Tên không hợp lệ", HttpStatus.BAD_REQUEST);
         }
         if (request.getDateValid() == null || request.getDateValid().before(new Date())) {
-            throw new AppException("Date Valid is required and must be in the future", HttpStatus.BAD_REQUEST);
+            throw new AppException("Ngày hợp lệ phải lớn hơn ngày hiện tại", HttpStatus.BAD_REQUEST);
         }
         if (request.getDateExpired() == null || request.getDateExpired().before(request.getDateValid())) {
-            throw new AppException("Date Expired is required and must be after Date Valid", HttpStatus.BAD_REQUEST);
+            throw new AppException("Ngày hết hạn phải lớn hơn ngày hợp lệ", HttpStatus.BAD_REQUEST);
         }
         if (request.getDescription() == null || request.getDescription().trim().isEmpty()) {
             throw new AppException("Vui lòng nhập mô tả", HttpStatus.BAD_REQUEST);
         }
         if (request.getLimitAccountUses() < 1) {
-            throw new AppException("Limit Account Uses is required and must be greater than 0", HttpStatus.BAD_REQUEST);
+            throw new AppException("Giới hạn sử dụng của 1 tài khoản là bắt buộc và phải lớn hơn 0", HttpStatus.BAD_REQUEST);
         }
         if (request.getLimitUses() < 1) {
-            throw new AppException("Limit Uses is required and must be greater than 0", HttpStatus.BAD_REQUEST);
+            throw new AppException("Giới hạn sử dụng là bắt buộc và phải lớn hơn 0", HttpStatus.BAD_REQUEST);
+        }
+        if (request.getLimitAccountUses() > request.getLimitUses()) {
+            throw new AppException("Giới hạn sử dụng phải lớn hơn giới hạn sử dụng của 1 tài khoản", HttpStatus.BAD_REQUEST);
         }
     }
 
@@ -301,6 +308,9 @@ public class CouponService {
     }
 
     public void updateCoupon(Long id, CouponRequest request) {
+        // validate before update information
+        validateCouponRequest(request);
+
         Optional<Coupon> optionalCoupon = couponRepository.findById(id);
 
         if (optionalCoupon.isPresent()) {

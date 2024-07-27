@@ -16,4 +16,5 @@ public class OrderResponse {
     private String orderStatus;
     private List<OrderDetailResponse> orderDetails;
     private Double discountPrice;
+    private String cancelReason;
 }

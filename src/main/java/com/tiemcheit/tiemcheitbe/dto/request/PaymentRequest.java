@@ -18,6 +18,7 @@ public class PaymentRequest {
     private String paymentMethod;
     private String message;
     private Double discountPrice;
+    private String couponCode;
     private Double totalPrice;
     private String username;
 }

@@ -15,7 +15,7 @@ public class ProductRequest {
     private Double price;
     private Category category;
     private LocalDate createAt;
-    private Integer quantity;
+    //    private Integer quantity;
     private String description;
     private List<Long> optionId;
     private List<ProductIngredientRequest> productIngredients;

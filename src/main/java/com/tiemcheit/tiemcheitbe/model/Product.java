@@ -34,8 +34,8 @@ public class Product {
     @Column(nullable = false)
     private LocalDate createAt = LocalDate.now();
 
-    @Column(nullable = false)
-    private Integer quantity;
+//    @Column(nullable = false)
+//    private Integer quantity;
 
     private Integer sold = 0;
 

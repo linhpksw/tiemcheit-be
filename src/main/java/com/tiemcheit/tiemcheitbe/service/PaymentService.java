@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +42,7 @@ public class PaymentService {
                             .shippingMethod(request.getShippingMethod())
                             .paymentMethod(request.getPaymentMethod())
                             .discountPrice(request.getDiscountPrice())
+                            .couponCode(request.getCouponCode())
                             .message(request.getMessage())
                             .totalPrice(request.getTotalPrice())
                             .build());
@@ -56,12 +58,14 @@ public class PaymentService {
 
     @Transactional
     public void handleWebhook(CassoTransaction transaction) {
+        log.info("transaction {}", transaction);
+
         if (transaction == null) {
             log.error("Transaction is null");
             return;
         }
 
-        String description = transaction.getDescription();
+        String description = transaction.getDescription().toLowerCase();
 
         if (description == null) {
             log.error("Transaction description is null");
@@ -69,7 +73,7 @@ public class PaymentService {
         }
 
         log.info("Transaction description: {}", description);
-        Pattern pattern = Pattern.compile("DEN:\\S+ (\\w+)");
+        Pattern pattern = Pattern.compile("den:\\S+ (\\w+)");
         Matcher matcher = pattern.matcher(description);
 
         if (matcher.find()) {
@@ -97,7 +101,7 @@ public class PaymentService {
                     .message(verifiedPayment.getMessage())
                     .build();
 
-            orderService.placeOrder(orderRequest, null, username);
+            orderService.placeOrder(orderRequest, verifiedPayment.getCouponCode(), username);
 
             // Delete all payments for the username after placing the order
             paymentRepo.deleteByUsername(username);
@@ -111,4 +115,8 @@ public class PaymentService {
         return paymentRepo.findMatchingPayment(username, amount).orElse(null);
     }
 
+    public boolean checkPaymentExists(String username) {
+        Optional<Payment> payment = paymentRepo.findTop1ByUsernameOrderByOrderDateDesc(username);
+        return payment.isPresent();
+    }
 }
