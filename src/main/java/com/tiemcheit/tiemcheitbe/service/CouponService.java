@@ -277,6 +277,9 @@ public class CouponService {
         if (request.getLimitUses() < 1) {
             throw new AppException("Giới hạn sử dụng là bắt buộc và phải lớn hơn 0", HttpStatus.BAD_REQUEST);
         }
+        if (request.getLimitAccountUses() > request.getLimitUses()) {
+            throw new AppException("Giới hạn sử dụng phải lớn hơn giới hạn sử dụng của 1 tài khoản", HttpStatus.BAD_REQUEST);
+        }
     }
 
     private boolean validateName(String name) {
@@ -307,6 +310,9 @@ public class CouponService {
     }
 
     public void updateCoupon(Long id, CouponRequest request) {
+        // validate before update information
+        validateCouponRequest(request);
+
         Optional<Coupon> optionalCoupon = couponRepository.findById(id);
 
         if (optionalCoupon.isPresent()) {
