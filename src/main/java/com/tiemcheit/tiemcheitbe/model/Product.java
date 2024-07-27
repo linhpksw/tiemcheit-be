@@ -56,4 +56,7 @@ public class Product {
 
     @OneToMany(mappedBy = "product", cascade = CascadeType.MERGE, fetch = FetchType.LAZY, orphanRemoval = true)
     private Set<ProductIngredient> productIngredients;
+
+    @ManyToOne
+    private User user;
 }

@@ -14,4 +14,5 @@ import java.util.Optional;
 @Repository
 public interface IngredientRepo extends JpaRepository<Ingredient, Long>, JpaSpecificationExecutor<Ingredient> {
     Optional<Ingredient> findByName(String name);
+    List<Ingredient> findAllByQuantityGreaterThan(int quantity);
 }

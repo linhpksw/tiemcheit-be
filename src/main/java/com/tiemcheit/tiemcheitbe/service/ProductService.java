@@ -2,6 +2,7 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.ProductRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.*;
+import com.tiemcheit.tiemcheitbe.mapper.IngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.OptionMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductIngredientMapper;
 import com.tiemcheit.tiemcheitbe.mapper.ProductMapper;
@@ -279,7 +280,7 @@ public class ProductService {
                     return PurchasedProductResponse.builder()
                             .id(product.getId())
                             .name(product.getName())
-//                            .price(product.getPrice())
+//                          .price(product.getPrice())
                             .image(productImageRepo.findAllByProductId(product.getId()).stream()
                                     .findFirst()
                                     .map(ProductImage::getImage)
@@ -291,6 +292,25 @@ public class ProductService {
                 .distinct()
                 .collect(Collectors.toList());
         return purchasedProducts;
+    }
+    public List<CustomizedProductResponse> getCreatedProducts(String username) {
+        var user = userRepo.findByUsername(username)
+                .orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
+
+        return productRepo.findAllCreatedProductsOfUser(user.getId()).stream()
+                .map(product -> CustomizedProductResponse.builder()
+                        .id(product.getId())
+                        .name(product.getName())
+                        .price(product.getPrice())
+                        .ingredientList(product.getProductIngredients()
+                                .stream()
+                                .map(productIngredientMapper::toProductIngredientResponse)
+                                .toList())
+                        .status(product.getStatus())
+                        .build())
+                .toList();
+
+
     }
 
     public List<ProductResponse> getAllRelativeProductOfProduct(Long productId) {
