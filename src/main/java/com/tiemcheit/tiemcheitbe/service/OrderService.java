@@ -35,7 +35,17 @@ public class OrderService {
 
     public List<OrderResponse> getUserOrders() {
         User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
-        return orderMapper.toResponses(orderRepo.findAllByUserOrderByIdDesc(user));
+        var orderResponses = orderMapper.toResponses(orderRepo.findAllByUserOrderByIdDesc(user));
+
+        orderResponses.forEach(orderResponse -> {
+            orderResponse.getOrderDetails().forEach(orderDetailResponse -> {
+                orderDetailResponse.getProduct().setImage(productImageRepo.findAllByProductId(orderDetailResponse.getProduct().getId()).stream()
+                        .findFirst()
+                        .map(ProductImage::getImage)
+                        .orElse(null));
+            });
+        });
+        return orderResponses;
     }
 
     @PreAuthorize("hasRole('ADMIN')")
