@@ -57,12 +57,14 @@ public class PaymentService {
 
     @Transactional
     public void handleWebhook(CassoTransaction transaction) {
+        log.info("transaction {}", transaction);
+
         if (transaction == null) {
             log.error("Transaction is null");
             return;
         }
 
-        String description = transaction.getDescription();
+        String description = transaction.getDescription().toLowerCase();
 
         if (description == null) {
             log.error("Transaction description is null");
@@ -70,7 +72,7 @@ public class PaymentService {
         }
 
         log.info("Transaction description: {}", description);
-        Pattern pattern = Pattern.compile("DEN:\\S+ (\\w+)");
+        Pattern pattern = Pattern.compile("den:\\S+ (\\w+)");
         Matcher matcher = pattern.matcher(description);
 
         if (matcher.find()) {

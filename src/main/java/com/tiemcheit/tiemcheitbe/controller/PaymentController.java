@@ -29,6 +29,8 @@ public class PaymentController {
 
     @PostMapping("/casso")
     public ApiResponse<Void> handleWebhook(@RequestBody CassoRequest request) {
+        log.info("Received webhook request: {}", request);
+
         if (request == null || request.getData() == null || request.getData().isEmpty()) {
             log.error("Received null or empty transaction list");
             return ApiResponse.<Void>builder().message("Transaction list is null or empty").build();
