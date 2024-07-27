@@ -257,9 +257,7 @@ public class CouponService {
         if (request.getCode() == null || !validateCode(request.getCode())) {
             throw new AppException("Mã không hợp lệ", HttpStatus.BAD_REQUEST);
         }
-        if (request.getName() == null || !validateName(request.getName())) {
-            throw new AppException("Tên không hợp lệ", HttpStatus.BAD_REQUEST);
-        }
+        
         if (request.getDateValid() == null || request.getDateValid().before(new Date())) {
             throw new AppException("Ngày hợp lệ phải lớn hơn ngày hiện tại", HttpStatus.BAD_REQUEST);
         }
@@ -280,15 +278,6 @@ public class CouponService {
         }
     }
 
-    private boolean validateName(String name) {
-        String trimmedValue = name.trim();
-        Pattern pattern = Pattern.compile("^[a-zA-Z0-9 ]+$");
-        return pattern.matcher(trimmedValue).matches() &&
-                !trimmedValue.contains("  ") &&
-                trimmedValue.length() >= 4 &&
-                trimmedValue.length() <= 64 &&
-                name.equals(trimmedValue);
-    }
 
     private boolean validateCode(String code) {
         String trimmedValue = code.trim();
