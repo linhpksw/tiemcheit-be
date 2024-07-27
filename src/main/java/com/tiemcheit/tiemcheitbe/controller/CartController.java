@@ -62,4 +62,13 @@ public class CartController {
                 .message("Success")
                 .data(data).build();
     }
+
+    @PostMapping("/check-ingredients")
+    public ApiResponse<Void> checkIngredients(@RequestBody List<CartItemRequest> products) {
+        cartService.checkIngredientsAvailability(products);
+
+        return ApiResponse.<Void>builder()
+                .message("Success")
+                .build();
+    }
 }

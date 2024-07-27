@@ -30,6 +30,7 @@ public class PaymentService {
     private final PaymentMapper paymentMapper;
     private final OrderService orderService;
 
+    @Transactional
     public void addPayment(PaymentRequest request) {
         User user = userRepo.findByUsername(request.getUsername()).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
 
@@ -46,6 +47,7 @@ public class PaymentService {
                             .message(request.getMessage())
                             .totalPrice(request.getTotalPrice())
                             .build());
+
         }
     }
 
@@ -119,4 +121,5 @@ public class PaymentService {
         Optional<Payment> payment = paymentRepo.findTop1ByUsernameOrderByOrderDateDesc(username);
         return payment.isPresent();
     }
+
 }
