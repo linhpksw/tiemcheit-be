@@ -484,7 +484,7 @@ public class ProductService {
             updateProductImages(productRequest, updatedProduct);
         }
 
-        if (productRequest.getOptionId() != null && !productRequest.getOptionId().isEmpty()) {
+        if (productRequest.getOptionList() != null && !productRequest.getOptionList().isEmpty()) {
             updateProductOptions(productRequest, updatedProduct);
         }
 
@@ -517,7 +517,7 @@ public class ProductService {
 
     private void updateProductOptions(ProductRequest productRequest, Product product) {
         productOptionRepo.deleteAllByProductId(product.getId());
-        List<ProductOption> productOptions = productRequest.getOptionId().stream()
+        List<ProductOption> productOptions = productRequest.getOptionList().stream()
                 .map(optionId -> ProductOption.builder().option(optionRepo.getReferenceById(optionId)).product(product).build())
                 .toList();
         if (productOptions == null) {

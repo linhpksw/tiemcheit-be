@@ -17,7 +17,7 @@ public class ProductRequest {
     private LocalDate createAt;
     //    private Integer quantity;
     private String description;
-    private List<Long> optionId;
+    private List<Long> optionList;
     private List<ProductIngredientRequest> productIngredients;
     private String status;
     private String prevStatus;
