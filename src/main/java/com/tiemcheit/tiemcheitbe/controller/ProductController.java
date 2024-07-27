@@ -176,6 +176,13 @@ public class ProductController {
                 .message("success")
                 .build();
     }
+    @GetMapping("/created/{username}")
+    public ApiResponse<List<CustomizedProductResponse>> getProductCustomizedByUsername(@PathVariable String username) {
+        return ApiResponse.<List<CustomizedProductResponse>>builder()
+                .data(productService.getCreatedProducts(username))
+                .message("success")
+                .build();
+    }
 
     @GetMapping("status/{status}/amount")
     public ApiResponse<Integer> getAllProductAmountByStatus(@PathVariable String status) {

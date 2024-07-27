@@ -1,6 +1,7 @@
 package com.tiemcheit.tiemcheitbe.dto.request;
 
 import com.tiemcheit.tiemcheitbe.model.Category;
+import com.tiemcheit.tiemcheitbe.model.User;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -20,4 +21,5 @@ public class ProductRequest {
     private List<ProductIngredientRequest> productIngredients;
     private String status;
     private String prevStatus;
+    private User user;
 }
