@@ -1,5 +1,6 @@
 package com.tiemcheit.tiemcheitbe.service;
 
+import com.tiemcheit.tiemcheitbe.dto.request.CassoTransactionRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.OrderRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.PaymentRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.PaymentResponse;
@@ -7,6 +8,7 @@ import com.tiemcheit.tiemcheitbe.mapper.PaymentMapper;
 import com.tiemcheit.tiemcheitbe.model.CassoTransaction;
 import com.tiemcheit.tiemcheitbe.model.Payment;
 import com.tiemcheit.tiemcheitbe.model.User;
+import com.tiemcheit.tiemcheitbe.repository.CassoTransactionRepo;
 import com.tiemcheit.tiemcheitbe.repository.PaymentRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
@@ -17,6 +19,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -29,6 +32,7 @@ public class PaymentService {
     private final UserRepo userRepo;
     private final PaymentMapper paymentMapper;
     private final OrderService orderService;
+    private final CassoTransactionRepo cassoTransactionRepo;
 
     public void addPayment(PaymentRequest request) {
         User user = userRepo.findByUsername(request.getUsername()).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
@@ -57,41 +61,38 @@ public class PaymentService {
     }
 
     @Transactional
-    public void handleWebhook(CassoTransaction transaction) {
-        log.info("transaction {}", transaction);
-
+    public void handleWebhook(CassoTransactionRequest transaction) {
         if (transaction == null) {
             log.error("Transaction is null");
             return;
         }
 
         String description = transaction.getDescription().toLowerCase();
-
-        if (description == null) {
-            log.error("Transaction description is null");
-            return;
-        }
-
-        log.info("Transaction description: {}", description);
         Pattern pattern = Pattern.compile("den:\\S+ (\\w+)");
         Matcher matcher = pattern.matcher(description);
 
         if (matcher.find()) {
             String username = matcher.group(1);
-            log.info("Extracted username: {}", username);
 
             if (username == null || username.isEmpty()) {
                 log.error("Extracted username is null or empty");
                 return;
             }
 
-            Long amount = transaction.getAmount();
+            Double amount = transaction.getAmount();
             Payment verifiedPayment = verifyPayment(username, amount);
+
+            cassoTransactionRepo.save(CassoTransaction.builder()
+                    .amount(transaction.getAmount())
+                    .description(transaction.getDescription())
+                    .transactionDate(transaction.getWhen())
+                    .build());
 
             if (verifiedPayment == null) {
                 log.error("No matching payment found for username: {} and amount: {}", username, amount);
                 return;
             }
+
             OrderRequest orderRequest = OrderRequest.builder()
                     .orderDate(new Date())
                     .shippingAddress(verifiedPayment.getShippingAddress())
@@ -111,12 +112,24 @@ public class PaymentService {
         }
     }
 
-    private Payment verifyPayment(String username, Long amount) {
+    private Payment verifyPayment(String username, Double amount) {
         return paymentRepo.findMatchingPayment(username, amount).orElse(null);
     }
 
-    public boolean checkPaymentExists(String username) {
-        Optional<Payment> payment = paymentRepo.findTop1ByUsernameOrderByOrderDateDesc(username);
-        return payment.isPresent();
+    public Double checkPaymentStatus(String username, Double expectedAmount) {
+        Optional<CassoTransaction> latestTransaction = cassoTransactionRepo.findTop1ByUsernameFromDescription(username);
+
+        if (latestTransaction.isPresent()) {
+            CassoTransaction transaction = latestTransaction.get();
+            Double transactionAmount = transaction.getAmount();
+
+            if (Objects.equals(transactionAmount, expectedAmount)) {
+                return transactionAmount;
+            } else {
+                return transactionAmount - expectedAmount;
+            }
+        } else {
+            return null;
+        }
     }
 }

@@ -5,13 +5,14 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
+import java.util.Date;
 
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class CassoRequest {
-    private int error;
-    private List<CassoTransactionRequest> data;
+public class CassoTransactionRequest {
+    private Date when;
+    private String description;
+    private Double amount;
 }

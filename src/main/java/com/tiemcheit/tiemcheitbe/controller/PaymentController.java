@@ -42,9 +42,8 @@ public class PaymentController {
     }
 
     @GetMapping("/check/{username}")
-    public ApiResponse<Boolean> isPaid(@PathVariable String username) {
-        boolean exists = paymentService.checkPaymentExists(username);
-        return ApiResponse.<Boolean>builder().data(!exists).message("Success").build();
+    public ApiResponse<Double> checkPaymentStatus(@PathVariable String username, @RequestParam("amount") Double amount) {
+        return ApiResponse.<Double>builder().data(paymentService.checkPaymentStatus(username, amount)).message("Success").build();
     }
 
 }
