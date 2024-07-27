@@ -1,6 +1,8 @@
 package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.UserReviewRequest;
+import com.tiemcheit.tiemcheitbe.dto.response.UserAvatarResponse;
+import com.tiemcheit.tiemcheitbe.dto.response.UserInfoResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.UserReviewResponse;
 import com.tiemcheit.tiemcheitbe.mapper.UserMapper;
 import com.tiemcheit.tiemcheitbe.mapper.UserReviewMapper;
@@ -27,6 +29,7 @@ public class ReviewService {
     private final OrderDetailRepo orderDetailRepo;
     private final UserRepo userRepo;
     private final UserReviewMapper userReviewMapper;
+    private final UserService userService;
 
     public List<UserReviewResponse> getReviewsOfProduct(long productId) {
         List<OrderDetail> orderDetailsOfProduct = orderDetailRepo.findAllByProductId(productId);
@@ -34,13 +37,20 @@ public class ReviewService {
                 .stream()
                 .flatMap(orderDetail -> reviewRepo.findAllByOrderDetailId(orderDetail.getId()).stream())
                 .toList();
+
         return reviewsOfProduct
                 .stream()
                 .map(review -> {
                     UserReviewResponse userReviewResponse = new UserReviewResponse();
                     userReviewResponse.setComment(review.getComment());
                     userReviewResponse.setRatingValue(review.getRatingValue());
-                    userReviewResponse.setUser(UserMapper.INSTANCE.toUserInfoResponse(review.getUser()));
+
+                    // Fetch user info and set the avatar image
+                    UserInfoResponse userInfo = UserMapper.INSTANCE.toUserInfoResponse(review.getUser());
+                    UserAvatarResponse avatarResponse = userService.getUserAvatar(review.getUser().getUsername());
+                    userInfo.setImage(avatarResponse.getImage());
+
+                    userReviewResponse.setUser(userInfo);
                     userReviewResponse.setCreateTime(review.getCreateTime());
                     userReviewResponse.setUpdatedTime(review.getUpdatedTime());
                     return userReviewResponse;
@@ -50,19 +60,16 @@ public class ReviewService {
     }
 
     public UserReviewResponse addReview(long orderDetailId, UserReviewRequest userReviewRequest) {
-
-
         var orderDetail = orderDetailRepo.findById(orderDetailId).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND));
         var username = SecurityUtils.getCurrentUsername();
         User user = userRepo.findByUsername(username).orElseThrow(() -> new AppException("User not found", HttpStatus.NOT_FOUND));
-        if(!Objects.equals(user.getId(), orderDetail.getOrder().getUser().getId())){
+        if (!Objects.equals(user.getId(), orderDetail.getOrder().getUser().getId())) {
             throw new AppException("The user cannot review this product", HttpStatus.UNAUTHORIZED);
         }
         UserReview userReview = userReviewMapper.toUserReview(userReviewRequest);
         userReview.setOrderDetail(orderDetail);
         userReview.setUser(user);
         reviewRepo.save(userReview);
-
 
         return userReviewMapper.toUserReviewResponse(userReview);
     }

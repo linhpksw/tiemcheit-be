@@ -10,6 +10,7 @@ import java.util.Set;
 public class UserInfoResponse {
     private String username;
     private String fullname;
+    private String image;
     private Set<RoleResponse> roles;
 
 }
