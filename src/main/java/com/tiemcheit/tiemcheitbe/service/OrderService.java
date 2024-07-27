@@ -27,6 +27,7 @@ public class OrderService {
     private final ProductRepo productRepo;
     private final ProductIngredientRepo productIngredientRepo;
     private final UserRepo userRepo;
+    private final ProductImageRepo productImageRepo;
     private final OrderMapper orderMapper;
     private final CartService cartService;
     private final CouponService couponService;
@@ -54,7 +55,17 @@ public class OrderService {
         Order order = orderRepo.findById(orderId).orElseThrow(() -> new AppException("Order not found", HttpStatus.NOT_FOUND));
 
         if (userHasRole(user, "ADMIN") || order.getUser().getId().equals(user.getId())) {
-            return orderMapper.toReponse(order);
+            var orderResponse = orderMapper.toReponse(order);
+
+            orderResponse.getOrderDetails().forEach(orderDetailResponse -> {
+                orderDetailResponse.getProduct().setImage(productImageRepo.findAllByProductId(orderDetailResponse.getProduct().getId()).stream()
+                        .findFirst()
+                        .map(ProductImage::getImage)
+                        .orElse(null));
+
+            });
+
+            return orderResponse;
         } else {
 
             throw new AppException("Access denied", HttpStatus.FORBIDDEN);

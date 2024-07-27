@@ -5,14 +5,8 @@ import com.tiemcheit.tiemcheitbe.dto.request.CartItemRequest;
 import com.tiemcheit.tiemcheitbe.dto.request.CartItemUpdateRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.mapper.CartItemMapper;
-import com.tiemcheit.tiemcheitbe.model.CartItem;
-import com.tiemcheit.tiemcheitbe.model.Ingredient;
-import com.tiemcheit.tiemcheitbe.model.Product;
-import com.tiemcheit.tiemcheitbe.model.ProductIngredient;
-import com.tiemcheit.tiemcheitbe.repository.CartItemRepo;
-import com.tiemcheit.tiemcheitbe.repository.ProductIngredientRepo;
-import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
-import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import com.tiemcheit.tiemcheitbe.model.*;
+import com.tiemcheit.tiemcheitbe.repository.*;
 import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +26,7 @@ public class CartService {
     private final UserRepo userRepo;
     private final CartItemMapper cartItemMapper;
     private final ProductRepo productRepo;
+    private final ProductImageRepo productImageRepo;
     private final ProductIngredientRepo productIngredientRepo;
 
     public List<CartItemResponse> allCartItemsFromUsername(String username) {
@@ -57,7 +52,15 @@ public class CartService {
             }
         }
 
-        return cartItemMapper.toCartItemResponses(userCartItems);
+        var cartItemResponses = cartItemMapper.toCartItemResponses(userCartItems);
+
+        cartItemResponses.forEach(cartItemResponse -> {
+            cartItemResponse.getProduct().setImage(productImageRepo.findAllByProductId(cartItemResponse.getProduct().getId()).stream()
+                    .findFirst()
+                    .map(ProductImage::getImage)
+                    .orElse(null));
+        });
+        return cartItemResponses;
     }
 
     public CartItemResponse addToCart(CartItemRequest cartItemRequest) {
