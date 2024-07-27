@@ -29,6 +29,13 @@ public class IngredientController {
                 .message("Success")
                 .build();
     }
+    @GetMapping("stock")
+    public ApiResponse<List<IngredientResponse>> getAllAvailableIngredients() {
+        return ApiResponse.<List<IngredientResponse>>builder()
+                .data(ingredientService.getAllAvailableIngredients())
+                .message("Success")
+                .build();
+    }
     @GetMapping("/{id}/products")
     public ApiResponse<List<ProductResponse>> getAllProductsOfIngredient(@PathVariable long id){
         return ApiResponse.<List<ProductResponse>>builder()

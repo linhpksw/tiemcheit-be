@@ -88,4 +88,10 @@ public class IngredientService {
 
         return ingredientPage.map(IngredientMapper.INSTANCE::toIngredientResponse);
     }
+    public List<IngredientResponse> getAllAvailableIngredients() {
+        return ingredientRepo.findAllByQuantityGreaterThan(10)
+                .stream()
+                .map(IngredientMapper.INSTANCE::toIngredientResponse)
+                .collect(Collectors.toList());
+    }
 }
