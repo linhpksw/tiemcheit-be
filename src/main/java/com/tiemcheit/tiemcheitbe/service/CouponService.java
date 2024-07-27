@@ -52,11 +52,9 @@ public class CouponService {
 
     @Transactional
     public CouponResponse getCouponById(Long id) {
-        if (couponRepository.findById(id).isPresent()) {
-            return couponMapper.toResponse(couponRepository.findById(id).get());
-        } else {
-            return null;
-        }
+        couponRepository.findById(id).orElseThrow(() -> new AppException("Không tìm thấy mã giảm giá", HttpStatus.BAD_REQUEST));
+        return couponMapper.toResponse(couponRepository.findById(id).get());
+
     }
 
     @Transactional
@@ -136,16 +134,16 @@ public class CouponService {
         List<CartItemResponse> cartItemList = cartService.allCartItems();
         Coupon coupon = couponRepository.findByCode(code);
         if (coupon == null) {
-            throw new AppException("Coupon not found", HttpStatus.BAD_REQUEST);
+            throw new AppException("Không tìm thấy mã giảm giá", HttpStatus.BAD_REQUEST);
         }
 
-        if (!coupon.getStatus().equals("active")) {
-            throw new AppException("Coupon is not valid", HttpStatus.BAD_REQUEST);
+        if (coupon.getStatus().equals("inactive")) {
+            throw new AppException("Mã giảm giá không hoạt động", HttpStatus.BAD_REQUEST);
         }
 
         // Check if the coupon has reached the total usage limit
         if (coupon.getUseCount() >= coupon.getLimitUses()) {
-            throw new AppException("Coupon is not valid anymore", HttpStatus.BAD_REQUEST);
+            throw new AppException("Mã giảm giá không còn giá trị nữa", HttpStatus.BAD_REQUEST);
         }
 
         // Check if the user has reached the account usage limit for this coupon
@@ -153,7 +151,7 @@ public class CouponService {
         List<Order> orders = orderRepo.findByUserIdAndCouponId(user.getId(), coupon.getId());
 
         if (orders.size() >= coupon.getLimitAccountUses()) {
-            throw new AppException("You have access the user's limit uses", HttpStatus.BAD_REQUEST);
+            throw new AppException("Bạn đã sử dụng hết lượt của mã giảm giá", HttpStatus.BAD_REQUEST);
         }
 
         String discountType = coupon.getDiscounts().getFirst().getType();
