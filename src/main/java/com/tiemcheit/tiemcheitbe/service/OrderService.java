@@ -200,7 +200,7 @@ public class OrderService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public Integer getOrdersAmountByStatus(String status) {
-        List<Order> orderList = orderRepo.findAllByOrderStatus(status.toUpperCase());
+        List<Order> orderList = orderRepo.findAllByOrderStatus(status);
         return orderList.size();
     }
 

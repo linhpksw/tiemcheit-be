@@ -19,8 +19,8 @@ public class RevenueService {
 
     @PreAuthorize("hasRole('ADMIN')")
     public Double getRevenue() {
-        String status = "DELIVERED";
-        List<Order> orderList = orderRepo.findAllByOrderStatus(status);
+        String status = "Order Canceled";
+        List<Order> orderList = orderRepo.findAllByOrderStatusExcept(status);
         List<List<OrderDetail>> orderDetailsList = orderList.stream().map(Order::getOrderDetails).toList();
         return orderDetailsList.stream().mapToDouble(orderDetails -> orderDetails.stream().mapToDouble(orderDetail -> orderDetail.getProduct().getPrice() * orderDetail.getQuantity()).sum()).sum();
     }
