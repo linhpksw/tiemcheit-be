@@ -222,6 +222,7 @@ public class ProductService {
                     .stream()
                     .map(productIngredientMapper::toProductIngredientResponse)
                     .toList();
+
             productResponse.setIngredientList(productIngredientResponseList);
             return productResponse;
         });

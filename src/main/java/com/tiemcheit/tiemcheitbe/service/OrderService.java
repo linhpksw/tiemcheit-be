@@ -5,9 +5,7 @@ import com.tiemcheit.tiemcheitbe.dto.response.CartItemResponse;
 import com.tiemcheit.tiemcheitbe.dto.response.OrderResponse;
 import com.tiemcheit.tiemcheitbe.mapper.OrderMapper;
 import com.tiemcheit.tiemcheitbe.model.*;
-import com.tiemcheit.tiemcheitbe.repository.OrderRepo;
-import com.tiemcheit.tiemcheitbe.repository.ProductRepo;
-import com.tiemcheit.tiemcheitbe.repository.UserRepo;
+import com.tiemcheit.tiemcheitbe.repository.*;
 import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
@@ -27,10 +25,12 @@ public class OrderService {
 
     private final OrderRepo orderRepo;
     private final ProductRepo productRepo;
+    private final ProductIngredientRepo productIngredientRepo;
     private final UserRepo userRepo;
     private final OrderMapper orderMapper;
     private final CartService cartService;
     private final CouponService couponService;
+    private final IngredientRepo ingredientRepo;
 
     public List<OrderResponse> getUserOrders() {
         User user = userRepo.findByUsername(SecurityUtils.getCurrentUsername()).orElseThrow(() -> new RuntimeException("User not found"));
@@ -70,6 +70,7 @@ public class OrderService {
         return orderMapper.toResponses(orderRepo.findAllByOptionalFilters(startDate, endDate, status));
     }
 
+    @Transactional
     public void placeOrder(OrderRequest request, String code, String username) {
         List<CartItemResponse> cartItemList = cartService.allCartItemsFromUsername(username);
 
@@ -107,6 +108,20 @@ public class OrderService {
                     .orElseThrow(() -> new RuntimeException("Product not found"));
             orderDetail.setProduct(product);
 
+            // Reduce quantities of ingredients for the product
+            List<ProductIngredient> productIngredients = productIngredientRepo.findAllByProductIdWithLock(cartItem.getProduct().getId());
+            for (ProductIngredient productIngredient : productIngredients) {
+                Ingredient ingredient = productIngredient.getIngredient();
+                float unitsNeeded = productIngredient.getUnit() * cartItem.getQuantity();
+
+                if (ingredient.getQuantity() < unitsNeeded) {
+                    throw new AppException("Không đủ nguyên liệu cho " + productIngredient.getProduct().getName(), HttpStatus.BAD_REQUEST);
+                }
+                ingredient.setQuantity(ingredient.getQuantity() - (long) unitsNeeded);
+                ingredientRepo.save(ingredient);
+            }
+
+
             orderDetail.setOrder(order);
             return orderDetail;
         }).collect(Collectors.toList());
@@ -114,7 +129,7 @@ public class OrderService {
         order.setOrderDetails(orderDetails);
 
         // Clear the user's cart
-        cartService.clearCart();
+        cartService.clearCart(username);
 
         // Save the order and order details
         orderRepo.save(order);
@@ -157,6 +172,9 @@ public class OrderService {
         order.setOrderStatus("Order Canceled");
         // Save the updated order
         orderRepo.save(order);
+
+        // restock ingredient quantity
+        restockWhenCancel(orderId);
     }
 
     @Transactional
@@ -199,5 +217,22 @@ public class OrderService {
         return countByMonth;
     }
 
+    @Transactional
+    protected void restockWhenCancel(Long orderId) {
+        Order order = orderRepo.findById(orderId)
+                .orElseThrow(() -> new RuntimeException("Order not found with ID: " + orderId));
+
+        // Restock quantities of ingredients for the product
+        for (OrderDetail response : order.getOrderDetails()) {
+            List<ProductIngredient> productIngredients = productIngredientRepo.findAllByProductIdWithLock(response.getProduct().getId());
+            for (ProductIngredient productIngredient : productIngredients) {
+                Ingredient ingredient = productIngredient.getIngredient();
+                float units = productIngredient.getUnit() * response.getQuantity();
+
+                ingredient.setQuantity(ingredient.getQuantity() + (long) units);
+                ingredientRepo.save(ingredient);
+            }
+        }
+    }
 
 }

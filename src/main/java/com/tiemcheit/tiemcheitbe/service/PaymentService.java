@@ -34,6 +34,7 @@ public class PaymentService {
     private final OrderService orderService;
     private final CassoTransactionRepo cassoTransactionRepo;
 
+    @Transactional
     public void addPayment(PaymentRequest request) {
         User user = userRepo.findByUsername(request.getUsername()).orElseThrow(() -> new AppException("User not found.", HttpStatus.NOT_FOUND));
 
@@ -50,6 +51,7 @@ public class PaymentService {
                             .message(request.getMessage())
                             .totalPrice(request.getTotalPrice())
                             .build());
+
         }
     }
 
@@ -134,4 +136,5 @@ public class PaymentService {
             return null;
         }
     }
+
 }
