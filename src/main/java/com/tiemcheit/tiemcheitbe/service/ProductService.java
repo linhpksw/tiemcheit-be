@@ -281,7 +281,7 @@ public class ProductService {
                     return PurchasedProductResponse.builder()
                             .id(product.getId())
                             .name(product.getName())
-//                          .price(product.getPrice())
+                            .price(product.getPrice())
                             .image(productImageRepo.findAllByProductId(product.getId()).stream()
                                     .findFirst()
                                     .map(ProductImage::getImage)
