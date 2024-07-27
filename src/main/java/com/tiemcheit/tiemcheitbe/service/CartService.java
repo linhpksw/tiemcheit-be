@@ -93,7 +93,14 @@ public class CartService {
         updatedCartItem.setProduct(getProductInCartItem(cartItemUpdateRequest.getId()));
         cartItemRepo.save(updatedCartItem);
 
-        return cartItemMapper.toCartItemResponse(updatedCartItem);
+        var cartItemResponse = cartItemMapper.toCartItemResponse(updatedCartItem);
+
+        cartItemResponse.getProduct().setImage(productImageRepo.findAllByProductId(cartItemResponse.getProduct().getId()).stream()
+                .findFirst()
+                .map(ProductImage::getImage)
+                .orElse(null));
+        
+        return cartItemResponse;
     }
 
     private Product getProductInCartItem(Long id) {
