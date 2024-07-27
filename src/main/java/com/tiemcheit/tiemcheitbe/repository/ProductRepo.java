@@ -33,6 +33,18 @@ public interface ProductRepo extends JpaRepository<Product, Long>, JpaSpecificat
 
     List<Product> findAllByCategoryIdAndStatus(Long category_id, String status);
 
-    @Query("SELECT p FROM Product p WHERE p.id != :id AND p.category.id = :category_id AND (p.status = 'active' OR p.status = 'disabled')")
-    List<Product> findAllExceptIdByCategoryId(Long id, Long category_id);
+    @Query("SELECT p " +
+            "FROM Product p " +
+            "JOIN p.productIngredients pi " +
+            "JOIN pi.ingredient i " +
+            "WHERE p.category.id = :categoryId " +
+            "AND p.id != :productId " +
+            "AND (p.status = 'active' OR p.status = 'disabled') " +
+            "AND pi.unit < i.quantity " +
+            "GROUP BY p.id " +
+            "HAVING COUNT(pi) = (SELECT COUNT(pi2) " +
+            "                    FROM ProductIngredient pi2 " +
+            "                    WHERE pi2.product.id = p.id)")
+    List<Product> findAllExceptIdByCategoryId(Long productId, Long categoryId);
+
 }
