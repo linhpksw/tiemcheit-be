@@ -2,11 +2,13 @@ package com.tiemcheit.tiemcheitbe.service;
 
 import com.tiemcheit.tiemcheitbe.dto.request.WishlistItemRequest;
 import com.tiemcheit.tiemcheitbe.dto.response.WishlistItemResponse;
-import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.mapper.WishlistItemMapper;
+import com.tiemcheit.tiemcheitbe.model.ProductImage;
 import com.tiemcheit.tiemcheitbe.model.WishlistItem;
+import com.tiemcheit.tiemcheitbe.repository.ProductImageRepo;
 import com.tiemcheit.tiemcheitbe.repository.UserRepo;
 import com.tiemcheit.tiemcheitbe.repository.WishlistRepo;
+import com.tiemcheit.tiemcheitbe.repository.exception.AppException;
 import com.tiemcheit.tiemcheitbe.util.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -23,6 +25,7 @@ public class WishlistService {
     private final WishlistRepo wishlistRepo;
     private final UserRepo userRepo;
     private final WishlistItemMapper wishlistItemMapper;
+    private final ProductImageRepo productImageRepo;
 
     public List<WishlistItemResponse> allWishlistItems() {
         List<WishlistItem> wishlistItems = wishlistRepo.findAll();
@@ -34,7 +37,17 @@ public class WishlistService {
             }
         }
 
-        return wishlistItemMapper.toWishlistItemResponses(userWishlistItems);
+        var wishListResponses = wishlistItemMapper.toWishlistItemResponses(userWishlistItems);
+
+        wishListResponses.forEach(wishListResponse -> {
+            wishListResponse.getProduct().setImage(productImageRepo.findAllByProductId(wishListResponse.getProduct().getId()).stream()
+                    .findFirst()
+                    .map(ProductImage::getImage)
+                    .orElse(null));
+        });
+
+
+        return wishListResponses;
     }
 
     public WishlistItemResponse addToWishlist(WishlistItemRequest wishlistItemRequest) {
