@@ -19,7 +19,7 @@ public interface ProductIngredientRepo extends JpaRepository<ProductIngredient, 
     List<ProductIngredient> findAllByProductId(Long product_id);
 
     List<ProductIngredient> findAllByIngredientId(Long ingredient_id);
-    @Query("SELECT DISTINCT pi.product FROM ProductIngredient pi WHERE pi.unit > pi.ingredient.quantity AND pi.product.status <> 'custom' AND pi.ingredient.status <> 'disabled'")
+    @Query("SELECT DISTINCT pi.product FROM ProductIngredient pi WHERE pi.unit > pi.ingredient.quantity AND pi.product.status <> 'custom' OR pi.ingredient.status = 'disabled'")
     Page<Product> findDistinctProductsByUnitInCupGreaterThanIngredientQuantity(Pageable pageable);
 
     void deleteAllByProductId(Long product_id);
